@@ -44,13 +44,13 @@ FEATURES
   - Local GLB file selection for direct file:// use.
   - Automatic adjacent GLB loading when hosted over HTTP(S).
   - Procedural placeholder mech used if the model cannot be loaded.
-  - Dash animation with forward lean and animated thruster flames.
+  - Dash animation with a forward lean; exhaust effects attach only to clearly named nozzle/thruster nodes.
   - Play, pause, and restart controls.
   - Collapsible sidebar and fullscreen mode.
   - Adjustable time-of-day lighting from 0 to 24 hours.
   - Orbit controls: left-drag to rotate, middle-mouse drag to pan within limits, wheel to zoom.
   - Touch support with one-finger rotation.
-  - Dark flight backdrop with distant mountain/tree silhouettes, stars, and drifting dust. No visible ground plane.
+  - Layered atmospheric mountain silhouettes, soft star/dust particles, and no visible ground plane or grid.
   - On-screen author watermark.
 
 MODEL CONFIGURATION
@@ -78,14 +78,15 @@ CONTROLS
 ANIMATION
   - The dash cycle repeats every CONFIG.dashDuration seconds (default: 1.6).
   - The mech leans forward in proportion to CONFIG.leanAngle.
-  - Thruster flames scale and change opacity with dash intensity.
+  - Recognized nozzle effects scale and change opacity with dash intensity.
+  - Unrecognized thruster locations are not guessed, preventing detached flames.
   - A subtle hover bob is applied during the animation.
 
 LIGHTING
-  - Directional sunlight with shadows.
-  - Hemisphere and ambient lighting.
-  - Sun color, intensity, sky gradient, ground color, and fog adapt to the
-    selected time of day.
+  - Procedural cube-map reflections for metallic GLB materials.
+  - Fixed studio key, fill, and rim lights keep the model readable at night.
+  - Adjustable directional sunlight, atmospheric sky gradient, ambient fill,
+    and fog adapt to the selected time of day.
 
 CREDITS AND ATTRIBUTION
   - Three.js (r128) and GLTFLoader (r128): Copyright 2010-2021 Three.js Authors,

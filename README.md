@@ -15,7 +15,7 @@ A clean, single-file, offline WebGL 3D renderer of Raven from Armored Core VI: F
 
 TdoT-WebGL is a self-contained, offline-capable WebGL 3D renderer that brings an Armored Core-style mech to the browser in a single HTML file. Three.js (r128) is fully inlined, so there are no external dependencies, no build step, and no internet required — just open index.html in any modern browser.
 
-The scene features Raven from Armored Core VI: Fires of Rubicon (dark armor with Raven-red accents) performing a dash animation: the mech leans forward slightly while its back thrusters flare with animated flames. A distant flight backdrop (gradient sky sphere + dark ground + subtle grid) keeps the focus on the model, while an adjustable sunlight slider lets you test different time-of-day lighting scenarios.
+The scene features Raven from Armored Core VI: Fires of Rubicon in a studio-lit flight environment. A procedural cube-map provides reflections for metallic armor, while fixed key, fill, and rim lights keep the model readable across the full time-of-day range. Layered atmospheric mountain silhouettes, soft stars, and drifting dust create depth without a visible floor or grid. The dash animation adds a forward lean; exhaust effects are attached only when the GLB contains clearly named nozzle or thruster nodes, avoiding guessed and misplaced flames.
 
 The real Raven model is loaded from raven.glb (GLTF/GLB). Set CONFIG.modelPath = null in the inline configuration in index.html to use the procedurally generated placeholder. See Model Format below.
 
@@ -25,13 +25,13 @@ The real Raven model is loaded from raven.glb (GLTF/GLB). Set CONFIG.modelPath =
 
 | Feature | Description |
 |---------|-------------|
-| Dash Animation | Mech leans forward and back thrusters shoot animated flame pulses. |
+| Dash Animation | Mech leans forward; animated exhaust effects are shown only for recognized nozzle or thruster nodes in the GLB. |
 | Playback Controls | Play / Pause / Restart buttons for the animation cycle. |
 | Collapsible Sidebar | UI panel collapses/expands for unobstructed fullscreen viewing. |
 | Fullscreen Mode | Toggle fullscreen via button; UI chrome hides automatically. |
-| Adjustable Sunlight | Time-of-Day slider (0-24h) shifts sun color, position, intensity, sky gradient, ground color, and fog (night to dawn to day to dusk to night). |
+| Adjustable Sunlight | Time-of-Day slider (0-24h) adjusts sun color, position, intensity, atmospheric gradient, ambient fill, and fog. Studio lighting keeps the model readable at night. |
 | Orbit Controls | Left-drag rotate, middle-mouse drag pan with limits, scroll-wheel zoom; touch-drag supported. |
-| Flight Backdrop | Deep black sky, distant mountain and tree silhouettes, stars, and drifting dust. No visible ground plane. |
+| Flight Backdrop | Layered atmospheric mountain silhouettes, soft star and dust particles, and no visible ground plane or grid. |
 | Single-File / Offline | index.html embeds Three.js (r128), its matching GLTFLoader, and all application code. The adjacent raven.glb can be selected locally when opened via file://. |
 | Watermark | Semi-transparent credit in the corner: Paul Hinterbauer 5BHWII @ TGM HWI. |
 
@@ -130,13 +130,12 @@ TdoT-WebGL/
 
 ## Time-of-Day Lighting
 
-The directional sun light is driven by a 0-24h slider. Internally, updateTimeOfDay(hour) computes:
+The directional sunlight is driven by a 0-24h slider. Fixed studio lights and a procedural reflection cube-map remain active independently of the selected hour. Internally, updateTimeOfDay(hour) adjusts:
 
 - Sun position on an arc across the sky
 - Sun color and intensity (dim at night, bright at noon, warm at dawn/dusk)
-- Hemisphere light (sky zenith / ground color)
-- Ambient fill
-- Sky gradient and fog color to match
+- Hemisphere light and ambient fill
+- Atmospheric sky gradient and fog color
 
 This lets you quickly test how the mech looks under different lighting scenarios without reloading.
 
