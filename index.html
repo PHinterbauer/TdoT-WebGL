@@ -49,7 +49,31 @@ input[type=range] { width: 100%; accent-color: #ff4d4d; cursor: pointer; }
   backdrop-filter: blur(4px);
 }
 .fs-btn:hover { background: rgba(30,30,40,0.95); border-color: #6b7280; }
-body.fullscreen #sidebar, body.fullscreen .fs-btn, body.fullscreen #watermark { display: none !important; }
+.side-btn {
+  position: fixed; top: 14px; left: 14px; z-index: 120;
+  width: 40px; height: 40px; border-radius: 50%;
+  background: rgba(20,20,28,0.9); color: #e8eaf2;
+  border: 1px solid #444858; cursor: pointer; font-size: 18px;
+  display: none; align-items: center; justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.side-btn:hover { background: rgba(30,30,40,0.98); border-color: #6b7280; }
+body.sidebar-collapsed .side-btn { display: flex; }
+body.fullscreen #sidebar, body.fullscreen #watermark { display: none !important; }
+body.fullscreen .side-btn { display: none !important; }
+body.fullscreen .fs-btn { display: flex !important; }
+.status[data-state="loading"] { color: #ffc857; }
+.status[data-state="error"] { color: #ff7777; }
+#model-error {
+  display: none; position: fixed; left: 50%; bottom: 18px; z-index: 90;
+  transform: translateX(-50%); width: max-content;
+  max-width: min(760px, calc(100vw - 32px));
+  padding: 11px 15px; border: 1px solid rgba(255, 110, 110, 0.55);
+  border-radius: 7px; background: rgba(35, 12, 16, 0.94);
+  color: #ffdede; font-size: 12px; line-height: 1.45;
+  box-shadow: 0 5px 22px rgba(0,0,0,0.35); pointer-events: none;
+}
+#model-error.visible { display: block; }
 .hint { font-size: 11.5px; color: #8a92a8; margin-top: 6px; line-height: 1.45; }
 </style>
 </head>
@@ -79,12 +103,13 @@ body.fullscreen #sidebar, body.fullscreen .fs-btn, body.fullscreen #watermark { 
     <button id="btn-fullscreen" class="btn">Fullscreen</button>
   </div>
   <div class="footer-note">
-    Real Raven model loaded from raven.glb.<br>
-    Set CONFIG.modelPath = null in index.html to use the placeholder mech.
+    Loading Raven model from raven.glb...
   </div>
 </div>
-<button id="btn-fullscreen-fs" class="fs-btn" title="Toggle Fullscreen">&#x2736;</button>
+<button id="btn-open-sidebar" class="side-btn" type="button" title="Open sidebar" aria-label="Open sidebar">&#x2630;</button>
+<button id="btn-fullscreen-fs" class="fs-btn" type="button" title="Enter fullscreen" aria-label="Enter fullscreen">&#x26F6;</button>
 <div id="watermark"></div>
+<div id="model-error" role="alert" aria-live="polite"></div>
 <script>
 // ==== THREE.JS (inlined for offline use) ====
 
@@ -4037,43 +4062,117 @@ body.fullscreen #sidebar, body.fullscreen .fs-btn, body.fullscreen #watermark { 
   // --------------------------------------------------------------------------
   // Model loading (GLTF/GLB) - swap in when you provide raven.glb
   // --------------------------------------------------------------------------
+  function setModelStatus(label, stateName) {
+    const status = document.getElementById('anim-status');
+    if (status) {
+      status.textContent = label;
+      status.dataset.state = stateName || '';
+    }
+  }
+
+  function showModelLoadError(message) {
+    const errorPanel = document.getElementById('model-error');
+    if (errorPanel) {
+      errorPanel.textContent = message;
+      errorPanel.classList.add('visible');
+    }
+  }
+
   function loadModel(path) {
     if (typeof THREE.GLTFLoader !== 'function') {
-      console.error('GLTFLoader is unavailable. Check the inline loader script.');
+      const message = 'GLTFLoader is unavailable. Check the embedded loader in index.html.';
+      console.error(message);
+      setModelStatus('Model error', 'error');
+      showModelLoadError(message);
       createPlaceholderMech();
       return;
     }
-    const loader = new THREE.GLTFLoader();
-    loader.load(
-      path,
-      function (gltf) {
-        mechGroup = gltf.scene;
-        mechGroup.traverse(function (child) {
-          if (child.isMesh) {
-            child.castShadow = true;
-            child.receiveShadow = true;
-          }
-        });
-        // Center + scale roughly
-        const box = new THREE.Box3().setFromObject(mechGroup);
-        const center = box.getCenter(new THREE.Vector3());
-        const size = box.getSize(new THREE.Vector3());
-        const maxDim = Math.max(size.x, size.y, size.z);
-        const scale = 8 / maxDim;
-        mechGroup.scale.setScalar(scale);
-        mechGroup.position.sub(center.multiplyScalar(scale));
-        mechGroup.position.y = 0;
-        mechGroup.rotation.y = Math.PI * 0.15; // face forward slightly angled
-        scene.add(mechGroup);
 
-        // Attach placeholder thrusters/flames if the model has none
-        attachPlaceholderFlames();
-      },
-      undefined,
-      function (err) {
-        console.error('Failed to load model:', err);
-        createPlaceholderMech();
+    setModelStatus('Loading Raven...', 'loading');
+
+    // Resolve the model relative to this HTML file, including when hosted in a subfolder.
+    const modelUrl = new URL(path, document.baseURI).href;
+    const loader = new THREE.GLTFLoader();
+
+    function failModelLoad(error) {
+      const httpStatus = error && error.target && error.target.status;
+      const errorMessage = error && error.message
+        ? error.message
+        : (httpStatus ? 'HTTP ' + httpStatus : 'Unknown loading error');
+
+      console.error('Failed to load Raven model from ' + modelUrl + ':', error);
+      setModelStatus('Placeholder', 'error');
+
+      if (window.location.protocol === 'file:') {
+        showModelLoadError(
+          'The browser blocks automatic GLB loading from file:// URLs. ' +
+          'Open this folder with VS Code Live Server, then reload the page.'
+        );
+      } else {
+        showModelLoadError(
+          'Could not load raven.glb (' + errorMessage + '). ' +
+          'Check that raven.glb is beside index.html and inspect the browser console.'
+        );
       }
+
+      createPlaceholderMech();
+    }
+
+    loader.load(
+      modelUrl,
+      function (gltf) {
+        try {
+          if (!gltf || !gltf.scene) {
+            throw new Error('The GLB file did not contain a scene.');
+          }
+
+          const model = gltf.scene;
+          model.traverse(function (child) {
+            if (child.isMesh) {
+              child.castShadow = true;
+              child.receiveShadow = true;
+            }
+          });
+
+          // Center and scale the model to fit the scene.
+          const box = new THREE.Box3().setFromObject(model);
+          const center = box.getCenter(new THREE.Vector3());
+          const size = box.getSize(new THREE.Vector3());
+          const maxDim = Math.max(size.x, size.y, size.z);
+
+          if (!Number.isFinite(maxDim) || maxDim <= 0) {
+            throw new Error('The GLB scene contains no visible geometry.');
+          }
+
+          const scale = 8 / maxDim;
+          model.scale.setScalar(scale);
+          model.position.sub(center.multiplyScalar(scale));
+          model.position.y = 0;
+          model.rotation.y = Math.PI * 0.15;
+
+          mechGroup = model;
+          scene.add(mechGroup);
+
+          // Add simple thruster flames if the model has no animated thrusters.
+          attachPlaceholderFlames();
+
+          setModelStatus('Raven loaded', 'success');
+          const errorPanel = document.getElementById('model-error');
+          if (errorPanel) errorPanel.classList.remove('visible');
+          const footerNote = document.querySelector('.footer-note');
+          if (footerNote) footerNote.textContent = 'Raven model loaded successfully from raven.glb.';
+          console.info('Raven model loaded successfully:', modelUrl);
+        } catch (error) {
+          failModelLoad(error);
+        }
+      },
+      function (progress) {
+        if (progress && progress.total > 0) {
+          const percent = Math.round((progress.loaded / progress.total) * 100);
+          setModelStatus('Loading ' + percent + '%', 'loading');
+        }
+      },
+      failModelLoad
     );
   }
 
@@ -4284,14 +4383,25 @@ body.fullscreen #sidebar, body.fullscreen .fs-btn, body.fullscreen #watermark { 
     const btnPause = document.getElementById('btn-pause');
     const btnRestart = document.getElementById('btn-restart');
     const btnToggleSidebar = document.getElementById('btn-toggle-sidebar');
+    const btnOpenSidebar = document.getElementById('btn-open-sidebar');
     const btnFullscreen = document.getElementById('btn-fullscreen');
+    const btnFullscreenFloating = document.getElementById('btn-fullscreen-fs');
     const sliderTOD = document.getElementById('slider-tod');
     const sidebar = document.getElementById('sidebar');
 
-    function setPlaying(p) {
-      state.isPlaying = p;
-      btnPlay.classList.toggle('active', p);
-      btnPause.classList.toggle('active', !p);
+    function setPlaying(playing) {
+      state.isPlaying = playing;
+      btnPlay.classList.toggle('active', playing);
+      btnPause.classList.toggle('active', !playing);
+    }
+
+    function setSidebarVisible(visible) {
+      state.showSidebar = visible;
+      sidebar.classList.toggle('collapsed', !visible);
+      document.body.classList.toggle('sidebar-collapsed', !visible);
+      btnToggleSidebar.textContent = visible ? 'Collapse' : 'Expand';
+      btnToggleSidebar.title = visible ? 'Collapse sidebar' : 'Expand sidebar';
+      btnOpenSidebar.setAttribute('aria-expanded', String(visible));
     }
 
     btnPlay.addEventListener('click', function () { setPlaying(true); });
@@ -4302,45 +4412,55 @@ body.fullscreen #sidebar, body.fullscreen .fs-btn, body.fullscreen #watermark { 
     });
 
     btnToggleSidebar.addEventListener('click', function () {
-      state.showSidebar = !state.showSidebar;
-      sidebar.classList.toggle('collapsed', !state.showSidebar);
-      btnToggleSidebar.textContent = state.showSidebar ? 'Collapse' : 'Expand';
-      btnToggleSidebar.title = state.showSidebar ? 'Collapse sidebar' : 'Expand sidebar';
+      setSidebarVisible(!state.showSidebar);
+    });
+    btnOpenSidebar.addEventListener('click', function () {
+      setSidebarVisible(true);
     });
 
     btnFullscreen.addEventListener('click', toggleFullscreen);
+    btnFullscreenFloating.addEventListener('click', toggleFullscreen);
 
-    sliderTOD.addEventListener('input', function (e) {
-      updateTimeOfDay(parseFloat(e.target.value));
+    sliderTOD.addEventListener('input', function (event) {
+      updateTimeOfDay(parseFloat(event.target.value));
     });
 
-    // Initialize UI
     setPlaying(true);
+    setSidebarVisible(state.showSidebar);
     sliderTOD.value = state.timeOfDay;
     document.getElementById('tod-value').textContent = state.timeOfDay.toFixed(0) + ':00';
-    btnToggleSidebar.textContent = state.showSidebar ? 'Collapse' : 'Expand';
   }
 
-  function toggleFullscreen() {
-    const container = document.getElementById('canvas-container');
-    const el = renderer.domElement;
-    if (!document.fullscreenElement) {
-      el.requestFullscreen().catch(function () {
-        console.warn('Fullscreen failed');
-      });
-      state.fullscreen = true;
-      document.body.classList.add('fullscreen');
-    } else {
-      document.exitFullscreen();
-      state.fullscreen = false;
-      document.body.classList.remove('fullscreen');
+  function syncFullscreenState() {
+    state.fullscreen = !!document.fullscreenElement;
+    document.body.classList.toggle('fullscreen', state.fullscreen);
+
+    const button = document.getElementById('btn-fullscreen-fs');
+    if (button) {
+      button.textContent = state.fullscreen ? '\u00D7' : '\u26F6';
+      button.title = state.fullscreen ? 'Exit fullscreen' : 'Enter fullscreen';
+      button.setAttribute('aria-label', button.title);
     }
   }
 
-  document.addEventListener('fullscreenchange', function () {
-    state.fullscreen = !!document.fullscreenElement;
-    document.body.classList.toggle('fullscreen', state.fullscreen);
-  });
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      if (!document.documentElement.requestFullscreen) {
+        console.warn('Fullscreen is not supported by this browser.');
+        return;
+      }
+
+      document.documentElement.requestFullscreen().catch(function (error) {
+        console.warn('Could not enter fullscreen:', error);
+      });
+    } else {
+      document.exitFullscreen().catch(function (error) {
+        console.warn('Could not exit fullscreen:', error);
+      });
+    }
+  }
+
+  document.addEventListener('fullscreenchange', syncFullscreenState);
 
   // --------------------------------------------------------------------------
   // Simple orbit controls (drag rotate, scroll zoom, right-drag pan)
@@ -4368,7 +4488,7 @@ body.fullscreen #sidebar, body.fullscreen .fs-btn, body.fullscreen #watermark { 
 
       if (state.dragMode === 'rotate') {
         orbit.theta -= dx * 0.004;
-        orbit.phi += dy * 0.004;
+        orbit.phi -= dy * 0.004;
         orbit.phi = Math.max(0.1, Math.min(Math.PI - 0.1, orbit.phi));
       } else if (state.dragMode === 'pan') {
         const panSpeed = 0.001;
@@ -4400,7 +4520,7 @@ body.fullscreen #sidebar, body.fullscreen .fs-btn, body.fullscreen #watermark { 
       const dy = e.touches[0].clientY - state.lastMouse.y;
       state.lastMouse.set(e.touches[0].clientX, e.touches[0].clientY);
       orbit.theta -= dx * 0.006;
-      orbit.phi += dy * 0.006;
+      orbit.phi -= dy * 0.006;
       orbit.phi = Math.max(0.1, Math.min(Math.PI - 0.1, orbit.phi));
     }, { passive: false });
 
