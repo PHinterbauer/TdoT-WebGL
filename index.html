@@ -4763,40 +4763,6 @@ body.fullscreen .fs-btn { display: flex !important; }
     scene.add(mechGroup);
   }
 
-  function createFlamePair(centerPos) {
-    // Two flame cones (left/right thruster)
-    ['left', 'right'].forEach(function (side) {
-      const flame = new THREE.Mesh(
-        new THREE.ConeGeometry(0.22, 1.0, 12),
-        new THREE.MeshBasicMaterial({
-          color: CONFIG.flameColor,
-          transparent: true,
-          opacity: 0,
-        })
-      );
-      flame.rotation.x = -Math.PI / 2; // point cone backward
-      flame.position.set(side === 'left' ? -0.35 : 0.35, centerPos.y, centerPos.z);
-      flame.visible = false;
-      scene.add(flame);
-      flameMeshes.push(flame);
-    });
-
-    // Core glow between thrusters
-    const core = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.18, 0.18, 0.9, 12),
-      new THREE.MeshBasicMaterial({
-        color: 0xffddaa,
-        transparent: true,
-        opacity: 0,
-      })
-    );
-    core.rotation.x = Math.PI / 2;
-    core.position.set(0, centerPos.y, centerPos.z);
-    core.visible = false;
-    scene.add(core);
-    flameMeshes.push(core);
-  }
-
   // --------------------------------------------------------------------------
   // Animation (dash: lean forward + thrusters flare)
   // --------------------------------------------------------------------------
