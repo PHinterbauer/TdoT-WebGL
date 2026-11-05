@@ -1,0 +1,88 @@
+================================================================================
+PROJECT INFO — AC6: Raven WebGL Renderer
+================================================================================
+PURPOSE
+  Single-file offline WebGL 3D renderer of an Armored Core (placeholder for
+  "Raven" from Armored Core 6: Fires of Rubicon) built with HTML5 + WebGL +
+  Three.js + vanilla JS.
+
+FILES (in this folder)
+  index.html   — The single self-contained HTML file. Three.js (r128 UMD) and
+                 all app code are inlined, so it runs fully offline.
+  three.min.js — Three.js r128 UMD build (source library; also inlined in
+                 index.html). Kept as a separate file for reference/editing.
+  app.js       — Application source (also inlined in index.html).
+  PROJECT_INFO.txt — this file.
+
+HOW TO RUN
+  Open index.html in any modern browser. No server, no internet, no dependencies
+  required (everything is inlined).
+
+FEATURES
+  - Placeholder Armored Core mech built from Three.js primitives (torso, head,
+    cockpit visor, arms, legs, feet, back thruster unit).
+  - Dash animation: mech leans forward slightly + back thrusters shoot flames
+    (play / pause / restart buttons).
+  - Collapsible/expandable sideboard with controls (fullscreen when collapsed).
+  - Fullscreen toggle (keyboard 'f' also works via browser fullscreen).
+  - Adjustable sunlight via a Time-of-Day slider (0–24h) that changes sun color,
+    position, intensity, sky gradient, ground color, and fog.
+  - Orbit controls: left-drag rotate, right-drag pan, scroll-wheel zoom, touch
+    drag to rotate.
+  - Minimalistic backdrop: gradient sky sphere + dark ground + subtle grid.
+  - Watermark (bottom-right, slightly transparent): Paul Hinterbauer  5BHWII  @  TGM HWI
+
+MODEL FORMAT NEEDED (to replace the placeholder)
+  To load the real Raven model, provide a GLTF/GLB file. Recommended: .glb
+  (single binary, contains geometry + materials + animations in one file).
+  Save it next to this folder as `raven.glb`, then in app.js set:
+    CONFIG.modelPath = './raven.glb';
+  The loader is THREE.GLTFLoader. If loading fails, it falls back to the
+  placeholder mech.
+
+CONTROLS
+  - Play / Pause / Restart: animation buttons in the sideboard.
+  - Time of Day: slider in the sideboard (adjusts sunlight/lighting).
+  - Collapse/Expand sideboard: hides/shows the UI for fullscreen viewing.
+  - Fullscreen: button in sideboard or floating top-right button.
+  - Orbit: left-click drag = rotate, right-click drag = pan, wheel = zoom.
+  - Touch: one-finger drag = rotate.
+
+ANIMATION DETAILS (dash cycle)
+  - state.time advances each frame; dash cycle repeats every CONFIG.dashDuration
+    (default 1.6s).
+  - dashIntensity = sin(cycle * PI) -> 0..1..0 pulse each cycle.
+  - body/head lean forward proportional to dashIntensity (CONFIG.leanAngle).
+  - Thruster flame cones scale length & opacity with dashIntensity, plus a
+    flicker (sin-based) when thrusters are on.
+  - Small idle hover bob when not dashing.
+
+LIGHTING / TIME OF DAY
+  - Directional sun light (shadows enabled, PCFSoftShadowMap).
+  - Hemisphere light (sky zenith / ground color).
+  - Ambient fill.
+  - updateTimeOfDay(hour) computes sun position on an arc and colors for night,
+    dawn, day, dusk, night. Fog and sky gradient also shift.
+
+CREDITS / ATTRIBUTION
+  - Three.js (r128): Copyright 2010-2021 Three.js Authors, MIT License.
+    https://threejs.org
+  - Watermark: Paul Hinterbauer  5BHWII  @  TGM HWI
+
+GITHUB / COMMITTING
+  - Create the repo under your personal GitHub account (github.com -> New
+    repository). Do NOT add me as a collaborator; I cannot authenticate as you.
+  - Initialize locally and push:
+      cd "C:\Users\phint\Documents\WebGL Render"
+      git init
+      git add index.html three.min.js app.js PROJECT_INFO.txt
+      git -c user.name="Paul Hinterbauer" -c user.email="YOUR_EMAIL" commit -m "Initial commit: AC6 Raven WebGL renderer (single-file offline)"
+      git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
+      git branch -M main
+      git push -u origin main
+  - Replace YOUR_USERNAME and YOUR_REPO with your values.
+  - Only commit using your personal account (set user.name/user.email above or
+    globally via `git config --global`).
+
+================================================================================
+END
