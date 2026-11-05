@@ -14,7 +14,8 @@ DOCUMENT PURPOSE
   backdrop, dash animation, sunlight slider, or thruster flames.
 
   All source-code comments, UI labels, user-facing strings, and documentation
-  must be written in English.
+  source code, comments, and developer-facing messages remain in English.
+  All user-facing interface text is written in German.
 
 
 1. PROJECT IDENTITY & PRODUCT DIRECTION
@@ -62,7 +63,7 @@ DOCUMENT PURPOSE
     - The former open-air / mountain / flying backdrop.
     - A visible sky or horizon flight environment.
     - The former dash / forward-lean animation.
-    - Procedural exhaust or thruster flames.
+    - Uncalibrated exhaust or thruster flames.
     - The former time-of-day sunlight slider.
     - A generic animation-control dashboard.
 
@@ -140,6 +141,32 @@ DOCUMENT PURPOSE
   The sidebar's "Replace GLB" action opens the same local file picker so a
   different .glb can be loaded without refreshing the page.
 
+  Temporary calibration mode:
+    - "Mesh kalibrieren" opens a non-show calibration panel.
+    - Opening the panel requires the calibration PIN 1818.
+    - Model scale, X/Y/Z offset, and RX/RY/RZ rotation are applied live to the
+      model-only transform node.
+    - Each inspection marker can receive an independent local offset.
+    - Each of the four sling endpoints can receive an independent local offset.
+      The crane/spreader remains independent while the model is calibrated.
+    - "Scheune ausblenden" hides the procedural workshop while retaining the
+      crane, sling, model, and calibration lighting for unobstructed alignment.
+      A neutral, invisible hemisphere light is enabled in this mode so the
+      model remains evenly readable without the workshop lamps.
+    - "XYZ-Linien einblenden" attaches a local red/green/blue orientation guide
+      to the model position while keeping the guide aligned to world-forward.
+      The crane/model assembly starts with zero yaw so model, guide, and
+      workshop share the same forward direction.
+    - Sling Z offsets range from -6 to +6 scene units and default to zero so
+      endpoints can be moved behind the model as well as toward the viewer.
+    - Imported meshes disable frustum culling to keep shoulder-mounted weapons
+      stable during orbiting and zooming despite unreliable GLB bounds.
+    - "Werte übernehmen" exports JSON containing model, marker, and hook values.
+      Those values can be copied back into the runtime as permanent defaults
+      after visual calibration is complete.
+    - The supplied production calibration is currently embedded as the default
+      configuration and is reapplied whenever the primary GLB is loaded.
+
 
 4. CURRENT APPLICATION ARCHITECTURE
 --------------------------------------------------------------------------------
@@ -151,8 +178,9 @@ DOCUMENT PURPOSE
     - time: elapsed animation time
     - showSidebar: whether the inspection panel is open
     - fullscreen: fullscreen state
-    - motionEnabled: whether the suspended mech is allowed to sway
-    - selectedPart: current component ID
+    - motionEnabled: whether the suspended mech is allowed to sway; the
+      default is held position
+    - selectedPart: current component ID, null until a 3D marker is clicked
     - isDragging / dragMoved / dragMode / lastMouse: pointer interaction state
 
   Important scene references:
@@ -320,6 +348,7 @@ DOCUMENT PURPOSE
     - Applies a very small vertical bob.
     - Applies a subtle Z displacement to craneAssembly.
     - Uses state.motionEnabled to hold the system stationary or enable motion.
+      The enabled motion uses deliberately visible sway for show-floor viewing.
 
   UI:
     - "Hold Position" toggles the sway off.
@@ -332,8 +361,8 @@ DOCUMENT PURPOSE
 8. INTERACTIVE COMPONENT INSPECTION
 --------------------------------------------------------------------------------
 
-  The component index is defined in the INSPECTION_PARTS array near the top of
-  the application code. It currently contains nine records:
+  The inspection records are defined in the INSPECTION_PARTS array near the
+  top of the application code. It currently contains nine records:
 
     ID           Displayed part / system
     ------------ -----------------------------------------------
@@ -351,7 +380,7 @@ DOCUMENT PURPOSE
   Each record contains:
     - id: stable identifier used by UI and hotspot mapping
     - n: displayed two-digit marker number
-    - label: short component name in the index
+    - label: short component name shown by the marker
     - system: technical slot / system heading
     - part: part designation
     - maker: manufacturer attribution
@@ -363,15 +392,15 @@ DOCUMENT PURPOSE
     - note: caveat, source context, or extra explanation
 
   UI behavior:
-    - renderComponentIndex() creates sidebar buttons from INSPECTION_PARTS.
     - createInspectionAnchors(bounds) converts normalized anchor ratios into
       local-space coordinates within the normalized model bounding box.
     - The function creates numbered DOM buttons in #hotspot-layer.
     - updateInspectionHotspots() projects each local anchor through mechGroup
       and camera into screen coordinates.
-    - selectInspectionPart(id) updates the active list button, marker, index,
-      and information panel.
-    - A user can select a part from the index or click its projected marker.
+    - selectInspectionPart(id) updates the active marker and floating callout.
+    - Details open exclusively from a projected 3D marker or a direct model
+      click; the sidebar has no component index or selected-component field.
+    - Clicking the active marker again clears the selection and hides details.
     - pickInspectionPart(x, y) raycasts against the model, then selects the
       nearest configured inspection anchor to the ray hit point.
 
@@ -474,7 +503,8 @@ DOCUMENT PURPOSE
     - One-finger touch drag: orbit.
     - A short left click on the canvas: selects the nearest model inspection
       anchor through raycasting.
-    - Clicking a numbered hotspot or component list entry selects that part.
+    - Clicking a numbered hotspot selects that part; clicking it again clears
+      the selection. The component list does not open details.
     - Recenter View restores the initial camera parameters.
     - Collapse Panel hides the left dossier.
     - The persistent open-panel icon restores it.
@@ -515,11 +545,30 @@ DOCUMENT PURPOSE
   Main regions:
     - Header: RAVEN / NIGHTFALL and hangar status.
     - Identity card: NIGHTFALL name and small dossier / frame labels.
-    - Component Index: nine compact selectable entries.
-    - Selected Component: technical record, facts, and GAME INTEL.
-    - Suspension System: sway / hold-position control.
+    - Component Nodes: nine compact selectable 3D markers.
+    - Floating inspection callout: selected component details positioned beside
+      the active 3D hotspot.
+    - Suspension System: hold-position / strong visible sway control.
+    - Reset control: restores arm, leg, crane, thruster, and motion defaults.
+    - Show controls: arm pose, crane
+      travel, and thruster ignition.
+    - The leg pose controls were removed from the show UI; inspection uses
+      model hotspots and floating callouts only.
+    - A sidebar button can hide or restore all inspection hotspots.
+    - Thruster calibration defaults to the current mirrored placement
+      (X 0.35, Y 3.62, Z -2.66, RX 130 degrees) and uses depth-tested
+      rendering so exhaust is occluded by the model correctly.
+    - Arm pose now includes recognized hand and shoulder weapon assemblies.
+      Leg pose bends both sides on their local Z axis.
+    - Thruster calibration uses one mirrored X position plus shared Y/Z
+      coordinates and shared RX/RY/RZ rotation controls; the calibration
+      export includes all six values.
+    - Suspension sway keeps its timing while increasing amplitude when the
+      crane is travelling, and inspection callouts render above hotspots.
     - Utility controls: Replace GLB, Recenter View, Collapse Panel, Fullscreen.
     - Floating numbered hotspots overlay the canvas.
+    - Calibration utilities: workshop visibility, model-local XYZ guide, and
+      independent sling endpoint offsets.
 
   Visual system:
     - Dark charcoal / graphite base.
@@ -533,6 +582,8 @@ DOCUMENT PURPOSE
     - Sidebar has a narrow-screen layout.
     - Hotspots must remain clickable and not obscure each other unnecessarily.
     - Selected component text must remain readable and scroll within the panel.
+    - The callout must stay inside the viewport and flip its connector when
+      the active hotspot is near the right edge.
     - Fullscreen hides the sidebar and watermark, but the fullscreen exit control
       remains available.
 
@@ -541,43 +592,41 @@ DOCUMENT PURPOSE
 --------------------------------------------------------------------------------
 
   Confirmed limitations:
-    1. No browser visual QA has yet been completed after the latest hangar
-       implementation with the owner's exact raven.glb file.
-    2. Inspection anchors are based on normalized bounding-box ratios rather
-       than actual GLB part nodes. Their screen positions need visual review.
-    3. Four suspension clamp / cable attachment points are also based on
-       normalized bounding-box ratios. Their exact physical attachment points
-       need calibration against the actual model.
-    4. The pickInspectionPart() method raycasts the model but maps the hit to
+    1. Browser visual QA has been completed with the supplied raven.glb over
+       HTTP in Chromium. The default composition is tuned for the inspection
+       sidebar and narrow viewports.
+    2. Inspection anchors first resolve matching GLB component names and
+       calculate their mesh bounds in model-local space. Calibrated normalized
+       positions remain the bounded fallback when a replacement GLB lacks
+       semantic names.
+    3. Four suspension cable endpoints are calibrated to the upper torso
+       envelope of the supplied model and use reduced, flush clamp collars.
+       They remain presentation anchors rather than semantic GLB hardpoints.
+    4. The GLB does not expose reliable thruster/nozzle names. The ignition
+       effect therefore uses rear-most lower mesh geometry as a calibrated
+       fallback and remains disabled by default.
+    5. The pickInspectionPart() method raycasts the model but maps the hit to
        the nearest configured anchor; it does not yet identify the actual
        semantic mesh or subassembly under the pointer.
     5. Some values / in-game details in INSPECTION_PARTS require source and
        regulation verification before being treated as authoritative.
-    6. The placeholder AC is only a basic fallback. It is not a substitute
+    7. The placeholder AC is only a basic fallback. It is not a substitute
        for the supplied NIGHTFALL model.
-    7. The project keeps some legacy helper code from earlier iterations
+    8. The project keeps some legacy helper code from earlier iterations
        inside index.html. Do not assume that every remaining function or
        variable related to flames, time-of-day lighting, or dash controls is
        part of the active UI or active render pipeline.
 
   Suggested next development tasks (priority order):
     P0 — Visual validation with the real GLB:
-      - Load raven.glb in Chrome / Edge.
-      - Check framing and the visual relationship between mech, hangar, crane,
-        cables, and four clamps.
-      - Confirm the model is not clipped or too dark.
-      - Confirm the hangar has a convincing depth / scale and does not compete
-        with the AC.
-      - Adjust camera and suspension heights if needed.
+      - Re-check framing after future hangar or camera changes.
+      - Re-check the visual relationship between mech, hangar, crane, cables,
+        and four clamps after future model replacements.
 
     P1 — Correct model-aware inspection anchors:
-      - Inspect the GLB node hierarchy (names, types, mesh counts, bounds).
-      - Identify actual head, core, arms, legs, hand weapons, shoulder weapons,
-        and internal-system representative nodes where possible.
-      - Prefer named nodes / actual mesh groups over fixed bounding ratios.
+      - Expand semantic mesh selection beyond nearest-anchor raycasting.
       - Build a robust fallback when a particular GLB has merged meshes.
-      - Keep normalized anchor mapping as a fallback, not as the primary path.
-      - Verify all nine hotspots from multiple camera angles.
+      - Recalibrate the supplied model anchors if the GLB or camera changes.
 
     P2 — Calibrate the suspension rig:
       - Place each clamp at believable load-bearing hardpoints.
@@ -600,6 +649,12 @@ DOCUMENT PURPOSE
       - Separate canon, game mechanics, build interpretation, and narrative intel.
 
     P5 — Professional polish:
+      - Arm angle, total leg stance, independent left/right leg angles, crane
+        travel, and thruster ignition controls are available in the suspension
+        panel.
+      - The model is framed at the larger 13-unit presentation scale.
+      - Suspension cable endpoints are placed on the visible front upper-frame
+        region and use a contrasting amber material for visual verification.
       - Add subtle camera focus / selection feedback.
       - Consider a small component callout line between hotspot and model.
       - Improve workshop material variation and local shadowing.
@@ -613,7 +668,8 @@ DOCUMENT PURPOSE
 --------------------------------------------------------------------------------
 
   Before committing changes:
-    [ ] Confirm all new source code, comments, and UI strings are English.
+    [ ] Confirm source code and comments remain English while all user-facing
+        UI text remains German.
     [ ] Confirm there are no duplicate HTML element IDs.
     [ ] Confirm getElementById references resolve to existing UI elements.
     [ ] Parse / syntax-check the full application script.
@@ -625,7 +681,8 @@ DOCUMENT PURPOSE
     [ ] Confirm model replacement clears old clamps, cables, hotspots, and data.
     [ ] Confirm camera orbit, pan, zoom, click selection, and recenter work.
     [ ] Confirm suspension motion can be held and resumed.
-    [ ] Confirm all nine component entries can be selected.
+    [ ] Confirm all nine component markers can be selected and toggled off.
+    [ ] Confirm the reset control restores every show-control value.
     [ ] Confirm hotspots are visible, correctly placed, and clickable.
     [ ] Confirm the scene remains usable at desktop and narrow viewport sizes.
 

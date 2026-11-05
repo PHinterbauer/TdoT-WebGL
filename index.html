@@ -21,6 +21,7 @@ body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #e8
   transition: transform 0.28s ease, opacity 0.28s ease;
   box-shadow: 8px 0 30px rgba(0,0,0,0.42);
 }
+
 #sidebar.collapsed { transform: translateX(-100%); }
 .sidebar-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #333644; }
 .sidebar-header h2 { font-size: 17px; letter-spacing: 0.5px; font-weight: 700; color: #ff4d4d; }
@@ -98,10 +99,19 @@ body.fullscreen .fs-btn { display: flex !important; }
 #canvas-container{z-index:1}
 #hotspot-layer{position:fixed;inset:0;z-index:30;pointer-events:none;overflow:hidden}
 .hotspot{position:absolute;width:30px;height:30px;margin:-15px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(245,194,128,.92);border-radius:50%;color:#fff4df;background:rgba(21,25,24,.88);box-shadow:0 0 0 4px rgba(215,161,92,.12),0 2px 12px rgba(0,0,0,.55);font:700 10px/1 Consolas,monospace;cursor:pointer;pointer-events:auto;transition:transform .18s,background .18s}
+.inspection-callout{position:absolute;z-index:1000;width:min(290px,calc(100vw - 32px));padding:12px 13px;border:1px solid rgba(215,161,92,.6);border-radius:6px;background:rgba(10,15,14,.98);box-shadow:0 14px 35px rgba(0,0,0,.58);color:#e7e9e4;pointer-events:auto}
+.inspection-callout:before{content:"";position:absolute;left:-7px;top:18px;width:12px;height:12px;background:rgba(10,15,14,.96);border-left:1px solid rgba(215,161,92,.6);border-bottom:1px solid rgba(215,161,92,.6);transform:rotate(45deg)}
+.inspection-callout.flip:before{left:auto;right:-7px;transform:rotate(225deg)}
+.inspection-callout-kicker{color:var(--accent);font:700 8px/1.2 Consolas,monospace;letter-spacing:.14em}.inspection-callout-title{margin-top:5px;font-size:14px;font-weight:800}.inspection-callout-maker{margin-top:3px;color:#99a59c;font:700 8px/1.2 Inter,sans-serif;text-transform:uppercase}.inspection-callout-description{margin-top:8px;color:#c5cdc5;font-size:10px;line-height:1.45}.inspection-callout-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:9px}.inspection-callout-grid div{padding:5px 6px;background:rgba(35,47,42,.65);border-left:2px solid rgba(141,185,160,.45)}.inspection-callout-grid b{display:block;color:#aab8ad;font:700 7px/1.1 Inter,sans-serif;letter-spacing:.08em;text-transform:uppercase}.inspection-callout-grid small{display:block;margin-top:3px;color:#e5c084;font:9px/1.2 Consolas,monospace}
 .hotspot:after{content:attr(data-label);position:absolute;left:34px;top:50%;transform:translateY(-50%);opacity:0;white-space:nowrap;padding:6px 9px;border:1px solid var(--line);border-radius:4px;background:rgba(11,15,15,.96);color:#e7e9e4;font:700 10px/1.2 Inter,sans-serif;pointer-events:none}
 .hotspot:hover,.hotspot.active{transform:scale(1.14);background:#b77b3c;box-shadow:0 0 0 6px rgba(215,161,92,.17),0 0 18px rgba(215,161,92,.38)}
 .hotspot:hover:after,.hotspot.active:after{opacity:1}
-#sidebar{top:14px;left:14px;bottom:14px;width:370px;max-width:min(92vw,410px);display:flex;flex-direction:column;padding:20px 19px 15px;overflow-y:auto;overscroll-behavior:contain;background:linear-gradient(155deg,rgba(18,24,24,.985),rgba(10,14,15,.975));border:1px solid rgba(190,195,178,.2);border-radius:9px;box-shadow:0 18px 65px rgba(0,0,0,.48);backdrop-filter:blur(15px)}
+.hotspot.active:after{display:none}
+#sidebar{top:14px;left:14px;bottom:14px;width:370px;max-width:min(92vw,410px);display:flex;flex-direction:column;padding:20px 19px 15px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(215,161,92,.48) transparent;background:linear-gradient(155deg,rgba(18,24,24,.985),rgba(10,14,15,.975));border:1px solid rgba(190,195,178,.2);border-radius:9px;box-shadow:0 18px 65px rgba(0,0,0,.48);backdrop-filter:blur(15px)}
+#sidebar::-webkit-scrollbar{width:5px}
+#sidebar::-webkit-scrollbar-track{background:transparent}
+#sidebar::-webkit-scrollbar-thumb{border-radius:8px;background:rgba(215,161,92,.48)}
+#sidebar::-webkit-scrollbar-thumb:hover{background:rgba(240,189,118,.76)}
 #sidebar.collapsed{transform:translateX(calc(-100% - 22px));opacity:.25;pointer-events:none}
 .sidebar-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:15px;border-bottom:1px solid var(--line)}
 .eyebrow{margin-bottom:5px;color:var(--accent);font:700 9px/1.2 Consolas,monospace;letter-spacing:.2em}
@@ -117,6 +127,9 @@ body.fullscreen .fs-btn { display: flex !important; }
 .identity-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid rgba(215,161,92,.16)}
 .identity-stats b{display:block;color:#e9e8df;font:700 12px/1.2 Consolas,monospace}
 .identity-stats small{display:block;margin-top:4px;color:#808c87;font:700 8px/1.2 Inter,sans-serif;letter-spacing:.12em}
+.telemetry{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px;padding-top:10px;border-top:1px solid rgba(215,161,92,.16)}
+.telemetry-item{min-width:0}.telemetry-item b{display:block;color:#e8c28d;font:700 10px/1.2 Consolas,monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.telemetry-item small{display:block;margin-top:4px;color:#808c87;font:700 7px/1.2 Inter,sans-serif;letter-spacing:.08em}
+@media (max-width:900px){#sidebar{width:340px;padding-left:16px;padding-right:16px}}
 .section{margin-bottom:17px}.section-heading{display:flex;justify-content:space-between;margin-bottom:9px}
 .section-heading h2{color:#aab2aa;font:800 9px/1.2 Inter,sans-serif;letter-spacing:.17em}
 .section-heading span{color:#68736e;font:700 9px/1.2 Consolas,monospace}
@@ -127,6 +140,7 @@ body.fullscreen .fs-btn { display: flex !important; }
 .component-copy{min-width:0}.component-copy b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px}
 .component-copy small{display:block;margin-top:3px;color:#85908a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:700 8px/1.15 Consolas,monospace}
 .detail-shell{min-height:172px;padding:13px;border:1px solid rgba(173,186,178,.16);border-radius:5px;background:linear-gradient(145deg,rgba(31,39,36,.72),rgba(17,22,22,.78))}
+#part-info{display:none}
 .detail-kicker{color:var(--accent);font:700 9px/1.3 Consolas,monospace;letter-spacing:.14em}
 .detail-title{margin-top:6px;color:#f1f1e9;font-size:16px;font-weight:800;overflow-wrap:anywhere}
 .detail-maker{margin-top:5px;color:#9da79f;font:700 9px/1.35 Inter,sans-serif;letter-spacing:.09em;text-transform:uppercase}
@@ -138,9 +152,16 @@ body.fullscreen .fs-btn { display: flex !important; }
 .detail-fact b{display:block;color:#e8c28d;font:700 11px/1.2 Consolas,monospace;overflow-wrap:anywhere}
 .detail-fact small{display:block;margin-top:4px;color:#7f8b84;font:700 7px/1.2 Inter,sans-serif;letter-spacing:.08em}
 .detail-disclaimer{margin-top:9px;color:#78827c;font-size:9px;line-height:1.45}
+.detail-engineering{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.engineering-item{padding:7px 8px;border-left:2px solid rgba(141,185,160,.45);background:rgba(6,10,10,.28)}
+.engineering-item b{display:block;color:#d9ded5;font:700 8px/1.2 Inter,sans-serif;letter-spacing:.08em;text-transform:uppercase}.engineering-item small{display:block;margin-top:4px;color:#a6afa7;font:9px/1.35 Consolas,monospace}
 .motion-panel{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px;border:1px solid rgba(173,186,178,.14);border-radius:4px;background:rgba(24,31,29,.66)}
 .motion-copy{display:flex;align-items:center;gap:8px}.motion-led{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 9px rgba(141,185,160,.62)}
 .motion-copy b{display:block;color:#d9ded5;font-size:10px}.motion-copy small{display:block;margin-top:3px;color:#7d8982;font:700 8px/1.2 Consolas,monospace}
+.control-panel{padding:10px;border:1px solid rgba(173,186,178,.14);border-radius:4px;background:rgba(24,31,29,.66)}
+.control-row{display:grid;grid-template-columns:78px 1fr 30px;align-items:center;gap:8px;margin-top:8px}.control-row:first-child{margin-top:0}
+.control-row label{color:#aeb8af;font:700 8px/1.2 Inter,sans-serif;letter-spacing:.08em;text-transform:uppercase}.control-row output{color:var(--bright);font:700 9px/1 Consolas,monospace;text-align:right}
+.control-row input{width:100%;accent-color:var(--accent);cursor:pointer}
 .btn{padding:9px 10px;color:#d7ddd4;background:rgba(48,58,53,.72);border:1px solid rgba(173,186,178,.2);border-radius:4px;font-size:10px;font-weight:750;cursor:pointer}
 .btn:hover{color:#fff3df;border-color:rgba(215,161,92,.55)}.btn.active{color:var(--bright);border-color:rgba(215,161,92,.68);background:rgba(111,77,42,.24)}
 .actions{display:flex;gap:7px;margin-top:8px}.actions .btn{flex:1}
@@ -156,35 +177,91 @@ body.sidebar-collapsed .side-btn{display:flex}body.fullscreen #sidebar,body.full
 .model-dialog.visible{display:flex}.model-dialog-card{width:min(460px,100%);padding:25px;border:1px solid rgba(215,161,92,.42);border-radius:8px;background:rgba(17,23,22,.98)}
 .model-dialog-card h2{margin-bottom:12px;color:var(--bright);font-size:18px}.model-dialog-card p{color:#c4ccc3;font-size:12px;line-height:1.6}
 .model-dialog-actions{display:flex;gap:10px;margin-top:18px}.model-dialog-note{margin-top:13px;color:#858f87!important;font-size:10px!important}
+.pin-dialog{display:none;position:fixed;inset:0;z-index:160;align-items:center;justify-content:center;padding:20px;background:rgba(3,5,5,.82);backdrop-filter:blur(8px)}
+.pin-dialog.visible{display:flex}.pin-dialog-card{width:min(360px,100%);padding:22px;border:1px solid rgba(215,161,92,.48);border-radius:8px;background:rgba(17,23,22,.98);box-shadow:0 18px 55px rgba(0,0,0,.52)}
+.pin-dialog-card h2{margin-bottom:9px;color:var(--bright);font-size:17px}.pin-dialog-card p{color:#c4ccc3;font-size:11px;line-height:1.5}
+.pin-dialog-card input{width:100%;margin-top:14px;padding:10px;color:#eef2e9;background:#08100e;border:1px solid rgba(173,186,178,.3);border-radius:4px;font:700 14px Consolas,monospace;letter-spacing:.18em}
+.pin-dialog-card input:focus{outline:1px solid var(--accent);border-color:var(--accent)}.pin-dialog-error{min-height:15px;margin-top:7px;color:#e58a78;font-size:10px}
+.pin-dialog-actions{display:flex;gap:8px;margin-top:8px}.pin-dialog-actions .btn{flex:1}
+#calibration-panel{display:none;position:fixed;top:14px;right:14px;z-index:110;width:min(360px,calc(100vw - 28px));max-height:calc(100vh - 28px);overflow:auto;padding:14px;border:1px solid rgba(215,161,92,.48);border-radius:7px;background:rgba(11,17,16,.96);box-shadow:0 12px 38px rgba(0,0,0,.4)}
+#calibration-panel.visible{display:block}#calibration-panel h2{color:var(--bright);font-size:14px;letter-spacing:.08em;text-transform:uppercase}
+.calibration-note{margin:6px 0 12px;color:#aab4aa;font-size:10px;line-height:1.45}.calibration-group{margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+.calibration-group h3{margin-bottom:7px;color:#d9ded5;font-size:10px;letter-spacing:.08em;text-transform:uppercase}.calibration-select{width:100%;padding:7px;color:#d7ddd4;background:#1b2521;border:1px solid rgba(173,186,178,.25);border-radius:3px}
+.calibration-row{display:grid;grid-template-columns:32px 1fr 52px;align-items:center;gap:7px;margin-top:7px}.calibration-row label{color:#9eaaa0;font:700 9px Consolas,monospace}.calibration-row input{width:100%;accent-color:var(--accent)}.calibration-row output{color:var(--bright);font:9px Consolas,monospace;text-align:right}
+#calibration-export{width:100%;min-height:84px;margin-top:8px;padding:8px;color:#bdc8bd;background:#08100e;border:1px solid rgba(173,186,178,.2);font:9px/1.35 Consolas,monospace;resize:vertical}
+.calibration-tools{display:flex;gap:7px;margin-top:8px}.calibration-tools .btn{flex:1}
 @media(max-width:680px){#sidebar{top:8px;left:8px;bottom:8px;width:min(355px,calc(100vw - 16px));padding:16px 14px 12px}.identity-card{margin:10px 0 13px}.section{margin-bottom:13px}.hotspot{width:26px;height:26px;margin:-13px}.fs-btn{top:10px;right:10px}.side-btn{top:10px;left:10px}}
 </style>
 </head>
 <body>
 <div id="canvas-container"></div><div id="hotspot-layer" aria-label="Interactive NIGHTFALL inspection points"></div>
 <aside id="sidebar">
-  <header class="sidebar-header"><div><div class="eyebrow">RUBICON // MOBILE WORKSHOP</div><h1>RAVEN <span>/ NIGHTFALL</span></h1></div><div class="status" id="anim-status" data-state="success">HANGAR 03</div></header>
+  <header class="sidebar-header"><div><div class="eyebrow">RUBICON // MOBILE WERKSTATT</div><h1>RAVEN <span>/ NIGHTFALL</span></h1></div><div class="status" id="anim-status" data-state="success">HANGAR 03</div></header>
   <section class="identity-card">
-    <div class="identity-top"><span>AC // 51-016 GA</span><span>BRANCH</span></div><div class="identity-name">NIGHTFALL</div>
-    <p>Original Raven's Armored Core. Suspended in the maintenance bay for a full system inspection.</p>
-    <div class="identity-stats"><div><b>γ-3</b><small>ARENA CLASSIFICATION</small></div><div><b>C-2000</b><small>FRAME LINEAGE</small></div></div>
+    <div class="identity-top"><span>AC // 51-016 GA</span><span>BAUREIHE</span></div><div class="identity-name">NIGHTFALL</div>
+    <p>Armored-Core-Einheit des ursprünglichen Raven. Für die technische Systemprüfung in der Wartungsbucht aufgehängt.</p>
+    <div class="identity-stats"><div><b>γ-3</b><small>ARENA-KLASSIFIKATION</small></div><div><b>C-2000</b><small>RAHMENHERKUNFT</small></div></div>
+    <div class="telemetry"><div class="telemetry-item"><b>09</b><small>INSPEKTIONSMARKER</small></div><div class="telemetry-item"><b>GLB</b><small>MODELLPIPELINE</small></div><div class="telemetry-item"><b>RT</b><small>LIVE-TELEMETRIE</small></div></div>
   </section>
-  <section class="section"><div class="section-heading"><h2>COMPONENT INDEX</h2><span>09 SYSTEMS</span></div><div class="component-list" id="component-list"></div><p class="hint">Select a system here or click its numbered marker on the 3D model.</p></section>
-  <section class="section"><div class="section-heading"><h2>SELECTED COMPONENT</h2><span id="selected-index">00 / 09</span></div><div class="detail-shell" id="part-info" aria-live="polite"><div class="placeholder-copy"><h3>Inspection ready</h3><p>Choose a component to open its technical record and game intel.</p></div></div></section>
-  <section class="section"><div class="section-heading"><h2>SUSPENSION SYSTEM</h2><span>GANTRY 03</span></div>
-    <div class="motion-panel"><div class="motion-copy"><span class="motion-led"></span><div><b>Low-frequency sway</b><small>LOAD SECURED // 4-POINT SLING</small></div></div><button id="btn-motion" class="btn active" type="button">Hold Position</button></div>
-    <p class="hint">Left-drag to orbit. Hold the middle mouse button to pan. Scroll to zoom. Camera movement is bounded around the mech.</p>
+  <section class="section"><div class="section-heading"><h2>AUFHÄNGUNGSSYSTEM</h2><span>PORTALKRAN 03</span></div>
+    <div class="motion-panel"><div class="motion-copy"><span class="motion-led"></span><div><b>Niederfrequente Pendelbewegung</b><small>LAST GESICHERT // 4-PUNKT-ANSCHLAG</small></div></div><button id="btn-motion" class="btn active" type="button">Pendelbewegung starten</button></div>
+    <div class="control-panel"><div class="control-row"><label for="arm-pose">Armwinkel</label><input id="arm-pose" type="range" min="-100" max="100" value="0" step="1"><output id="arm-pose-value">0°</output></div><div class="control-row"><label for="crane-travel">Kranfahrt</label><input id="crane-travel" type="range" min="-100" max="100" value="0" step="1"><output id="crane-travel-value">0%</output></div><button id="btn-thrusters" class="btn" type="button">Triebwerke zünden</button><button id="btn-reset-controls" class="btn" type="button">Alle Werte zurücksetzen</button></div>
+    <p class="hint">Linke Maustaste: Ansicht drehen. Mittlere Maustaste: verschieben. Mausrad: zoomen.</p>
   </section>
-  <div class="actions"><button id="btn-load-model" class="btn" type="button">Replace GLB</button><button id="btn-recenter" class="btn" type="button">Recenter View</button></div>
-  <div class="actions"><button id="btn-toggle-sidebar" class="btn" type="button">Collapse Panel</button><button id="btn-fullscreen" class="btn" type="button">Fullscreen</button></div>
-  <div class="footer-note">FIELD DOSSIER // AC6: FIRES OF RUBICON<br>STORY INTEL MAY CONTAIN SPOILERS. PART BALANCE VALUES FOLLOW THE LISTED GAME REGULATION.</div>
+  <div class="actions"><button id="btn-load-model" class="btn" type="button">GLB ersetzen</button><button id="btn-recenter" class="btn" type="button">Ansicht zentrieren</button></div>
+  <div class="actions"><button id="btn-toggle-nodes" class="btn" type="button">Nodes ausblenden</button><button id="btn-calibration-open" class="btn" type="button">Mesh kalibrieren</button></div>
+  <div class="actions"><button id="btn-toggle-sidebar" class="btn" type="button">Panel einklappen</button><button id="btn-fullscreen" class="btn" type="button">Vollbild</button></div>
+  <div class="footer-note">TECHNISCHES DOSSIER // AC6: FIRES OF RUBICON<br>HANDLUNGS- UND SPIELINFORMATIONEN KÖNNEN SPOILER ENTHALTEN.</div>
 </aside>
-<button id="btn-open-sidebar" class="side-btn" type="button" title="Open inspection panel" aria-label="Open inspection panel">&#x2630;</button>
-<button id="btn-fullscreen-fs" class="fs-btn" type="button" title="Enter fullscreen" aria-label="Enter fullscreen">&#x26F6;</button>
+<button id="btn-open-sidebar" class="side-btn" type="button" title="Inspektionspanel öffnen" aria-label="Inspektionspanel öffnen">&#x2630;</button>
+<button id="btn-fullscreen-fs" class="fs-btn" type="button" title="Vollbild öffnen" aria-label="Vollbild öffnen">&#x26F6;</button>
+<section id="calibration-panel" aria-label="Temporäre Modellkalibrierung">
+  <h2>Temporäre Kalibrierung</h2>
+  <p class="calibration-note">Modell, Marker und Krananschläge direkt am geladenen Mesh ausrichten. Die Exportwerte danach zurückgeben.</p>
+  <div class="calibration-group"><h3>Modellposition und Maßstab</h3>
+    <div class="calibration-row"><label for="cal-model-scale">S</label><input id="cal-model-scale" type="range" min="0.7" max="1.5" value="1" step="0.001"><output id="cal-model-scale-value">1.000</output></div>
+    <div class="calibration-row"><label for="cal-model-x">X</label><input id="cal-model-x" type="range" min="-3" max="3" value="0" step="0.01"><output id="cal-model-x-value">0.00</output></div>
+    <div class="calibration-row"><label for="cal-model-y">Y</label><input id="cal-model-y" type="range" min="-3" max="3" value="0" step="0.01"><output id="cal-model-y-value">0.00</output></div>
+    <div class="calibration-row"><label for="cal-model-z">Z</label><input id="cal-model-z" type="range" min="-3" max="3" value="0" step="0.01"><output id="cal-model-z-value">0.00</output></div>
+    <div class="calibration-row"><label for="cal-model-rx">RX</label><input id="cal-model-rx" type="range" min="-180" max="180" value="0" step="1"><output id="cal-model-rx-value">0°</output></div>
+    <div class="calibration-row"><label for="cal-model-ry">RY</label><input id="cal-model-ry" type="range" min="-180" max="180" value="0" step="1"><output id="cal-model-ry-value">0°</output></div>
+    <div class="calibration-row"><label for="cal-model-rz">RZ</label><input id="cal-model-rz" type="range" min="-180" max="180" value="0" step="1"><output id="cal-model-rz-value">0°</output></div>
+  </div>
+  <div class="calibration-group"><h3>Markerposition</h3>
+    <select id="cal-marker-select" class="calibration-select"></select>
+    <div class="calibration-row"><label for="cal-marker-x">X</label><input id="cal-marker-x" type="range" min="-2" max="2" value="0" step="0.01"><output id="cal-marker-x-value">0.00</output></div>
+    <div class="calibration-row"><label for="cal-marker-y">Y</label><input id="cal-marker-y" type="range" min="-2" max="2" value="0" step="0.01"><output id="cal-marker-y-value">0.00</output></div>
+    <div class="calibration-row"><label for="cal-marker-z">Z</label><input id="cal-marker-z" type="range" min="-2" max="2" value="0" step="0.01"><output id="cal-marker-z-value">0.00</output></div>
+  </div>
+  <div class="calibration-group"><h3>Krananschlag</h3>
+    <select id="cal-hook-select" class="calibration-select"><option value="0">Anschlag 1</option><option value="1">Anschlag 2</option><option value="2">Anschlag 3</option><option value="3">Anschlag 4</option></select>
+    <div class="calibration-row"><label for="cal-hook-x">X</label><input id="cal-hook-x" type="range" min="-2" max="2" value="0" step="0.01"><output id="cal-hook-x-value">0.00</output></div>
+    <div class="calibration-row"><label for="cal-hook-y">Y</label><input id="cal-hook-y" type="range" min="-2" max="2" value="0" step="0.01"><output id="cal-hook-y-value">0.00</output></div>
+    <div class="calibration-row"><label for="cal-hook-z">Z</label><input id="cal-hook-z" type="range" min="-6" max="6" value="0" step="0.01"><output id="cal-hook-z-value">0.00</output></div>
+  </div>
+  <div class="calibration-group"><h3>Triebwerksposition (gespiegelt)</h3>
+    <div class="calibration-row"><label for="cal-thruster-x">X</label><input id="cal-thruster-x" type="range" min="0.1" max="4" value="0.65" step="0.01"><output id="cal-thruster-x-value">0.65</output></div>
+    <div class="calibration-row"><label for="cal-thruster-y">Y</label><input id="cal-thruster-y" type="range" min="-10" max="10" value="0" step="0.01"><output id="cal-thruster-y-value">0.00</output></div>
+    <div class="calibration-row"><label for="cal-thruster-z">Z</label><input id="cal-thruster-z" type="range" min="-5" max="2" value="-1" step="0.01"><output id="cal-thruster-z-value">-1.00</output></div>
+    <div class="calibration-row"><label for="cal-thruster-rx">RX</label><input id="cal-thruster-rx" type="range" min="-180" max="180" value="0" step="1"><output id="cal-thruster-rx-value">0°</output></div>
+    <div class="calibration-row"><label for="cal-thruster-ry">RY</label><input id="cal-thruster-ry" type="range" min="-180" max="180" value="0" step="1"><output id="cal-thruster-ry-value">0°</output></div>
+    <div class="calibration-row"><label for="cal-thruster-rz">RZ</label><input id="cal-thruster-rz" type="range" min="-180" max="180" value="0" step="1"><output id="cal-thruster-rz-value">0°</output></div>
+  </div>
+  <div class="calibration-tools"><button id="btn-toggle-workshop" class="btn" type="button">Scheune ausblenden</button><button id="btn-toggle-axes" class="btn" type="button">XYZ-Linien einblenden</button></div>
+  <div class="actions"><button id="btn-calibration-export" class="btn" type="button">Werte übernehmen</button><button id="btn-calibration-close" class="btn" type="button">Kalibrierung schließen</button></div>
+  <textarea id="calibration-export" readonly aria-label="Exportierte Kalibrierwerte"></textarea>
+</section>
 <div id="model-error" role="alert" aria-live="polite"></div>
+<div id="pin-dialog" class="pin-dialog" role="dialog" aria-modal="true" aria-labelledby="pin-dialog-title"><form id="pin-form" class="pin-dialog-card">
+  <h2 id="pin-dialog-title">Kalibrierung geschützt</h2><p>Bitte PIN eingeben, um die Mesh-Kalibrierung zu öffnen.</p>
+  <input id="calibration-pin" type="password" inputmode="numeric" autocomplete="off" maxlength="4" placeholder="PIN" aria-label="Kalibrierungs-PIN" required>
+  <div id="pin-dialog-error" class="pin-dialog-error" aria-live="polite"></div>
+  <div class="pin-dialog-actions"><button id="btn-pin-cancel" class="btn" type="button">Abbrechen</button><button class="btn active" type="submit">Freischalten</button></div>
+</form></div>
 <div id="local-model-dialog" class="model-dialog" role="dialog" aria-modal="true" aria-labelledby="local-model-title"><div class="model-dialog-card">
-  <h2 id="local-model-title">Load NIGHTFALL model</h2><p>You opened this page directly from your computer. Select <strong>raven.glb</strong> from the same folder to load the 3D model.</p>
-  <div class="model-dialog-actions"><button id="btn-select-model" class="btn active" type="button">Choose raven.glb</button><button id="btn-use-placeholder" class="btn" type="button">Use Placeholder</button></div>
-  <p class="model-dialog-note">This one-time selection is required by browser security. The file is read locally and is not uploaded.</p>
+  <h2 id="local-model-title">NIGHTFALL-Modell laden</h2><p>Diese Seite wurde direkt vom Computer geöffnet. Bitte <strong>raven.glb</strong> aus demselben Ordner auswählen.</p>
+  <div class="model-dialog-actions"><button id="btn-select-model" class="btn active" type="button">raven.glb auswählen</button><button id="btn-use-placeholder" class="btn" type="button">Platzhalter verwenden</button></div>
+  <p class="model-dialog-note">Diese einmalige Auswahl ist eine Sicherheitsvorgabe des Browsers. Die Datei wird lokal gelesen und nicht hochgeladen.</p>
 </div></div>
 <input id="model-file-input" type="file" accept=".glb,model/gltf-binary" hidden><span id="tod-value" hidden></span>
 <script>
@@ -3859,7 +3936,7 @@ body.sidebar-collapsed .side-btn{display:flex}body.fullscreen #sidebar,body.full
   // State
   // --------------------------------------------------------------------------
   const state = {
-    time: 0, showSidebar: true, fullscreen: false, motionEnabled: true,
+    time: 0, showSidebar: true, fullscreen: false, motionEnabled: false,
     selectedPart: null, isDragging: false, dragMoved: false, dragMode: null,
     lastMouse: new THREE.Vector2(),
   };
@@ -3867,28 +3944,58 @@ body.sidebar-collapsed .side-btn{display:flex}body.fullscreen #sidebar,body.full
   // --------------------------------------------------------------------------
   // Three.js internals
   // --------------------------------------------------------------------------
-  let scene,camera,renderer,mechGroup,bodyMesh,headMesh,thrusterGroup;
-  let thrusterEffects=[],dustPoints=null,dustPositions=null,dustVelocities=[];
-  let hemiLight,ambientLight,hangarRoot=null,craneAssembly=null;
-  let suspensionCables=[],suspensionSpreader=null,suspensionBaseY=5.1,inspectionAnchors={},hotspotElements={},inspectionBounds=null;
+  let scene,camera,renderer,mechGroup,modelRoot=null,bodyMesh,headMesh,thrusterGroup;
+  let thrusterEffects=[],dustPoints=null,dustPositions=null,dustVelocities=[],flameTexture=null,flameGlowTexture=null;
+  let hemiLight,ambientLight,calibrationLight,modelLighting=null,hangarRoot=null,craneAssembly=null,calibrationAxes=null,workshopVisible=true,axesVisible=false;
+  let workshopBackground=new THREE.Color(0x101615),workshopFog=new THREE.Color(0x171d1b);
+  let suspensionCables=[],suspensionSpreader=null,suspensionBaseY=6.15,inspectionAnchors={},hotspotElements={},inspectionBounds=null;
+  let baseInspectionAnchors={},calibrationModel={scale:1,x:0,y:0,z:0,rx:0,ry:0,rz:0},calibrationMarker={id:'head',x:0,y:0,z:0},calibrationHooks=[{x:0,y:0,z:0},{x:0,y:0,z:0},{x:0,y:0,z:0},{x:0,y:0,z:0}];
+  const CALIBRATION_PIN='1818';
+  let calloutElement=null,thrustersEnabled=false,nodesVisible=true,thrusterCalibration={x:.35,y:3.62,z:-2.66,rx:130,ry:0,rz:0};
+  const DEFAULT_CALIBRATION={
+    model:{scale:1.15,x:.84,y:.75,z:0,rx:0,ry:0,rz:0},
+    markers:{
+      head:{x:.8,y:2,z:.3},core:{x:.78,y:-.35,z:0},arms:{x:-.9,y:.13,z:-1.11},
+      legs:{x:1.72,y:2,z:0},'right-arm':{x:-2,y:.87,z:2},'left-arm':{x:2,y:.53,z:1.4},
+      'right-back':{x:-2,y:2,z:-.78},'left-back':{x:.89,y:2,z:-.35},internal:{x:.78,y:.72,z:.95}
+    },
+    hooks:[
+      {x:-.15,y:1.48,z:-3.15},{x:.38,y:1.32,z:-4.44},
+      {x:-.09,y:1.26,z:-.13},{x:.1,y:-.28,z:-1.11}
+    ],
+    thruster:{x:.35,y:3.62,z:-2.66,rx:130,ry:0,rz:0}
+  };
+  const modelBasePosition=new THREE.Vector3();
+  let armPoseNodes=[],legPoseNodes=[],armPoseValue=0,legPoseValue=0,leftLegPoseValue=0,rightLegPoseValue=0,craneTravelValue=0;
   const raycaster=new THREE.Raycaster(),pickPointer=new THREE.Vector2();
   let clock=new THREE.Clock();
 
   // Camera orbit state (simple custom controls)
-  const orbit={theta:Math.PI*.25,phi:Math.PI*.39,radius:19,target:new THREE.Vector3(1.4,5.05,-.4)};
+  const orbit={theta:Math.PI*.25,phi:Math.PI*.39,radius:19.5,target:new THREE.Vector3(-2.6,5.45,-.4)};
 
 
   const INSPECTION_PARTS=[
-    {id:'head',n:'01',label:'Head',system:'HEAD UNIT',part:'HC-2000/BC SHADE EYE',maker:'Reuse and Development (RaD)',category:'Frame component',a:[.5,.87,.76],description:'A rebuilt scout-AC head unit. RaD’s original survey design was comprehensively reworked for combat by an anonymous independent mercenary group.',intel:'In-game, SHADE EYE flips its visor over the eyes when the pilot activates Target Assist or Assault Boost.',facts:[['770','AP'],['472','STABILITY'],['450','SCAN RANGE']],note:'Regulation 1.09.1 values. The custom rebuild trades the original minimalist profile for a more combat-focused sensor and protection package.'},
-    {id:'core',n:'02',label:'Core',system:'CORE',part:'CC-2000 ORBITER',maker:'Reuse and Development (RaD)',category:'Frame component',a:[.5,.66,.79],description:'The central C-2000 chassis section. ORBITER originated as a lightweight civilian platform rather than a purpose-built corporate war machine.',intel:'NIGHTFALL keeps the C-2000 family identity, but the original Raven’s machine is a modified combat build—not an untouched survey unit.',facts:[['RaD','MAKER'],['C-2000','FRAME FAMILY'],['LIGHT','DESIGN BIAS']],note:'The C-2000 family was conceived for exploration and utility work. Its parts were adapted for combat on Rubicon.'},
-    {id:'arms',n:'03',label:'Arms',system:'ARM UNITS',part:'AC-2000 TOOL ARM',maker:'Reuse and Development (RaD)',category:'Frame component',a:[.5,.5,.78],description:'Utility arms built around handling and salvage work. Their presence on NIGHTFALL is a reminder that the C-2000 platform began life outside the front line.',intel:'The same TOOL ARM family is also used by C4-621’s starting AC, LOADER 4. NIGHTFALL shares a visible piece of its frame lineage with the player’s early machine.',facts:[['1,990','AP'],['RaD','MAKER'],['UTILITY','ORIGIN']],note:'NIGHTFALL uses the AC-2000 TOOL ARM frame part. The weapon mounted in each hand is a separate assembly slot.'},
-    {id:'legs',n:'04',label:'Legs',system:'LEG UNITS',part:'2C-2000 CRAWLER',maker:'Reuse and Development (RaD)',category:'Frame component',a:[.5,.19,.78],description:'A lightweight bipedal leg frame from the C-2000 line. It provides the familiar humanoid AC stance while retaining the frame’s utility-first heritage.',intel:'The original C-2000 platform was designed for exploration and space-related work. NIGHTFALL turns that civilian architecture into a combat machine through its weapon loadout and custom systems.',facts:[['BIPED','LEG TYPE'],['C-2000','FRAME FAMILY'],['LIGHT','DESIGN BIAS']],note:'The legs are a frame part, not a weapon system. Their load and mobility trade-offs are part of the overall AC assembly.'},
-    {id:'right-arm',n:'05',label:'R-Hand',system:'RIGHT ARM WEAPON',part:'RF-025 SCUDDER',maker:'Balam Industries',category:'Arm weapon',a:[.8,.51,.96],description:'A conventional kinetic assault rifle. SCUDDER supplies reliable direct-fire pressure while the heavier shoulder systems and pile bunker cover burst damage.',intel:'NIGHTFALL’s ranged weapon gives the build a practical way to maintain pressure while approaching for the ASHMEAD strike or setting up an explosive stagger.',facts:[['KINETIC','DAMAGE'],['ASSAULT','CLASS'],['BALAM','MAKER']],note:'Performance numbers depend on the game regulation; this dossier focuses on the confirmed NIGHTFALL loadout and weapon role.'},
-    {id:'left-arm',n:'06',label:'L-Hand',system:'LEFT ARM WEAPON',part:'PB-033M ASHMEAD',maker:'Balam Industries',category:'Arm weapon',a:[.2,.47,.96],description:'A pile bunker: a close-range kinetic weapon that drives a heavy stake into the target. It is built around commitment and impact rather than sustained fire.',intel:'The ASHMEAD is the threat that makes close range dangerous. A stagger window is the ideal moment to commit to the pile-bunker hit.',facts:[['KINETIC','DAMAGE'],['PILE BUNKER','CLASS'],['BALAM','MAKER']],note:'This is a melee weapon, not a conventional blade. Its effectiveness is tied to timing and landing the strike at close range.'},
-    {id:'right-back',n:'07',label:'R-Back',system:'RIGHT BACK UNIT',part:'SONGBIRDS',maker:'Melinite',category:'Back weapon',a:[.76,.82,.28],description:'A shoulder-mounted grenade cannon. It adds explosive impact and burst damage to the relatively light C-2000 frame.',intel:'SONGBIRDS is a familiar AC6 pressure tool: explosive hits can rapidly build ACS strain, making it useful for creating the opening that a close-range weapon needs.',facts:[['EXPLOSIVE','DAMAGE'],['GRENADE','CLASS'],['MELINITE','MAKER']],note:'Mounted on the right back hardpoint of the original NIGHTFALL assembly.'},
-    {id:'left-back',n:'08',label:'L-Back',system:'LEFT BACK UNIT',part:'BML-G1/P32DUO-03',maker:'Furlong Dynamics',category:'Back weapon',a:[.24,.82,.28],description:'A shoulder-mounted dual missile launcher. It gives NIGHTFALL a guided ranged option alongside the direct-fire rifle and explosive cannon.',intel:'The DUO designation identifies this as a paired missile system. It is the build’s tracking pressure rather than another close-range commitment.',facts:[['MISSILE','DAMAGE'],['DUAL','LAUNCHER'],['FURLONG','MAKER']],note:'Mounted on the left back hardpoint of the original NIGHTFALL assembly.'},
-    {id:'internal',n:'09',label:'Internal',system:'INTERNAL SYSTEMS',part:'BOOSTER / FCS / GENERATOR',maker:'RaD · Balam · Dafeng',category:'Propulsion and control',a:[.5,.56,.16],description:'NIGHTFALL’s documented internal setup combines the BST-G1/P10 booster, FC-006 ABBOT fire-control system, and DF-GN-02 LING-TAI generator.',intel:'The original Raven’s NIGHTFALL keeps the C-2000 frame but upgrades key internal systems. LING-TAI is a Dafeng generator commissioned by Balam, while ABBOT is a Balam FCS tuned toward close-range assistance.',facts:[['BST-G1/P10','BOOSTER'],['FC-006','FCS'],['DF-GN-02','GENERATOR']],note:'These three internal units are grouped because they are not distinct exterior mesh parts in the supplied model.'}
+    {id:'head',n:'01',label:'Kopfmodul',system:'KOPFEINHEIT',part:'HC-2000/BC SHADE EYE',maker:'Reuse and Development (RaD)',category:'Rahmenbauteil',nodePattern:/HC-2000.*SHADE EYE/i,a:[.5,.72,.78],description:'Aufbereitete Sensoreinheit für Aufklärung und Zielerfassung. Die ursprüngliche RaD-Konstruktion wurde für den Kampfeinsatz verstärkt.',intel:'Das Visier von SHADE EYE schützt die Sensoroptik und unterstützt die Zielerfassung im Gefecht.',facts:[['770','AP'],['472','STABILITÄT'],['450','SCANBEREICH']],note:'Regulationswerte 1.09.1. Die Angaben dienen der technischen Einordnung des ausgestellten Aufbaus.'},
+    {id:'core',n:'02',label:'Rumpf',system:'ZENTRALRUMPF',part:'CC-2000 ORBITER',maker:'Reuse and Development (RaD)',category:'Rahmenbauteil',nodePattern:/CC-2000.*ORBITER/i,a:[.5,.55,.80],description:'Zentrales Strukturmodul der C-2000-Plattform. Der Rumpf verbindet Energieversorgung, Steuerung und die Lastpfade der Antriebs- und Waffenmodule.',intel:'ORBITER ist ein leichter Arbeitsrahmen, der für den Kampfeinsatz durch zusätzliche Systeme und Bewaffnung adaptiert wurde.',facts:[['RaD','HERSTELLER'],['C-2000','RAHMENFAMILIE'],['LEICHT','AUSLEGUNG']],note:'Der C-2000-Rahmen stammt aus einer zivilen Entwicklungsrichtung und wurde für den Einsatz auf Rubicon kampftauglich ausgerüstet.'},
+    {id:'arms',n:'03',label:'Arme',system:'ARMEINHEITEN',part:'AC-2000 TOOL ARM',maker:'Reuse and Development (RaD)',category:'Rahmenbauteil',nodePattern:/AC-2000.*TOOL ARM/i,a:[.5,.42,.82],description:'Manipulatoren für Handhabung, Wartung und Bergung. Gelenkantriebe übertragen die Stellkräfte von der Schulter bis zu den Handaufnahmen.',intel:'Die TOOL-ARM-Familie zeigt die industrielle Herkunft der C-2000-Plattform und wurde für die Montage von Handwaffen angepasst.',facts:[['1.990','AP'],['RaD','HERSTELLER'],['UTILITY','URSPRUNG']],note:'Die Handwaffen sind separate Baugruppen und werden über die jeweiligen Waffenaufnahmen mitgeführt.'},
+    {id:'legs',n:'04',label:'Beine',system:'BEINEINHEITEN',part:'2C-2000 CRAWLER',maker:'Reuse and Development (RaD)',category:'Rahmenbauteil',nodePattern:/2C-2000.*CRAWLER/i,a:[.5,.16,.82],description:'Leichter zweibeiniger Laufrahmen der C-2000-Linie. Coxa-, Oberschenkel- und Unterschenkelglieder bilden die mechanische Kinematik für Stand und Bewegung.',intel:'Die Beinbaugruppe verbindet die zivile Leichtbauarchitektur mit den Anforderungen eines mobilen Kampfgeräts.',facts:[['ZWEIBEIN','BAUART'],['C-2000','RAHMENFAMILIE'],['LEICHT','AUSLEGUNG']],note:'Die Beine sind Rahmenkomponenten. Last, Standbreite und Gelenkwinkel beeinflussen die Gesamtkinematik des AC.'},
+    {id:'right-arm',n:'05',label:'Rechte Hand',system:'RECHTE HANDWAFFE',part:'RF-025 SCUDDER',maker:'Balam Industries',category:'Handwaffe',nodePattern:/RF-025.*SCUDDER/i,a:[.78,.40,.94],description:'Kinetisches Sturmgewehr für direkten Beschuss. SCUDDER erzeugt kontinuierlichen Druck, während Schulterwaffen und Pile Bunker für Wirkungstreffer sorgen.',intel:'Die Schusswaffe hält Gegner auf Distanz unter Druck und schafft Gelegenheiten für den Nahkampfangriff mit ASHMEAD.',facts:[['KINETISCH','SCHADEN'],['STURMGEWEHR','KLASSE'],['BALAM','HERSTELLER']],note:'Leistungswerte sind regulationsabhängig. Dieser Datensatz beschreibt die bestätigte Ausrüstung und ihre technische Rolle.'},
+    {id:'left-arm',n:'06',label:'Linke Hand',system:'LINKE HANDWAFFE',part:'PB-033M ASHMEAD',maker:'Balam Industries',category:'Handwaffe',nodePattern:/PB-033M.*ASHMEAD/i,a:[.32,.38,.94],description:'Kinetischer Pile Bunker mit linearer Einschlagbewegung. Die Baugruppe ist auf kurze Distanz, hohe Spitzenkraft und präzises Timing ausgelegt.',intel:'ASHMEAD wird während eines kurzen Stabilitätsfensters eingesetzt, um die gespeicherte Antriebsenergie direkt in den Zielkörper einzuleiten.',facts:[['KINETISCH','SCHADEN'],['PILE BUNKER','KLASSE'],['BALAM','HERSTELLER']],note:'Es handelt sich um eine Nahkampfwaffe, nicht um eine konventionelle Klinge. Die Wirkung hängt stark vom Einschlagzeitpunkt ab.'},
+    {id:'right-back',n:'07',label:'Rechte Schulter',system:'RECHTE RÜCKENEINHEIT',part:'SONGBIRDS',maker:'Melinite',category:'Rückenwaffe',nodePattern:/SONGBIRDS/i,a:[.72,.62,.34],description:'Schultergestützter Granatwerfer für Sprengwirkung und kurze Salven. Die Baugruppe ergänzt den leichten C-2000-Rahmen um hohe Impulsleistung.',intel:'SONGBIRDS erhöht die ACS-Belastung und kann dadurch ein Zeitfenster für den Nahkampfangriff erzeugen.',facts:[['SPRENG','SCHADEN'],['GRANATWERFER','KLASSE'],['MELINITE','HERSTELLER']],note:'Auf der rechten rückwärtigen Hardpoint-Aufnahme des ausgestellten NIGHTFALL-Aufbaus montiert.'},
+    {id:'left-back',n:'08',label:'Linke Schulter',system:'LINKE RÜCKENEINHEIT',part:'BML-G1/P32DUO-03',maker:'Furlong Dynamics',category:'Rückenwaffe',nodePattern:/BML-G1.*P32DUO-03/i,a:[.62,.62,.34],description:'Doppeltes Raketenstartmodul mit gelenkter Munition. Es ergänzt Gewehr und Granatwerfer um eine verfolgungsfähige Distanzkomponente.',intel:'Die DUO-Ausführung arbeitet mit zwei parallelen Startkanälen und erzeugt kontinuierlichen Lenkdruck auf bewegliche Ziele.',facts:[['RAKETE','SCHADEN'],['DOPPEL','STARTMODUL'],['FURLONG','HERSTELLER']],note:'Auf der linken rückwärtigen Hardpoint-Aufnahme des ausgestellten NIGHTFALL-Aufbaus montiert.'},
+    {id:'internal',n:'09',label:'Interne Systeme',system:'INTERNE SYSTEME',part:'BOOSTER / FCS / GENERATOR',maker:'RaD · Balam · Dafeng',category:'Antrieb und Steuerung',a:[.5,.49,.18],description:'Kombination aus BST-G1/P10-Booster, FC-006-Feuerleitsystem und DF-GN-02-LING-TAI-Generator. Die Baugruppen versorgen Bewegung, Zielverfolgung und Energieverteilung.',intel:'Die internen Systeme ergänzen den leichten C-2000-Rahmen um die für den Kampfeinsatz erforderliche Energie- und Steuerungsleistung.',facts:[['BST-G1/P10','BOOSTER'],['FC-006','FCS'],['DF-GN-02','GENERATOR']],note:'Die drei Einheiten werden zusammengefasst, da sie im gelieferten Modell nicht als eigenständige Außenkomponenten sichtbar sind.'}
   ];
+  const TECHNICAL_PROFILES={
+    head:{assembly:'Rahmen / Sensorik',mount:'Oberes Chassis',service:'Optik + Scanmodul',signal:'Zielassistenz'},
+    core:{assembly:'Primärrahmen',mount:'Zentrales Chassis',service:'Generatorbus',signal:'Lastverteilung'},
+    arms:{assembly:'Manipulatorrahmen',mount:'Schultergelenke',service:'Aktuatorik',signal:'Waffensteuerung'},
+    legs:{assembly:'Zweibeiniger Rahmen',mount:'Unteres Chassis',service:'Gelenkhydraulik',signal:'Standsicherheit'},
+    'right-arm':{assembly:'Kinetische Waffe',mount:'Rechte Hand',service:'Direktfeuer-Zuführung',signal:'Ballistiksteuerung'},
+    'left-arm':{assembly:'Nahkampfwaffe',mount:'Linke Hand',service:'Pile-Bunker-Antrieb',signal:'Einschlagsteuerung'},
+    'right-back':{assembly:'Sprengwaffe',mount:'Rechter Rücken-Hardpoint',service:'Granatkammer',signal:'ACS-Belastung'},
+    'left-back':{assembly:'Raketenwaffe',mount:'Linker Rücken-Hardpoint',service:'Doppelstartmodul',signal:'Lenkverbindung'},
+    internal:{assembly:'Interne Systeme',mount:'Geschützte Rumpfbucht',service:'Energie + FCS',signal:'Telemetriebus'}
+  };
   function addHangarBox(parent,w,h,d,x,y,z,material){
     const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);
     mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;
@@ -3913,18 +4020,82 @@ body.sidebar-collapsed .side-btn{display:flex}body.fullscreen #sidebar,body.full
     for(let y=0;y<=512;y+=128){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(512,y);ctx.stroke();}
     const texture=new THREE.CanvasTexture(canvas);texture.wrapS=THREE.RepeatWrapping;texture.wrapT=THREE.RepeatWrapping;texture.repeat.set(5,5);texture.encoding=THREE.sRGBEncoding;return texture;
   }
-  function createInspectionAnchors(bounds){
+  function findNamedModelNode(model, pattern) {
+    let match = null;
+    model.traverse(function (node) {
+      if (!match && pattern.test(node.name || '')) match = node;
+    });
+    return match;
+  }
+  function findNearestMeshAnchor(model,target){
+    let best=null,bestDistance=Infinity;
+    model.traverse(function(node){
+      if(!node.isMesh)return;
+      const nodeBounds=getObjectLocalBounds(node,model);if(!nodeBounds||nodeBounds.isEmpty())return;
+      const nodeSize=nodeBounds.getSize(new THREE.Vector3());
+      if(nodeSize.length()<.08||nodeSize.length()>inspectionBounds.getSize(new THREE.Vector3()).length()*.32)return;
+      const center=nodeBounds.getCenter(new THREE.Vector3());
+      model.localToWorld(center);
+      model.parent.worldToLocal(center);
+      const distance=center.distanceTo(target);
+      if(distance<bestDistance){bestDistance=distance;best=center;}
+    });
+    return best||target;
+  }
+
+  function createInspectionAnchors(bounds, model, root) {
     const size=bounds.getSize(new THREE.Vector3());inspectionBounds=bounds.clone();inspectionAnchors={};
-    INSPECTION_PARTS.forEach(function(p){inspectionAnchors[p.id]=new THREE.Vector3(bounds.min.x+size.x*p.a[0],bounds.min.y+size.y*p.a[1],bounds.min.z+size.z*p.a[2]);});
+    INSPECTION_PARTS.forEach(function(p){
+      inspectionAnchors[p.id]=new THREE.Vector3(bounds.min.x+size.x*p.a[0],bounds.min.y+size.y*p.a[1],bounds.min.z+size.z*p.a[2]);
+    });
+    if(model){
+      Object.keys(inspectionAnchors).forEach(function(id){
+        const target=inspectionAnchors[id].clone();
+        if(id==='head'||id==='right-back')target.y-=size.y*.18;
+        inspectionAnchors[id]=findNearestMeshAnchor(model,target);
+      });
+    }
+    inspectionAnchors.internal = inspectionAnchors.core.clone().add(new THREE.Vector3(0, 0, size.z * -.12));
+    baseInspectionAnchors={};
+    Object.keys(inspectionAnchors).forEach(function(id){baseInspectionAnchors[id]=inspectionAnchors[id].clone();});
+    calibrationMarker={id:'head',x:0,y:0,z:0};
     const layer=document.getElementById('hotspot-layer');if(!layer)return;
     layer.innerHTML='';hotspotElements={};
+    calloutElement=document.createElement('div');calloutElement.className='inspection-callout';calloutElement.hidden=true;layer.appendChild(calloutElement);
     INSPECTION_PARTS.forEach(function(p){
       const b=document.createElement('button');b.type='button';b.className='hotspot';b.textContent=p.n;b.dataset.part=p.id;b.dataset.label=p.label+' / '+p.part;
-      b.setAttribute('aria-label','Inspect '+p.system+': '+p.part);
-      b.addEventListener('click',function(e){e.stopPropagation();selectInspectionPart(p.id);});
+      b.setAttribute('aria-label','Bauteil prüfen: '+p.system+': '+p.part);
+      b.addEventListener('click',function(e){e.stopPropagation();toggleInspectionPart(p.id);});
       layer.appendChild(b);hotspotElements[p.id]=b;
     });
-    selectInspectionPart('head');
+    armPoseNodes=[];legPoseNodes=[];
+    if(model){
+      model.updateMatrixWorld(true);
+      model.traverse(function(node){
+        const name=node.name||'';
+        if(!/^(L|R)_ArmJoint_\d+$/i.test(name))return;
+        armPoseNodes.push({node:node,base:node.rotation.z,side:name.charAt(0).toUpperCase()==='L'?-1:1});
+      });
+      const leftHand=findNamedModelNode(model,/^L_Hand_037$/i)||findNamedModelNode(model,/^Root_L_Hand_036$/i);
+      const rightHand=findNamedModelNode(model,/^R_Hand_062$/i)||findNamedModelNode(model,/^Root_R_Hand_061$/i);
+      const leftWeapon=findNamedModelNode(model,/^L_Weapon_00_02$/i),rightWeapon=findNamedModelNode(model,/^R_Weapon_00_078$/i);
+      if(leftHand&&leftWeapon&&leftWeapon.parent!==leftHand)leftHand.attach(leftWeapon);
+      if(rightHand&&rightWeapon&&rightWeapon.parent!==rightHand)rightHand.attach(rightWeapon);
+      const leftHolder=findNamedModelNode(model,/^Weapon Holder L$/i),rightHolder=findNamedModelNode(model,/^Weapon holder R$/i);
+      if(leftHand&&leftHolder){leftHand.attach(leftHolder);leftHolder.position.set(0,0,0);leftHolder.rotation.set(0,0,0);}
+      if(rightHand&&rightHolder){rightHand.attach(rightHolder);rightHolder.position.set(0,0,0);rightHolder.rotation.set(0,0,0);}
+    }
+  }
+  function clearInspectionSelection(){
+    state.selectedPart=null;
+    Object.keys(hotspotElements).forEach(function(k){hotspotElements[k].classList.remove('active');});
+    const idx=document.getElementById('selected-index');if(idx)idx.textContent='00 / 09';
+    const target=document.getElementById('part-info');if(target)target.innerHTML='<div class="placeholder-copy"><h3>Inspektion bereit</h3><p>Nummerierten Marker am Modell anklicken, um den technischen Datensatz zu öffnen.</p></div>';
+    if(calloutElement){calloutElement.hidden=true;calloutElement.innerHTML='';}
+  }
+  function toggleInspectionPart(id){
+    if(state.selectedPart===id){clearInspectionSelection();return;}
+    selectInspectionPart(id);
   }
   function selectInspectionPart(id){
     const p=INSPECTION_PARTS.find(function(x){return x.id===id;});if(!p)return;state.selectedPart=id;
@@ -3932,20 +4103,30 @@ body.sidebar-collapsed .side-btn{display:flex}body.fullscreen #sidebar,body.full
     if(list)list.querySelectorAll('[data-part]').forEach(function(b){b.classList.toggle('active',b.dataset.part===id);});
     Object.keys(hotspotElements).forEach(function(k){hotspotElements[k].classList.toggle('active',k===id);});
     const idx=document.getElementById('selected-index');if(idx)idx.textContent=String(INSPECTION_PARTS.indexOf(p)+1).padStart(2,'0')+' / 09';
-    const target=document.getElementById('part-info');if(!target)return;
     const facts=p.facts.map(function(f){return '<div class="detail-fact"><b>'+f[0]+'</b><small>'+f[1]+'</small></div>';}).join('');
-    target.innerHTML='<div class="detail-kicker">'+p.system+' // '+p.category.toUpperCase()+'</div>'+
+    const profile=TECHNICAL_PROFILES[p.id]||TECHNICAL_PROFILES.internal;
+    const target=document.getElementById('part-info');
+    if(target)target.innerHTML='<div class="detail-kicker">'+p.system+' // '+p.category.toUpperCase()+'</div>'+
       '<div class="detail-title">'+p.part+'</div><div class="detail-maker">'+p.maker+'</div>'+
-      '<p class="detail-description">'+p.description+'</p><div class="detail-subhead">TECHNICAL RECORD</div>'+
-      '<div class="detail-facts">'+facts+'</div><div class="detail-subhead">GAME INTEL</div>'+
-      '<p class="detail-intel">'+p.intel+'</p><p class="detail-disclaimer">'+p.note+'</p>';
+      '<p class="detail-description">'+p.description+'</p><div class="detail-subhead">TECHNISCHER DATENSATZ</div>'+
+      '<div class="detail-facts">'+facts+'</div><div class="detail-subhead">SPIEL- UND SYSTEMKONTEXT</div>'+
+      '<p class="detail-intel">'+p.intel+'</p><div class="detail-subhead">ENGINEERING-PROFIL</div>'+
+      '<div class="detail-engineering"><div class="engineering-item"><b>Baugruppe</b><small>'+profile.assembly+'</small></div>'+
+      '<div class="engineering-item"><b>Montage</b><small>'+profile.mount+'</small></div>'+
+      '<div class="engineering-item"><b>Servicepfad</b><small>'+profile.service+'</small></div>'+
+      '<div class="engineering-item"><b>Telemetrie</b><small>'+profile.signal+'</small></div></div>'+
+      '<p class="detail-disclaimer">'+p.note+'</p>';
+    if(calloutElement){
+      calloutElement.innerHTML='<div class="inspection-callout-kicker">'+p.system+' // MARKER '+p.n+'</div><div class="inspection-callout-title">'+p.part+'</div><div class="inspection-callout-maker">'+p.maker+'</div><p class="inspection-callout-description">'+p.description+'</p><div class="inspection-callout-grid"><div><b>Baugruppe</b><small>'+profile.assembly+'</small></div><div><b>Montage</b><small>'+profile.mount+'</small></div></div>';
+      calloutElement.hidden=false;
+    }
   }
   function renderComponentIndex(){
     const list=document.getElementById('component-list');if(!list)return;list.innerHTML='';
     INSPECTION_PARTS.forEach(function(p){
       const b=document.createElement('button');b.type='button';b.className='component-button';b.dataset.part=p.id;
       b.innerHTML='<span class="component-number">'+p.n+'</span><span class="component-copy"><b>'+p.label+'</b><small>'+p.part+'</small></span>';
-      b.addEventListener('click',function(){selectInspectionPart(p.id);});list.appendChild(b);
+      b.addEventListener('click',function(){const marker=hotspotElements[p.id];if(marker)marker.focus();});list.appendChild(b);
     });
   }
   function updateInspectionHotspots(){
@@ -3954,9 +4135,14 @@ body.sidebar-collapsed .side-btn{display:flex}body.fullscreen #sidebar,body.full
     INSPECTION_PARTS.forEach(function(p){
       const el=hotspotElements[p.id],anchor=inspectionAnchors[p.id];if(!el||!anchor)return;
       const v=mechGroup.localToWorld(anchor.clone()).project(camera);
-      const visible=v.z>-1&&v.z<1&&v.x>-1.15&&v.x<1.15&&v.y>-1.15&&v.y<1.15;
-      el.style.display=visible?'flex':'none';
+      const visible=v.z>-1&&v.z<1&&v.x>-1.05&&v.x<1.05&&v.y>-1.05&&v.y<1.05;
+      el.style.display=visible&&nodesVisible?'flex':'none';
+      if(!nodesVisible&&calloutElement)calloutElement.hidden=true;
       if(visible){el.style.left=((v.x*.5+.5)*w)+'px';el.style.top=((-v.y*.5+.5)*h)+'px';}
+      if(p.id===state.selectedPart&&calloutElement&&visible){
+        const x=((v.x*.5+.5)*w)+24,y=((-v.y*.5+.5)*h)-22;
+        const flip=x+290>w-12;calloutElement.classList.toggle('flip',flip);calloutElement.style.left=Math.max(8,flip?x-310:x)+'px';calloutElement.style.top=Math.max(8,Math.min(h-190,y))+'px';
+      }
     });
   }
   function pickInspectionPart(x,y){
@@ -3967,7 +4153,7 @@ body.sidebar-collapsed .side-btn{display:flex}body.fullscreen #sidebar,body.full
     const hits=raycaster.intersectObjects(mechGroup.children,true);if(!hits.length)return;
     const point=mechGroup.worldToLocal(hits[0].point.clone());let id=null,best=Infinity;
     Object.keys(inspectionAnchors).forEach(function(k){const d=inspectionAnchors[k].distanceTo(point);if(d<best){best=d;id=k;}});
-    if(id)selectInspectionPart(id);
+    if(id)toggleInspectionPart(id);
   }
   function createDynamicCable(start,end,radius,material){
     const mesh=new THREE.Mesh(new THREE.CylinderGeometry(radius,radius,1,8),material);mesh.castShadow=true;hangarRoot.add(mesh);
@@ -3976,22 +4162,44 @@ body.sidebar-collapsed .side-btn{display:flex}body.fullscreen #sidebar,body.full
   function updateSuspensionRig(){
     if(!mechGroup||!suspensionSpreader)return;
     const up=new THREE.Vector3(0,1,0);
-    suspensionCables.forEach(function(c){
+    suspensionCables.forEach(function(c,index){
       const start=suspensionSpreader.localToWorld(c.start.clone());
-      const end=mechGroup.localToWorld(c.end.clone());
+      const offset=calibrationHooks[index]||{x:0,y:0,z:0};
+      const end=mechGroup.localToWorld(c.end.clone().add(new THREE.Vector3(offset.x,offset.y,offset.z)));
       const dir=new THREE.Vector3().subVectors(end,start),len=dir.length();
       c.mesh.position.copy(start).add(end).multiplyScalar(.5);
       c.mesh.quaternion.setFromUnitVectors(up,dir.normalize());
       c.mesh.scale.set(1,len,1);
+      if(c.clamp)c.clamp.position.copy(mechGroup.worldToLocal(end.clone()));
     });
   }
-  function createSuspensionRig(bounds){
+  function findSuspensionAnchors(model,bounds){
+    const size=bounds.getSize(new THREE.Vector3()),anchors=[];
+    model.updateMatrixWorld(true);
+    model.traverse(function(node){
+      if(!node.isMesh)return;
+      const meshBounds=getObjectLocalBounds(node,model);if(!meshBounds)return;
+      const meshSize=meshBounds.getSize(new THREE.Vector3()),center=meshBounds.getCenter(new THREE.Vector3());
+      const height=(center.y-bounds.min.y)/Math.max(size.y,.001);
+      if(height<.52||height>.82||meshSize.length()<.05||meshSize.length()>size.length()*.18)return;
+      const side=center.x<0?0:1,depth=center.z<bounds.getCenter(new THREE.Vector3()).z?0:1,index=side*2+depth;
+      const anchor=new THREE.Vector3(center.x,meshBounds.min.y+meshSize.y*.38,center.z);
+      model.localToWorld(anchor);
+      model.parent.worldToLocal(anchor);
+      anchor.y-=size.y*.12;
+      anchor.y=Math.max(bounds.min.y+size.y*.42,anchor.y);
+      if(!anchors[index]||anchor.y>anchors[index].y)anchors[index]=anchor;
+    });
+    if(anchors.filter(Boolean).length<4)return null;
+    return anchors;
+  }
+  function createSuspensionRig(bounds,model){
     const steel=new THREE.MeshStandardMaterial({color:0x69716d,metalness:.84,roughness:.32});
     const clampMat=new THREE.MeshStandardMaterial({color:0x59605b,metalness:.72,roughness:.38});
     const safety=new THREE.MeshStandardMaterial({color:0xb77b3e,metalness:.38,roughness:.48});
     const size=bounds.getSize(new THREE.Vector3());
     suspensionSpreader=new THREE.Group();
-    suspensionSpreader.position.set(0,10.48,-.65);
+    suspensionSpreader.position.set(0,11.25,-.65);
     hangarRoot.add(suspensionSpreader);
     addHangarBox(suspensionSpreader,4.2,.16,.24,0,0,0,steel);
     addHangarBox(suspensionSpreader,.34,.35,.38,-1.9,-.12,0,clampMat);
@@ -4001,17 +4209,28 @@ body.sidebar-collapsed .side-btn{display:flex}body.fullscreen #sidebar,body.full
     hoist.position.set(0,.72,0);suspensionSpreader.add(hoist);
     const hook=new THREE.Mesh(new THREE.TorusGeometry(.17,.035,8,20,Math.PI*1.5),steel);
     hook.position.set(0,.08,0);hook.rotation.z=Math.PI;suspensionSpreader.add(hook);
-    const points=[[.28,.80,.22,-1.72,-.15],[.72,.80,.22,1.72,-.15],[.28,.80,.78,-1.72,.15],[.72,.80,.78,1.72,.15]];
-    const cableMat=new THREE.MeshStandardMaterial({color:0x9b9d91,metalness:.9,roughness:.28});
+    const dynamicAnchors=findSuspensionAnchors(model,bounds);
+    const points=dynamicAnchors?[
+      [dynamicAnchors[0],-2.05,-.28],[dynamicAnchors[2],2.05,-.28],
+      [dynamicAnchors[1],-2.05,.28],[dynamicAnchors[3],2.05,.28]
+    ]:[
+      [new THREE.Vector3(bounds.min.x+size.x*.30,bounds.min.y+size.y*.68,bounds.min.z+size.z*.82),-2.05,-.28],
+      [new THREE.Vector3(bounds.min.x+size.x*.70,bounds.min.y+size.y*.68,bounds.min.z+size.z*.82),2.05,-.28],
+      [new THREE.Vector3(bounds.min.x+size.x*.30,bounds.min.y+size.y*.68,bounds.min.z+size.z*.90),-2.05,.28],
+      [new THREE.Vector3(bounds.min.x+size.x*.70,bounds.min.y+size.y*.68,bounds.min.z+size.z*.90),2.05,.28]
+    ];
+    const cableMat=new THREE.MeshStandardMaterial({color:0xd3a35e,metalness:.72,roughness:.3});
     points.forEach(function(p){
-      const end=new THREE.Vector3(bounds.min.x+size.x*p[0],bounds.min.y+size.y*p[1],bounds.min.z+size.z*p[2]);
-      const start=new THREE.Vector3(p[3],-.06,p[4]);
-      createDynamicCable(start,end,.025,cableMat);
+      const end=dynamicAnchors?p[0]:p[0].clone();
+      const start=new THREE.Vector3(p[1],-.06,p[2]);
+      createDynamicCable(start,end,.04,cableMat);
       const clamp=new THREE.Group();clamp.position.copy(end);
-      addHangarBox(clamp,.36,.16,.38,0,0,0,clampMat);
-      addHangarBox(clamp,.13,.19,.4,0,-.015,0,safety);
+      addHangarBox(clamp,.28,.13,.3,0,0,0,clampMat);
+      addHangarBox(clamp,.10,.16,.32,0,-.015,0,safety);
       mechGroup.add(clamp);
+      suspensionCables[suspensionCables.length-1].clamp=clamp;
     });
+    calibrationHooks=[{x:0,y:0,z:0},{x:0,y:0,z:0},{x:0,y:0,z:0},{x:0,y:0,z:0}];
     updateSuspensionRig();
   }
   function disposeSuspensionRig(){
@@ -4040,10 +4259,10 @@ body.sidebar-collapsed .side-btn{display:flex}body.fullscreen #sidebar,body.full
   function init(){
     scene=new THREE.Scene();scene.background=new THREE.Color(0x111716);scene.fog=new THREE.Fog(0x171d1b,30,64);
     camera=new THREE.PerspectiveCamera(43,window.innerWidth/window.innerHeight,.1,250);camera.position.set(12,10,15);
-    renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(window.innerWidth,window.innerHeight);
-    renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputEncoding=THREE.sRGBEncoding;
-    renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.08;
+    renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'high-performance'});
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1));renderer.setSize(window.innerWidth,window.innerHeight);
+    renderer.shadowMap.enabled=false;renderer.outputEncoding=THREE.sRGBEncoding;
+    renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.68;
     document.getElementById('canvas-container').appendChild(renderer.domElement);
     createLights();createBackdrop();if(CONFIG.modelPath)loadModel(CONFIG.modelPath);else createPlaceholderMech();
     wireUI();window.addEventListener('resize',onWindowResize,false);createWatermark();recenterView();animate();
@@ -4117,12 +4336,24 @@ function createStudioEnvironment() {
   // --------------------------------------------------------------------------
   function createLights(){
     createStudioEnvironment();
-    ambientLight=new THREE.AmbientLight(0xb4b8a8,.78);scene.add(ambientLight);
-    hemiLight=new THREE.HemisphereLight(0xd3c6a7,0x353a35,.82);scene.add(hemiLight);
-    const key=new THREE.DirectionalLight(0xffd6a3,2.1);key.position.set(-8,14,9);key.castShadow=true;
-    key.shadow.mapSize.set(2048,2048);key.shadow.camera.left=-16;key.shadow.camera.right=16;key.shadow.camera.top=18;key.shadow.camera.bottom=-12;key.shadow.bias=-.0004;scene.add(key);
-    const fill=new THREE.DirectionalLight(0x9ab7bd,1.15);fill.position.set(10,8,8);scene.add(fill);
-    const rim=new THREE.DirectionalLight(0xd39a58,1.45);rim.position.set(0,11,-10);scene.add(rim);
+    ambientLight=new THREE.AmbientLight(0x8d8874,.52);scene.add(ambientLight);
+    hemiLight=new THREE.HemisphereLight(0xb09a78,.34);scene.add(hemiLight);
+    calibrationLight=new THREE.HemisphereLight(0xffffff,0x6f7780,1.15);calibrationLight.visible=false;scene.add(calibrationLight);
+    const key=new THREE.DirectionalLight(0xb47c48,.88);key.position.set(-8,14,9);key.castShadow=true;
+    key.shadow.mapSize.set(1024,1024);key.shadow.camera.left=-16;key.shadow.camera.right=16;key.shadow.camera.top=18;key.shadow.camera.bottom=-12;key.shadow.bias=-.0004;scene.add(key);
+    const fill=new THREE.DirectionalLight(0x637b70,.38);fill.position.set(10,8,8);scene.add(fill);
+    const rim=new THREE.DirectionalLight(0xb06a3b,.42);rim.position.set(0,11,-10);scene.add(rim);
+    const inspectionLight=new THREE.PointLight(0xd89a58,5.5,18,1.8);inspectionLight.position.set(0,7.2,6.5);scene.add(inspectionLight);
+  }
+
+  function attachModelLighting(){
+    if(modelLighting&&modelLighting.parent)modelLighting.parent.remove(modelLighting);
+    if(!mechGroup)return;
+    modelLighting=new THREE.Group();modelLighting.name='Invisible model fill lights';
+    const front=new THREE.PointLight(0xffd7a1,7.2,17,1.45);front.position.set(0,5.2,5.5);
+    const left=new THREE.PointLight(0x9ec8ff,5.4,15,1.5);left.position.set(-5.5,4.2,1.8);
+    const right=new THREE.PointLight(0xffa45f,4.8,15,1.5);right.position.set(5.5,3.8,1.8);
+    modelLighting.add(front,left,right);mechGroup.add(modelLighting);
   }
 
   function updateTimeOfDay(hour) {
@@ -4235,11 +4466,11 @@ function createStudioEnvironment() {
   // --------------------------------------------------------------------------
   function createBackdrop(){
     scene.background=new THREE.Color(0x101615);scene.fog=new THREE.Fog(0x171d1b,28,62);hangarRoot=new THREE.Group();scene.add(hangarRoot);
-    const concrete=new THREE.MeshStandardMaterial({color:0x858b80,map:makeConcreteTexture(),roughness:.94,metalness:.04});
-    const wall=new THREE.MeshStandardMaterial({color:0x303936,roughness:.86,metalness:.34});
+    const concrete=new THREE.MeshStandardMaterial({color:0x5e6259,map:makeConcreteTexture(),roughness:.94,metalness:.04});
+    const wall=new THREE.MeshStandardMaterial({color:0x252b28,roughness:.86,metalness:.34});
     const dark=new THREE.MeshStandardMaterial({color:0x202927,roughness:.88,metalness:.4});
     const steel=new THREE.MeshStandardMaterial({color:0x454e4b,roughness:.5,metalness:.82});
-    const lightSteel=new THREE.MeshStandardMaterial({color:0x68716a,roughness:.44,metalness:.78});
+    const lightSteel=new THREE.MeshStandardMaterial({color:0x59645f,roughness:.44,metalness:.78});
     const timber=new THREE.MeshStandardMaterial({color:0x554333,roughness:.88,metalness:.05});
     const rust=new THREE.MeshStandardMaterial({color:0x754b31,roughness:.82,metalness:.32});
     const safety=new THREE.MeshStandardMaterial({color:0xb77b3e,roughness:.58,metalness:.34});
@@ -4255,6 +4486,17 @@ function createStudioEnvironment() {
     addHangarBox(hangarRoot,12.8,8.8,.14,0,4.75,-16.58,dark);addHangarBox(hangarRoot,13.2,.22,.34,0,9.25,-16.25,lightSteel);
     addHangarBox(hangarRoot,.2,9.2,.35,-6.65,4.65,-16.25,lightSteel);addHangarBox(hangarRoot,.2,9.2,.35,6.65,4.65,-16.25,lightSteel);
     for(let y=.65;y<9;y+=.72)addHangarBox(hangarRoot,12.5,.06,.12,0,y,-16.36,lightSteel);
+    const flagRed=new THREE.MeshStandardMaterial({color:0xb62f32,roughness:.9,metalness:.02});
+    const flagWhite=new THREE.MeshStandardMaterial({color:0xe9e3d2,roughness:.9,metalness:.02});
+    const flagBlue=new THREE.MeshStandardMaterial({color:0x243f72,roughness:.82,metalness:.04});
+    const flagFrame=new THREE.MeshStandardMaterial({color:0x9b6a3d,roughness:.75,metalness:.2});
+    const sideFlag=new THREE.Group();sideFlag.position.set(16.68,7.4,4.5);sideFlag.rotation.y=-Math.PI/2;hangarRoot.add(sideFlag);
+    for(let stripe=0;stripe<13;stripe++)addHangarBox(sideFlag,10.4,.32,.07,0,2.08-stripe*.42,0,stripe%2===0?flagRed:flagWhite);
+    addHangarBox(sideFlag,10.55,.1,.11,0,2.29,0,flagFrame);addHangarBox(sideFlag,10.55,.1,.11,0,-2.29,0,flagFrame);
+    addHangarBox(sideFlag,.1,4.7,.11,-5.22,0,0,flagFrame);addHangarBox(sideFlag,.1,4.7,.11,5.22,0,0,flagFrame);
+    addHangarBox(sideFlag,3.9,1.9,.08,-3.25,1.12,.01,flagBlue);
+    for(let row=0;row<4;row++)for(let col=0;col<7;col++)addHangarBox(sideFlag,.12,.12,.09,-4.75+col*.48,1.68-row*.42,.02,flagWhite);
+    addHangarBox(sideFlag,.11,6.0,.12,-5.55,0,0,flagFrame);
     // Exposed roof trusses.
     addHangarBox(hangarRoot,.55,.52,34,0,14.65,-1,timber);addHangarBox(hangarRoot,.45,.42,34,-16,10.5,-1,steel);addHangarBox(hangarRoot,.45,.42,34,16,10.5,-1,steel);
     for(let z=-15;z<=13;z+=4){addHangarBeam(hangarRoot,new THREE.Vector3(-16,10.55,z),new THREE.Vector3(0,14.55,z),.32,timber);addHangarBeam(hangarRoot,new THREE.Vector3(16,10.55,z),new THREE.Vector3(0,14.55,z),.32,timber);addHangarBeam(hangarRoot,new THREE.Vector3(-16,10.55,z),new THREE.Vector3(16,10.55,z),.28,steel);}
@@ -4276,27 +4518,13 @@ function createStudioEnvironment() {
       addHangarBox(hangarRoot,1,.85,.85,x+side*2,.45,3,rust);addHangarBox(hangarRoot,1.05,.09,.9,x+side*2,.91,3,steel);addHangarBox(hangarRoot,.8,.7,.7,x-side*1.5,.38,8,dark);
     }
 
-    // Warm task lights.
-    const lamps=[[-10.5,9.4,-4.5],[10.5,9.4,-4.5],[-10.5,9.4,7],[10.5,9.4,7]];
-    lamps.forEach(function(p,i){
-      const fixture=new THREE.Mesh(new THREE.BoxGeometry(1.5,.12,.36),new THREE.MeshStandardMaterial({color:0xd4b27f,emissive:0xf6bd76,emissiveIntensity:1.1,roughness:.28}));
-      fixture.position.set(p[0],p[1],p[2]);hangarRoot.add(fixture);
-      const point=new THREE.PointLight(i%2===0?0xffd2a0:0xc1d5cc,18,22,1.6);point.position.set(p[0],p[1]-.5,p[2]);hangarRoot.add(point);
-    });
     // Painted inspection bay perimeter.
     const stripe=new THREE.MeshStandardMaterial({color:0xc18a46,roughness:.75,metalness:.08});
     addHangarBox(hangarRoot,.12,.018,13,-5.2,-.095,-.5,stripe);addHangarBox(hangarRoot,.12,.018,13,5.2,-.095,-.5,stripe);
     addHangarBox(hangarRoot,10.4,.018,.12,0,-.095,5.8,stripe);addHangarBox(hangarRoot,10.4,.018,.12,0,-.095,-6.8,stripe);
 
     // Fine dust suspended in the workshop air.
-    const canvas=document.createElement('canvas');canvas.width=32;canvas.height=32;const ctx=canvas.getContext('2d');
-    const glow=ctx.createRadialGradient(16,16,0,16,16,15);glow.addColorStop(0,'rgba(255,237,205,.8)');glow.addColorStop(.28,'rgba(255,224,180,.36)');glow.addColorStop(1,'rgba(255,224,180,0)');
-    ctx.fillStyle=glow;ctx.fillRect(0,0,32,32);const tex=new THREE.CanvasTexture(canvas),count=150;
-    dustPositions=new Float32Array(count*3);dustVelocities=[];
-    for(let i=0;i<count;i++){dustPositions[i*3]=(Math.random()-.5)*27;dustPositions[i*3+1]=.5+Math.random()*9.4;dustPositions[i*3+2]=-13+Math.random()*24;dustVelocities.push(.06+Math.random()*.16);}
-    const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(dustPositions,3));geo.attributes.position.setUsage(THREE.DynamicDrawUsage);
-    const mat=new THREE.PointsMaterial({color:0xffd9a8,map:tex,size:.12,sizeAttenuation:true,transparent:true,opacity:.24,depthWrite:false,blending:THREE.AdditiveBlending});
-    dustPoints=new THREE.Points(geo,mat);dustPoints.frustumCulled=false;hangarRoot.add(dustPoints);
+    dustPoints=null;dustPositions=null;dustVelocities=[];
   }
 
   function updateBackdrop(dt){
@@ -4304,6 +4532,29 @@ function createStudioEnvironment() {
     for(let i=0;i<dustVelocities.length;i++){const x=i*3,y=x+1,z=x+2;dustPositions[y]+=dustVelocities[i]*dt;dustPositions[x]+=Math.sin(state.time*.3+i)*dt*.025;
       if(dustPositions[y]>10.2){dustPositions[y]=.3;dustPositions[x]=(Math.random()-.5)*27;dustPositions[z]=-13+Math.random()*24;}}
     dustPoints.geometry.attributes.position.needsUpdate=true;
+  }
+  function setWorkshopVisibility(visible){
+    workshopVisible=visible;
+    if(!hangarRoot)return;
+    hangarRoot.visible=true;
+    hangarRoot.traverse(function(node){
+      if(node===hangarRoot)return;
+      let belongsToCrane=false,parent=node;
+      while(parent){
+        if(parent===craneAssembly){belongsToCrane=true;break;}
+        parent=parent.parent;
+      }
+      node.visible=visible||belongsToCrane;
+    });
+    scene.background.copy(visible?workshopBackground:new THREE.Color(0x050807));
+    scene.fog=visible?new THREE.Fog(workshopFog,28,62):null;
+    if(calibrationLight)calibrationLight.visible=!visible;
+  }
+  function updateCalibrationAxes(){
+    if(!calibrationAxes||!modelRoot)return;
+    modelRoot.getWorldPosition(calibrationAxes.position);
+    calibrationAxes.quaternion.identity();
+    calibrationAxes.visible=axesVisible;
   }
 
     // --------------------------------------------------------------------------
@@ -4326,9 +4577,11 @@ function createStudioEnvironment() {
   }
 
   function clearCurrentModel(){
+    if(modelLighting&&modelLighting.parent)modelLighting.parent.remove(modelLighting);modelLighting=null;
     if(mechGroup&&mechGroup.parent)mechGroup.parent.remove(mechGroup);disposeSuspensionRig();
     Object.keys(hotspotElements).forEach(function(id){const el=hotspotElements[id];if(el&&el.parentNode)el.parentNode.removeChild(el);});
-    hotspotElements={};inspectionAnchors={};inspectionBounds=null;mechGroup=null;bodyMesh=null;headMesh=null;thrusterGroup=null;thrusterEffects=[];
+    if(calloutElement&&calloutElement.parentNode)calloutElement.parentNode.removeChild(calloutElement);
+    hotspotElements={};inspectionAnchors={};inspectionBounds=null;mechGroup=null;modelRoot=null;bodyMesh=null;headMesh=null;thrusterGroup=null;thrusterEffects=[];    armPoseNodes=[];legPoseNodes=[];calloutElement=null;
   }
 
   function showLocalModelDialog() {
@@ -4344,7 +4597,7 @@ function createStudioEnvironment() {
   function handleModelLoadError(error, sourceName) {
     const errorMessage = error && error.message ? error.message : String(error || 'Unknown error');
     console.error('Failed to load Raven model from ' + sourceName + ':', error);
-    setModelStatus('Model error', 'error');
+    setModelStatus('Modellfehler', 'error');
     showModelLoadError(
       'Could not load ' + sourceName + ': ' + errorMessage +
       '. Use Load Raven Model to select the GLB file again.'
@@ -4357,14 +4610,20 @@ function createStudioEnvironment() {
     try{
       if(!gltf||!gltf.scene)throw new Error('The GLB file did not contain a scene.');
       const model=gltf.scene;model.updateMatrixWorld(true);
-      model.traverse(function(child){if(child.isMesh){child.castShadow=true;child.receiveShadow=true;child.frustumCulled=false;}});
+      model.traverse(function(child){if(child.isMesh){child.castShadow=false;child.receiveShadow=false;child.frustumCulled=false;}});
       const box=new THREE.Box3().setFromObject(model),center=box.getCenter(new THREE.Vector3()),size=box.getSize(new THREE.Vector3());
       const max=Math.max(size.x,size.y,size.z);if(!Number.isFinite(max)||max<=0)throw new Error('The GLB scene contains no visible geometry.');
-      clearCurrentModel();const scale=9/max;model.scale.setScalar(scale);model.position.set(-center.x*scale,-center.y*scale,-center.z*scale);model.rotation.y=0;model.updateMatrixWorld(true);
-      const bounds=new THREE.Box3().setFromObject(model);mechGroup=new THREE.Group();mechGroup.position.set(0,suspensionBaseY,-.65);mechGroup.rotation.y=Math.PI*.075;mechGroup.add(model);scene.add(mechGroup);
-      createInspectionAnchors(bounds);createSuspensionRig(bounds);setModelStatus('NIGHTFALL ONLINE','success');
+      calibrationModel={scale:1,x:0,y:0,z:0,rx:0,ry:0,rz:0};calibrationHooks=[{x:0,y:0,z:0},{x:0,y:0,z:0},{x:0,y:0,z:0},{x:0,y:0,z:0}];
+      ['scale','x','y','z','rx','ry','rz'].forEach(function(axis){const input=document.getElementById('cal-model-'+axis);if(input)input.value=calibrationModel[axis];});
+      ['x','y','z'].forEach(function(axis){const input=document.getElementById('cal-marker-'+axis);if(input)input.value=0;});
+      clearCurrentModel();const scale=13/max;model.scale.setScalar(scale);model.position.set(-center.x*scale,-center.y*scale,-center.z*scale);modelBasePosition.copy(model.position);model.rotation.y=0;model.updateMatrixWorld(true);
+      modelRoot=model;mechGroup=new THREE.Group();mechGroup.position.set(0,suspensionBaseY,-.65);mechGroup.rotation.set(0,0,0);mechGroup.add(modelRoot);scene.add(mechGroup);attachModelLighting();
+      if(!calibrationAxes){calibrationAxes=new THREE.AxesHelper(3.2);scene.add(calibrationAxes);}
+      calibrationAxes.visible=axesVisible;
+      const bounds=getObjectLocalBounds(model, mechGroup);
+      createInspectionAnchors(bounds, model, mechGroup);createSuspensionRig(bounds,model);applyDefaultCalibration();attachModelThrusterEffects(model);setModelStatus('NIGHTFALL AKTIV','success');
       const panel=document.getElementById('model-error');if(panel)panel.classList.remove('visible');
-      const footer=document.querySelector('.footer-note');if(footer)footer.innerHTML='FIELD DOSSIER // AC6: FIRES OF RUBICON<br>MODEL SOURCE // '+sourceName.toUpperCase()+'<br>INTERACTIVE COMPONENT INSPECTION ENABLED';
+      const footer=document.querySelector('.footer-note');if(footer)footer.innerHTML='TECHNISCHES DOSSIER // AC6: FIRES OF RUBICON<br>MODELLQUELLE // '+sourceName.toUpperCase()+'<br>INTERAKTIVE BAUTEILINSPEKTION AKTIV';
       hideLocalModelDialog();recenterView();console.info('NIGHTFALL model loaded successfully:',sourceName);
     }catch(error){handleModelLoadError(error,sourceName);}
   }
@@ -4373,18 +4632,18 @@ function createStudioEnvironment() {
     if (!file) return;
 
     if (!/\.glb$/i.test(file.name)) {
-      handleModelLoadError(new Error('Please select a .glb file'), file.name);
+      handleModelLoadError(new Error('Bitte eine .glb-Datei auswählen'), file.name);
       return;
     }
 
     hideLocalModelDialog();
     const reader = new FileReader();
-    setModelStatus('Reading Raven...', 'loading');
+    setModelStatus('Raven wird gelesen …', 'loading');
 
     reader.onprogress = function (event) {
       if (event.lengthComputable && event.total > 0) {
         const percent = Math.round((event.loaded / event.total) * 100);
-        setModelStatus('Reading ' + percent + '%', 'loading');
+        setModelStatus('Lesefortschritt ' + percent + '%', 'loading');
       }
     };
 
@@ -4393,7 +4652,7 @@ function createStudioEnvironment() {
     };
 
     reader.onload = function () {
-      setModelStatus('Parsing Raven...', 'loading');
+      setModelStatus('Raven wird analysiert …', 'loading');
       try {
         const loader = new THREE.GLTFLoader();
         loader.parse(
@@ -4426,12 +4685,12 @@ function createStudioEnvironment() {
     // Browsers protect file:// pages from reading adjacent files by pathname.
     // Ask the user to select the GLB, then parse the explicitly granted File object.
     if (window.location.protocol === 'file:') {
-      setModelStatus('Select raven.glb', 'loading');
+      setModelStatus('raven.glb auswählen', 'loading');
       showLocalModelDialog();
       return;
     }
 
-    setModelStatus('Loading Raven...', 'loading');
+    setModelStatus('NIGHTFALL wird geladen …', 'loading');
     const modelUrl = new URL(path, document.baseURI).href;
     const loader = new THREE.GLTFLoader();
 
@@ -4444,7 +4703,7 @@ function createStudioEnvironment() {
         function (progress) {
           if (progress && progress.total > 0) {
             const percent = Math.round((progress.loaded / progress.total) * 100);
-            setModelStatus('Loading ' + percent + '%', 'loading');
+            setModelStatus('Ladevorgang ' + percent + '%', 'loading');
           }
         },
         function (error) {
@@ -4516,6 +4775,7 @@ function createStudioEnvironment() {
       opacity: 0,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
+      depthTest: true,
       side: THREE.DoubleSide,
     });
     const innerMaterial = new THREE.MeshBasicMaterial({
@@ -4525,6 +4785,7 @@ function createStudioEnvironment() {
       opacity: 0,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
+      depthTest: true,
       side: THREE.DoubleSide,
     });
 
@@ -4553,6 +4814,7 @@ function createStudioEnvironment() {
       opacity: 0,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
+      depthTest: true,
     }));
     glow.position.z = 0.04 * sizeFactor;
     glow.scale.set(0.72 * sizeFactor, 0.72 * sizeFactor, 1);
@@ -4635,6 +4897,30 @@ function createStudioEnvironment() {
       });
     });
 
+    if (candidates.length === 0) {
+      model.traverse(function (node) {
+        if (!node || !node.isMesh) return;
+        const bounds = getObjectLocalBounds(node, model);
+        if (!bounds) return;
+        const size = bounds.getSize(new THREE.Vector3());
+        const center = bounds.getCenter(new THREE.Vector3());
+        const rearDepth = center.z - modelBounds.min.z;
+        const rearBand = modelSize.z * .16;
+        const lowerBand = center.y - modelBounds.min.y;
+        if (rearDepth > rearBand || lowerBand < modelSize.y * .28 || lowerBand > modelSize.y * .7) return;
+        if (size.length() < .08 || size.length() > modelSize.length() * .16) return;
+        const position = new THREE.Vector3(center.x, center.y - modelSize.y * .08, bounds.min.z - Math.max(size.z * .08, modelSize.z * .004));
+        for (let i = 0; i < candidates.length; i++) {
+          if (candidates[i].position.distanceTo(position) < Math.max(modelSize.length() * .02, .08)) return;
+        }
+        candidates.push({
+          name: node.name || 'Rückseitiger Auslass',
+          position: position,
+          sizeFactor: THREE.MathUtils.clamp(Math.sqrt(size.x * size.y) * 2.2, .62, 1.35),
+        });
+      });
+    }
+
     candidates.sort(function (a, b) {
       return a.position.x - b.position.x;
     });
@@ -4643,16 +4929,37 @@ function createStudioEnvironment() {
   }
 
   function attachModelThrusterEffects(model) {
+    createFlameTextures();
     const anchors = findModelThrusterAnchors(model);
-    anchors.forEach(function (anchor) {
-      createThrusterEffect(model, anchor.position, anchor.sizeFactor);
+    const bounds = getObjectLocalBounds(model, model);
+    if (!bounds) return;
+    const center = bounds.getCenter(new THREE.Vector3());
+    thrusterCalibration.y = DEFAULT_CALIBRATION.thruster.y;
+    thrusterCalibration.z = DEFAULT_CALIBRATION.thruster.z;
+    [-1,1].forEach(function(side){
+      createThrusterEffect(model, new THREE.Vector3(side * thrusterCalibration.x,thrusterCalibration.y,thrusterCalibration.z), 1.55);
     });
+    updateThrusterCalibration();
+    console.info('Attached mirrored procedural thruster effects; named exhaust candidates:', anchors.length);
+  }
 
-    if (anchors.length > 0) {
-      console.info('Attached model thruster effects to:', anchors.map(function (anchor) { return anchor.name; }).join(', '));
-    } else {
-      console.info('No explicitly named nozzle nodes found; exhaust effects are disabled to prevent misplaced flames.');
-    }
+  function updateThrusterCalibration(){
+    if(!modelRoot)return;
+    thrusterEffects.forEach(function(effect,index){
+      const side=index%2===0?-1:1;
+      effect.group.position.set(side*thrusterCalibration.x,thrusterCalibration.y,thrusterCalibration.z);
+      effect.group.rotation.set(
+        THREE.MathUtils.degToRad(thrusterCalibration.rx),
+        THREE.MathUtils.degToRad(thrusterCalibration.ry),
+        THREE.MathUtils.degToRad(thrusterCalibration.rz)
+      );
+    });
+    ['x','y','z','rx','ry','rz'].forEach(function(axis){
+      const input=document.getElementById('cal-thruster-'+axis);
+      const output=document.getElementById('cal-thruster-'+axis+'-value');
+      if(input)input.value=thrusterCalibration[axis];
+      if(output)output.textContent=axis.length===2?Math.round(thrusterCalibration[axis])+'°':thrusterCalibration[axis].toFixed(2);
+    });
   }
 
   function createFlamePair(centerPos) {
@@ -4685,8 +4992,74 @@ function createStudioEnvironment() {
     const back=new THREE.Mesh(new THREE.BoxGeometry(1.3,.72,.72),body);back.position.set(0,1.1,-.65);placeholder.add(back);
     const box=new THREE.Box3().setFromObject(placeholder),center=box.getCenter(new THREE.Vector3()),size=box.getSize(new THREE.Vector3()),scale=9/Math.max(size.x,size.y,size.z);
     placeholder.scale.setScalar(scale);placeholder.position.set(-center.x*scale,-center.y*scale,-center.z*scale);placeholder.updateMatrixWorld(true);
-    const bounds=new THREE.Box3().setFromObject(placeholder);mechGroup=new THREE.Group();mechGroup.position.set(0,suspensionBaseY,-.65);mechGroup.rotation.y=Math.PI*.075;mechGroup.add(placeholder);scene.add(mechGroup);
-    createInspectionAnchors(bounds);createSuspensionRig(bounds);setModelStatus('PLACEHOLDER','');recenterView();
+    const bounds=new THREE.Box3().setFromObject(placeholder);modelRoot=placeholder;modelBasePosition.copy(placeholder.position);mechGroup=new THREE.Group();mechGroup.position.set(0,suspensionBaseY,-.65);mechGroup.rotation.set(0,0,0);mechGroup.add(modelRoot);scene.add(mechGroup);attachModelLighting();
+    createInspectionAnchors(bounds);createSuspensionRig(bounds,modelRoot);setModelStatus('PLATZHALTER','');recenterView();
+  }
+
+  function applyCalibrationTransform(){
+    if(!modelRoot)return;
+    modelRoot.scale.setScalar(calibrationModel.scale);
+    modelRoot.position.set(modelBasePosition.x+calibrationModel.x,modelBasePosition.y+calibrationModel.y,modelBasePosition.z+calibrationModel.z);
+    modelRoot.rotation.set(
+      THREE.MathUtils.degToRad(calibrationModel.rx),
+      THREE.MathUtils.degToRad(calibrationModel.ry),
+      THREE.MathUtils.degToRad(calibrationModel.rz)
+    );
+  }
+  function applyCalibrationMarker(){
+    const base=baseInspectionAnchors[calibrationMarker.id];
+    if(!base)return;
+    inspectionAnchors[calibrationMarker.id]=base.clone().add(new THREE.Vector3(calibrationMarker.x,calibrationMarker.y,calibrationMarker.z));
+  }
+  function applyDefaultCalibration(){
+    calibrationModel=Object.assign({},DEFAULT_CALIBRATION.model);
+    calibrationHooks=DEFAULT_CALIBRATION.hooks.map(function(hook){return Object.assign({},hook);});
+    Object.keys(DEFAULT_CALIBRATION.markers).forEach(function(id){
+      const base=baseInspectionAnchors[id],offset=DEFAULT_CALIBRATION.markers[id];
+      if(base)inspectionAnchors[id]=base.clone().add(new THREE.Vector3(offset.x,offset.y,offset.z));
+    });
+    thrusterCalibration=Object.assign({},DEFAULT_CALIBRATION.thruster);
+    calibrationMarker={id:'head',x:DEFAULT_CALIBRATION.markers.head.x,y:DEFAULT_CALIBRATION.markers.head.y,z:DEFAULT_CALIBRATION.markers.head.z};
+    applyCalibrationTransform();
+    updateSuspensionRig();
+    const modelSelectValues=['scale','x','y','z','rx','ry','rz'];
+    modelSelectValues.forEach(function(axis){
+      const input=document.getElementById('cal-model-'+axis);
+      if(input)input.value=calibrationModel[axis];
+    });
+    const markerSelect=document.getElementById('cal-marker-select');
+    if(markerSelect)markerSelect.value='head';
+    ['x','y','z'].forEach(function(axis){
+      const input=document.getElementById('cal-marker-'+axis);
+      if(input)input.value=calibrationMarker[axis];
+    });
+    const hookSelect=document.getElementById('cal-hook-select');
+    if(hookSelect)hookSelect.value='0';
+    syncCalibrationHook();
+    updateCalibrationOutputs();
+  }
+  function updateCalibrationOutputs(){
+    const values={scale:calibrationModel.scale,x:calibrationModel.x,y:calibrationModel.y,z:calibrationModel.z,rx:calibrationModel.rx,ry:calibrationModel.ry,rz:calibrationModel.rz};
+    Object.keys(values).forEach(function(key){const output=document.getElementById('cal-model-'+key+'-value');if(output)output.textContent=key==='scale'?values[key].toFixed(3):key.length===2?Math.round(values[key])+'°':values[key].toFixed(2);});
+    ['x','y','z'].forEach(function(axis){const output=document.getElementById('cal-marker-'+axis+'-value');if(output)output.textContent=calibrationMarker[axis].toFixed(2);});
+    const hook=calibrationHooks[Number(document.getElementById('cal-hook-select').value)||0]||{x:0,y:0,z:0};
+    ['x','y','z'].forEach(function(axis){const output=document.getElementById('cal-hook-'+axis+'-value');if(output)output.textContent=hook[axis].toFixed(2);});
+  }
+  function syncCalibrationMarker(){
+    const select=document.getElementById('cal-marker-select');if(!select)return;
+    calibrationMarker={id:select.value,x:0,y:0,z:0};
+    ['x','y','z'].forEach(function(axis){const input=document.getElementById('cal-marker-'+axis);if(input)input.value='0';});
+    updateCalibrationOutputs();
+  }
+  function syncCalibrationHook(){
+    const index=Number(document.getElementById('cal-hook-select').value)||0,hook=calibrationHooks[index]||{x:0,y:0,z:0};
+    ['x','y','z'].forEach(function(axis){const input=document.getElementById('cal-hook-'+axis);if(input)input.value=hook[axis];});
+    updateCalibrationOutputs();updateSuspensionRig();
+  }
+  function exportCalibration(){
+    const output=document.getElementById('calibration-export');if(!output)return;
+    output.value=JSON.stringify({model:calibrationModel,markers:Object.keys(baseInspectionAnchors).reduce(function(result,id){const base=baseInspectionAnchors[id],current=inspectionAnchors[id];result[id]={x:Number((current.x-base.x).toFixed(3)),y:Number((current.y-base.y).toFixed(3)),z:Number((current.z-base.z).toFixed(3))};return result;},{}),hooks:calibrationHooks,thruster:thrusterCalibration},null,2);
+    output.select();
   }
 
   // --------------------------------------------------------------------------
@@ -4694,10 +5067,69 @@ function createStudioEnvironment() {
   // --------------------------------------------------------------------------
   function updateAnimation(dt){
     if(!mechGroup)return;const motion=state.motionEnabled?1:0,t=state.time;
-    mechGroup.rotation.z=THREE.MathUtils.lerp(mechGroup.rotation.z,Math.sin(t*.56)*.012*motion,.035);
-    mechGroup.rotation.x=THREE.MathUtils.lerp(mechGroup.rotation.x,Math.cos(t*.39)*.009*motion,.035);
-    mechGroup.position.y=THREE.MathUtils.lerp(mechGroup.position.y,suspensionBaseY+Math.sin(t*.72)*.035*motion,.035);
-    if(craneAssembly)craneAssembly.position.z=Math.sin(t*.17)*.025*motion;
+    mechGroup.rotation.y=0;
+    const craneMotion=Math.min(1,Math.abs(craneTravelValue)/40);
+    const swayScale=motion*(1+craneMotion*2.8);
+    const thrusterKick=thrustersEnabled?1:0;
+    mechGroup.rotation.z=THREE.MathUtils.lerp(mechGroup.rotation.z,Math.sin(t*.56)*.045*swayScale+Math.sin(t*16)*.006*thrusterKick,.035);
+    mechGroup.rotation.x=THREE.MathUtils.lerp(mechGroup.rotation.x,Math.cos(t*.39)*.032*swayScale+Math.cos(t*13)*.005*thrusterKick,.035);
+    mechGroup.position.y=THREE.MathUtils.lerp(mechGroup.position.y,suspensionBaseY+Math.sin(t*.72)*.11*motion+Math.sin(t*15)*.025*thrusterKick,.035);
+    if(craneAssembly)craneAssembly.position.z=Math.sin(t*.17)*.075*motion;
+    if(craneAssembly)craneAssembly.position.x=craneTravelValue;
+    if(suspensionSpreader)suspensionSpreader.position.x=craneTravelValue;
+    mechGroup.position.x=craneTravelValue;
+    mechGroup.position.z=-.65;
+    applyCalibrationTransform();
+    thrusterEffects.forEach(function(effect){
+      const intensity=thrustersEnabled?(0.82+Math.sin(t*18+effect.phase)*.12):0;
+      effect.outer.material.opacity=intensity;
+      effect.inner.material.opacity=intensity*.82;
+      effect.glow.material.opacity=intensity*.72;
+      effect.group.scale.y=thrustersEnabled?1.35+Math.sin(t*14+effect.phase)*.2:.35;
+    });
+  }
+
+  function applyArmPose(value){
+    armPoseValue=Number(value)||0;
+    const bend=armPoseValue*.004;
+    armPoseNodes.forEach(function(entry){entry.node.rotation.z=entry.base+entry.side*bend;});
+    const output=document.getElementById('arm-pose-value');if(output)output.textContent=Math.round(armPoseValue)+'°';
+  }
+
+  function applySingleLegPose(side,value){
+    const pose=Number(value)||0;
+    legPoseNodes.forEach(function(entry){
+      if(entry.side===side){
+        entry.node.rotation.z=entry.base+pose*.006;
+      }
+    });
+    const output=document.getElementById(side<0?'left-leg-pose-value':'right-leg-pose-value');
+    if(output)output.textContent=Math.round(pose)+'°';
+  }
+  function applyLegPose(value){
+    legPoseValue=Number(value)||0;leftLegPoseValue=legPoseValue;rightLegPoseValue=legPoseValue;
+    applySingleLegPose(-1,leftLegPoseValue);applySingleLegPose(1,rightLegPoseValue);
+    const output=document.getElementById('leg-stance-value');if(output)output.textContent=Math.round(legPoseValue)+'°';
+    const left=document.getElementById('left-leg-pose'),right=document.getElementById('right-leg-pose');
+    if(left)left.value=leftLegPoseValue;if(right)right.value=rightLegPoseValue;
+  }
+
+  function applyCraneTravel(value){
+    craneTravelValue=(Number(value)||0)*.022;
+    const output=document.getElementById('crane-travel-value');if(output)output.textContent=Math.round(Number(value)||0)+'%';
+  }
+
+  function resetShowControls(){
+    const controls=[
+      ['arm-pose','0',applyArmPose],
+      ['crane-travel','0',applyCraneTravel]
+    ];
+    controls.forEach(function(entry){const input=document.getElementById(entry[0]);if(input){input.value=entry[1];entry[2](entry[1]);}});
+    thrustersEnabled=false;
+    const thrusters=document.getElementById('btn-thrusters');if(thrusters){thrusters.textContent='Triebwerke zünden';thrusters.classList.remove('active');}
+    state.motionEnabled=false;
+    const motion=document.getElementById('btn-motion');if(motion){motion.textContent='Pendelbewegung starten';motion.classList.add('active');}
+    clearInspectionSelection();
   }
 
   // --------------------------------------------------------------------------
@@ -4707,14 +5139,54 @@ function createStudioEnvironment() {
     const sidebar=document.getElementById('sidebar'),toggle=document.getElementById('btn-toggle-sidebar'),open=document.getElementById('btn-open-sidebar');
     const fullscreen=document.getElementById('btn-fullscreen'),floating=document.getElementById('btn-fullscreen-fs');
     const load=document.getElementById('btn-load-model'),recenter=document.getElementById('btn-recenter'),motion=document.getElementById('btn-motion');
+    const armPose=document.getElementById('arm-pose'),craneTravel=document.getElementById('crane-travel'),thrusters=document.getElementById('btn-thrusters'),resetControls=document.getElementById('btn-reset-controls');
     const select=document.getElementById('btn-select-model'),placeholder=document.getElementById('btn-use-placeholder'),input=document.getElementById('model-file-input');
-    function setSidebar(visible){state.showSidebar=visible;sidebar.classList.toggle('collapsed',!visible);document.body.classList.toggle('sidebar-collapsed',!visible);toggle.textContent=visible?'Collapse Panel':'Expand Panel';open.setAttribute('aria-expanded',String(visible));}
+    const calibrationPanel=document.getElementById('calibration-panel'),calibrationOpen=document.getElementById('btn-calibration-open'),calibrationClose=document.getElementById('btn-calibration-close'),calibrationExport=document.getElementById('btn-calibration-export');
+    const pinDialog=document.getElementById('pin-dialog'),pinForm=document.getElementById('pin-form'),pinInput=document.getElementById('calibration-pin'),pinError=document.getElementById('pin-dialog-error'),pinCancel=document.getElementById('btn-pin-cancel');
+    const workshopToggle=document.getElementById('btn-toggle-workshop'),axesToggle=document.getElementById('btn-toggle-axes');
+    function setSidebar(visible){state.showSidebar=visible;sidebar.classList.toggle('collapsed',!visible);document.body.classList.toggle('sidebar-collapsed',!visible);toggle.textContent=visible?'Panel einklappen':'Panel ausklappen';open.setAttribute('aria-expanded',String(visible));}
     function picker(){input.value='';input.click();}
-    renderComponentIndex();selectInspectionPart('head');
+    clearInspectionSelection();
+    const markerSelect=document.getElementById('cal-marker-select');
+    INSPECTION_PARTS.forEach(function(part){const option=document.createElement('option');option.value=part.id;option.textContent=part.n+' / '+part.label;markerSelect.appendChild(option);});
     toggle.addEventListener('click',function(){setSidebar(!state.showSidebar);});open.addEventListener('click',function(){setSidebar(true);});
     fullscreen.addEventListener('click',toggleFullscreen);floating.addEventListener('click',toggleFullscreen);
     load.addEventListener('click',picker);select.addEventListener('click',picker);recenter.addEventListener('click',recenterView);
-    motion.addEventListener('click',function(){state.motionEnabled=!state.motionEnabled;motion.textContent=state.motionEnabled?'Hold Position':'Resume Sway';motion.classList.toggle('active',state.motionEnabled);});
+    motion.addEventListener('click',function(){state.motionEnabled=!state.motionEnabled;motion.textContent=state.motionEnabled?'Pendelbewegung stoppen':'Pendelbewegung starten';motion.classList.toggle('active',!state.motionEnabled);});
+    armPose.addEventListener('input',function(){applyArmPose(armPose.value);});
+    craneTravel.addEventListener('input',function(){applyCraneTravel(craneTravel.value);});
+    thrusters.addEventListener('click',function(){thrustersEnabled=!thrustersEnabled;thrusters.textContent=thrustersEnabled?'Triebwerke abschalten':'Triebwerke zünden';thrusters.classList.toggle('active',thrustersEnabled);});
+    resetControls.addEventListener('click',resetShowControls);
+    calibrationOpen.addEventListener('click',function(){pinInput.value='';pinError.textContent='';pinDialog.classList.add('visible');window.setTimeout(function(){pinInput.focus();},0);});
+    pinForm.addEventListener('submit',function(event){event.preventDefault();if(pinInput.value===CALIBRATION_PIN){pinDialog.classList.remove('visible');calibrationPanel.classList.add('visible');return;}pinInput.value='';pinError.textContent='Falsche PIN. Bitte erneut versuchen.';pinInput.focus();});
+    pinCancel.addEventListener('click',function(){pinDialog.classList.remove('visible');});
+    calibrationClose.addEventListener('click',function(){calibrationPanel.classList.remove('visible');});
+    calibrationExport.addEventListener('click',exportCalibration);
+    workshopToggle.addEventListener('click',function(){setWorkshopVisibility(!workshopVisible);workshopToggle.textContent=workshopVisible?'Scheune ausblenden':'Scheune einblenden';workshopToggle.classList.toggle('active',!workshopVisible);});
+    axesToggle.addEventListener('click',function(){axesVisible=!axesVisible;axesToggle.textContent=axesVisible?'XYZ-Linien ausblenden':'XYZ-Linien einblenden';axesToggle.classList.toggle('active',axesVisible);});
+    const nodesToggle=document.getElementById('btn-toggle-nodes');
+    nodesToggle.addEventListener('click',function(){
+      nodesVisible=!nodesVisible;
+      Object.keys(hotspotElements).forEach(function(id){hotspotElements[id].style.display=nodesVisible?'':'none';});
+      if(calloutElement&&!nodesVisible){calloutElement.hidden=true;}
+      nodesToggle.textContent=nodesVisible?'Nodes ausblenden':'Nodes einblenden';
+      nodesToggle.classList.toggle('active',!nodesVisible);
+    });
+    markerSelect.addEventListener('change',syncCalibrationMarker);
+    document.getElementById('cal-hook-select').addEventListener('change',syncCalibrationHook);
+    ['x','y','z','rx','ry','rz'].forEach(function(axis){
+      document.getElementById('cal-thruster-'+axis).addEventListener('input',function(){
+        thrusterCalibration[axis]=Number(this.value)||0;updateThrusterCalibration();
+      });
+    });
+    ['scale','x','y','z','rx','ry','rz'].forEach(function(axis){
+      document.getElementById('cal-model-'+axis).addEventListener('input',function(){calibrationModel[axis]=Number(this.value)||0;applyCalibrationTransform();updateCalibrationOutputs();});
+    });
+    ['x','y','z'].forEach(function(axis){
+      document.getElementById('cal-marker-'+axis).addEventListener('input',function(){calibrationMarker[axis]=Number(this.value)||0;applyCalibrationMarker();updateCalibrationOutputs();});
+      document.getElementById('cal-hook-'+axis).addEventListener('input',function(){const index=Number(document.getElementById('cal-hook-select').value)||0;calibrationHooks[index][axis]=Number(this.value)||0;updateCalibrationOutputs();updateSuspensionRig();});
+    });
+    updateCalibrationOutputs();
     placeholder.addEventListener('click',function(){hideLocalModelDialog();if(!mechGroup)createPlaceholderMech();setModelStatus('PLACEHOLDER','');});
     input.addEventListener('change',function(e){const f=e.target.files&&e.target.files[0];if(f)loadModelFromFile(f);});
     setSidebar(state.showSidebar);
@@ -4727,7 +5199,7 @@ function createStudioEnvironment() {
     const button = document.getElementById('btn-fullscreen-fs');
     if (button) {
       button.textContent = state.fullscreen ? '\u00D7' : '\u26F6';
-      button.title = state.fullscreen ? 'Exit fullscreen' : 'Enter fullscreen';
+      button.title = state.fullscreen ? 'Vollbild verlassen' : 'Vollbild öffnen';
       button.setAttribute('aria-label', button.title);
     }
   }
@@ -4755,7 +5227,7 @@ function createStudioEnvironment() {
   // Camera navigation
   // --------------------------------------------------------------------------
   function recenterView(){
-    orbit.theta=Math.PI*.25;orbit.phi=Math.PI*.39;orbit.radius=19;orbit.target.set(1.4,5.05,-.4);
+    orbit.theta=Math.PI*.25;orbit.phi=Math.PI*.39;orbit.radius=19;orbit.target.set(-2.6,5.05,-.4);
     state.isDragging=false;state.dragMoved=false;state.dragMode=null;updateCamera();
   }
 
@@ -4796,7 +5268,7 @@ function createStudioEnvironment() {
   // --------------------------------------------------------------------------
   function animate(){
     requestAnimationFrame(animate);const dt=clock.getDelta();state.time+=dt;
-    updateAnimation(dt);updateBackdrop(dt);updateSuspensionRig();updateCamera();updateInspectionHotspots();renderer.render(scene,camera);
+    updateAnimation(dt);updateBackdrop(dt);updateSuspensionRig();updateCalibrationAxes();updateCamera();updateInspectionHotspots();renderer.render(scene,camera);
   }
 
   // --------------------------------------------------------------------------
@@ -4810,4 +5282,3 @@ function createStudioEnvironment() {
 </script>
 </body>
 </html>
-
