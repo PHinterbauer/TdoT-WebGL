@@ -1,106 +1,720 @@
 ================================================================================
-PROJECT INFO - AC6: Raven WebGL Renderer
+PROJECT HANDOVER & TECHNICAL REFERENCE
+PROJECT: TdoT-WebGL — ARMored Core VI: NIGHTFALL Inspection Viewer
 ================================================================================
 
-PURPOSE
-  Single-file, offline-capable WebGL 3D renderer of Raven from Armored Core VI:
-  Fires of Rubicon, built with HTML5, WebGL, Three.js, and vanilla JavaScript.
+DOCUMENT PURPOSE
+  This file is the main handover document for developers and AI assistants
+  continuing work on this repository.
 
-RUNTIME FILES
-  index.html
-    The only HTML and JavaScript source file. It contains the Three.js r128
-    library, the matching GLTFLoader r128, all application logic, CSS, and UI.
+  Read this file before changing the application. It describes the current
+  product direction, runtime architecture, scene graph, loading pipeline,
+  inspection system, user interaction, known limitations, and development
+  constraints. It supersedes older project notes that describe a flight
+  backdrop, dash animation, sunlight slider, or thruster flames.
 
-  raven.glb
-    The Raven 3D model loaded by index.html.
+  All source-code comments, UI labels, user-facing strings, and documentation
+  must be written in English.
 
-DOCUMENTATION
-  README.md
-    Project overview, controls, model instructions, and technical details.
 
-  PROJECT_INFO.txt
-    This file.
+1. PROJECT IDENTITY & PRODUCT DIRECTION
+--------------------------------------------------------------------------------
 
-  LICENSE
-    MIT License information.
+  Repository:
+    https://github.com/PHinterbauer/TdoT-WebGL
 
-HOW TO RUN
-  1. Keep index.html and raven.glb in the same folder.
-  2. Double-click index.html to open it in a modern browser.
-  3. When opened directly from file://, click "Choose raven.glb" and select
-     raven.glb from the same folder.
-  4. The model is read locally from the user-selected File object and parsed
-     by the embedded Three.js r128 GLTFLoader.
+  Default branch:
+    main
 
-  No local server, build step, package manager, or internet connection is
-  required. Browsers do not allow a file:// page to read adjacent files by
-  pathname, so the explicit file selection is required.
+  Project:
+    A self-contained, offline-capable Three.js/WebGL inspection experience for
+    NIGHTFALL, the Armored Core associated with the original Raven in
+    Armored Core VI: Fires of Rubicon.
 
-  When hosted on HTTP(S), raven.glb is loaded automatically from the same
-  folder as index.html.
+  Current concept:
+    NIGHTFALL is displayed inside a compact industrial maintenance hangar.
+    The AC is suspended from a workshop gantry / overhead crane using a
+    four-point sling. The viewer can orbit the camera and inspect selected
+    components through numbered 3D hotspots or a component list.
 
-FEATURES
-  - Raven GLB model loaded with the embedded Three.js r128 GLTFLoader.
-  - Local GLB file selection for direct file:// use.
-  - Automatic adjacent GLB loading when hosted over HTTP(S).
-  - Procedural placeholder mech used if the model cannot be loaded.
-  - Industrial maintenance hangar with concrete floor, corrugated walls, roof trusses, service benches, tool cabinets, task lights, and floating dust.
-  - NIGHTFALL suspended beneath a workshop gantry crane by a four-point sling.
-  - Nine clickable inspection systems with technical records and Armored Core VI game intel.
-  - Component selection through both 3D hotspots and the component index.
-  - Optional low-frequency suspension sway with a hold-position control.
-  - Collapsible dossier panel and fullscreen inspection mode.
-  - Orbit controls: left-drag to rotate, middle-mouse drag to pan within limits, wheel to zoom.
-  - Touch support with one-finger rotation.
-  - On-screen author watermark.
+    Selecting a component opens a dossier containing:
+      - Component / system designation
+      - Manufacturer or in-universe manufacturer attribution
+      - Component category
+      - Technical description
+      - Technical record / selected statistics
+      - Armored Core VI gameplay or lore context
+      - Notes about regulation, interpretation, or source limitations
 
-MODEL CONFIGURATION
-  The model path is configured near the top of the inline application code in
-  index.html:
+  The experience should feel like a professional in-universe maintenance
+  terminal or technical museum exhibit, not a generic game HUD.
 
-    modelPath: './raven.glb',
+  Visual direction:
+    - Industrial, utilitarian, believable workshop / hangar.
+    - Dark muted steel, concrete, weathered surfaces, timber details.
+    - Restrained amber / warm task lighting and small safety-orange accents.
+    - NIGHTFALL remains the visual focus.
+    - High-quality composition, readable model silhouette, controlled contrast.
+    - Background detail should support the model, not compete with it.
+    - UI should be compact, precise, legible, and consistent with the scene.
 
-  Set modelPath to null to display the procedural placeholder instead.
+  Do not revert to:
+    - The former open-air / mountain / flying backdrop.
+    - A visible sky or horizon flight environment.
+    - The former dash / forward-lean animation.
+    - Procedural exhaust or thruster flames.
+    - The former time-of-day sunlight slider.
+    - A generic animation-control dashboard.
 
-  The GLTFLoader implementation is embedded in index.html and matches Three.js
-  r128. No separate loader file is required.
 
-CONTROLS
-  - Play / Pause / Restart: control the dash animation.
-  - Time of Day: adjust sunlight and scene lighting.
-  - Load Raven Model: select a local GLB file.
-  - Recenter View: restore the initial camera position and framing.
-  - Collapse / Expand: hide or show the sidebar.
-  - Fullscreen: use the sidebar button or floating top-right button.
-  - Rotate: left mouse drag or one-finger touch drag.
-  - Pan: hold the middle mouse button and drag. Movement is clamped to keep the model in view.
-  - Zoom: mouse wheel.
+2. FILE STRUCTURE & RUNTIME CONSTRAINTS
+--------------------------------------------------------------------------------
 
-ANIMATION
-  - The dash cycle repeats every CONFIG.dashDuration seconds (default: 1.6).
-  - The mech leans forward in proportion to CONFIG.leanAngle.
-  - Recognized nozzle effects scale and change opacity with dash intensity.
-  - Unrecognized thruster locations are not guessed, preventing detached flames.
-  - A subtle hover bob is applied during the animation.
+  Current repository root:
+    index.html
+      The complete browser runtime. Contains the HTML, CSS, embedded
+      Three.js r128 build, embedded matching GLTFLoader r128, application
+      JavaScript, scene construction, UI, controls, and inspection data.
 
-LIGHTING
-  - Procedural cube-map reflections for metallic GLB materials.
-  - Fixed studio key, fill, and rim lights keep the model readable at night.
-  - Adjustable directional sunlight, atmospheric sky gradient, ambient fill,
-    and fog adapt to the selected time of day.
+    raven.glb
+      The user-provided NIGHTFALL GLB model. This is the primary visual asset.
+      Preserve the original binary file unless explicitly asked to replace it.
 
-CREDITS AND ATTRIBUTION
-  - Three.js (r128) and GLTFLoader (r128): Copyright 2010-2021 Three.js Authors,
-    MIT License. https://threejs.org
-  - Watermark: Paul Hinterbauer 5BHWII @ TGM HWI.
-  - Model inspiration: Raven from Armored Core VI: Fires of Rubicon.
+    README.md
+      Public project overview, quick start, controls, and high-level features.
 
-GITHUB
-  Repository: https://github.com/PHinterbauer/TdoT-WebGL
+    PROJECT_INFO.txt
+      This technical handover document.
 
-  To stage the runtime and documentation files locally:
+    LICENSE
+      Repository license information.
 
-    git add index.html raven.glb README.md PROJECT_INFO.txt LICENSE
+  Runtime architecture is intentionally single-file:
+    - index.html is the only HTML / JavaScript runtime source file.
+    - raven.glb is the adjacent 3D model asset.
+    - Do not create app.js, style.css, separate loader files, package files,
+      build tooling, or other runtime dependencies unless the owner explicitly
+      changes this requirement.
+    - Do not add external script imports, CDNs, remote fonts, APIs, or network
+      dependencies. The application must remain usable offline.
+    - CSS belongs in the existing <style> block in index.html.
+    - Application JavaScript belongs in the existing inline application script.
+    - The bundled Three.js and GLTFLoader code must not be modified casually.
+
+  The repository currently uses three inline script blocks:
+    1. Three.js r128 library.
+    2. Matching GLTFLoader r128 implementation.
+    3. Application code, enclosed in an IIFE with strict mode.
+
+  Keep the runtime compatible with modern Chromium browsers (Chrome / Edge).
+  Avoid relying on a build step, npm, Node.js, or a local development server.
+
+
+3. HOW TO RUN THE PROJECT
+--------------------------------------------------------------------------------
+
+  Local Windows folder used by the owner:
+    C:\Users\phint\Documents\WebGL Render
+
+  Local update command:
+    cd "C:\Users\phint\Documents\WebGL Render"
+    git pull origin main
+
+  Direct local launch:
+    1. Keep index.html and raven.glb in the same folder.
+    2. Double-click index.html.
+    3. The browser displays a local-file dialog.
+    4. Select raven.glb from the same folder.
+    5. The browser reads the chosen File object with FileReader and passes its
+       ArrayBuffer to the embedded GLTFLoader.parse() method.
+
+  The explicit file selection is intentional. Browsers restrict file:// pages
+  from reading adjacent files by pathname. Do not remove the file picker or
+  replace it with an unsafe local-file path assumption.
+
+  Hosted launch:
+    - When served over HTTP(S), CONFIG.modelPath is './raven.glb'.
+    - GLTFLoader loads the adjacent model automatically.
+    - The page does not need an API, backend, build step, or package manager.
+
+  The sidebar's "Replace GLB" action opens the same local file picker so a
+  different .glb can be loaded without refreshing the page.
+
+
+4. CURRENT APPLICATION ARCHITECTURE
+--------------------------------------------------------------------------------
+
+  Application configuration:
+    const CONFIG = { modelPath: './raven.glb' };
+
+  Global application state currently includes:
+    - time: elapsed animation time
+    - showSidebar: whether the inspection panel is open
+    - fullscreen: fullscreen state
+    - motionEnabled: whether the suspended mech is allowed to sway
+    - selectedPart: current component ID
+    - isDragging / dragMoved / dragMode / lastMouse: pointer interaction state
+
+  Important scene references:
+    - scene, camera, renderer
+    - mechGroup: top-level transform group for the imported AC and its clamps
+    - hangarRoot: procedural workshop environment
+    - craneAssembly: travelling overhead crane / trolley assembly
+    - suspensionSpreader: suspended crossbar / sling spreader below the trolley
+    - suspensionCables: four cable meshes connecting the spreader to the AC
+    - dustPoints / dustPositions / dustVelocities: floating workshop dust
+    - inspectionAnchors: local-space component anchor positions
+    - hotspotElements: DOM hotspot buttons corresponding to the component data
+    - raycaster / pickPointer: model selection support
+
+  The application logic is wrapped in an IIFE:
+    (function () {
+      'use strict';
+      // application code
+    })();
+
+  Important functions in the current application:
+    - init()
+    - createLights()
+    - createBackdrop()
+    - updateBackdrop(dt)
+    - handleModelLoaded(gltf, sourceName)
+    - clearCurrentModel()
+    - loadModel(path)
+    - loadModelFromFile(file)
+    - createInspectionAnchors(bounds)
+    - renderComponentIndex()
+    - selectInspectionPart(id)
+    - updateInspectionHotspots()
+    - pickInspectionPart(x, y)
+    - createSuspensionRig(bounds)
+    - updateSuspensionRig()
+    - disposeSuspensionRig()
+    - updateAnimation(dt)
+    - wireUI()
+    - recenterView()
+    - setupPointerControls()
+    - updateCamera()
+    - animate()
+
+  The app boot sequence calls init() and setupPointerControls(). The render
+  loop updates the animation, dust, suspension cables, camera, hotspot
+  projections, and renderer.
+
+
+5. 3D SCENE: WORKSHOP / HANGAR
+--------------------------------------------------------------------------------
+
+  The workshop is generated procedurally in createBackdrop() and attached to
+  hangarRoot. It does not use an external environment model or image.
+
+  Current visual elements:
+    - Textured concrete floor.
+    - Dark industrial side walls and rear wall.
+    - Corrugated wall ribs / vertical metal strips.
+    - Rear roller-door structure and horizontal panels.
+    - Exposed roof ridge, sloped roof trusses, and cross beams.
+    - Overhead crane rails and travelling trolley / crossbeam.
+    - Service benches, storage cabinets, drawers, and salvage / parts crates.
+    - Small practical workshop lamps with warm point lights.
+    - Painted amber safety perimeter around the inspection bay.
+    - Low-density floating dust particles.
+
+  Lighting:
+    - Procedural studio reflection environment is still created by
+      createStudioEnvironment().
+    - Ambient and hemisphere fill lights.
+    - Warm directional key light with shadow mapping.
+    - Cool / neutral fill light.
+    - Warm rim light.
+    - Renderer uses antialiasing, ACES filmic tone mapping, and sRGB output.
+    - Pixel ratio is capped at 2 to avoid excessive GPU cost on high-DPI displays.
+
+  Current scene scale is expressed in abstract Three.js world units.
+  The workshop shell is deliberately larger than the AC and the camera is
+  framed around the suspended model.
+
+  Keep the model well lit and readable. Do not allow the walls, floor, crane,
+  dust, or task lights to overwhelm the AC. Prefer restrained visual detail
+  over clutter.
+
+  Procedural materials and geometries should be reused where sensible. Avoid
+  creating new per-frame objects or materials in animate().
+
+
+6. MODEL LOADING, NORMALIZATION & TRANSFORMS
+--------------------------------------------------------------------------------
+
+  Model file:
+    raven.glb
+
+  Loader:
+    Embedded THREE.GLTFLoader matching Three.js r128.
+
+  Loading paths:
+    - file:// : local file picker -> FileReader.readAsArrayBuffer() ->
+      GLTFLoader.parse().
+    - HTTP(S): GLTFLoader.load('./raven.glb').
+
+  handleModelLoaded(gltf, sourceName) currently:
+    1. Validates gltf.scene.
+    2. Traverses imported meshes.
+    3. Enables castShadow and receiveShadow.
+    4. Disables frustumCulled for imported meshes to prevent individual parts
+       from disappearing when imported bounds / transforms are unreliable.
+    5. Calculates the model's Box3 bounds, center, and largest dimension.
+    6. Scales the model uniformly so its largest dimension is 9 world units.
+    7. Offsets the model so its bounding-box center is at its local origin.
+    8. Wraps the normalized model in mechGroup.
+    9. Places mechGroup at approximately (0, 5.1, -0.65).
+    10. Applies a small Y rotation for the intended display angle.
+    11. Creates inspection anchors and the suspension rig.
+    12. Updates the loading status and recenters the camera.
+
+  Do not casually change the model normalization or top-level transform:
+    Inspection anchors, cable endpoints, and initial camera framing depend on
+    these coordinate conventions.
+
+  When replacing the model or changing its scale:
+    - Recalculate the bounding box after normalization.
+    - Re-check all inspection anchors.
+    - Re-check cable attachment positions.
+    - Re-check hotspot visibility and the camera framing.
+    - Do not assume another GLB uses the same orientation, scale, or pivot.
+
+  Model replacement cleanup:
+    clearCurrentModel() removes the previous mech group, clears hotspot DOM
+    elements and anchor maps, and disposes the suspension rig. Preserve this
+    cleanup behavior when extending model reload functionality.
+
+
+7. SUSPENSION / CRANE SYSTEM
+--------------------------------------------------------------------------------
+
+  The former dash animation is replaced by a restrained suspended inspection
+  motion. NIGHTFALL should look heavy and secured, not like it is flying.
+
+  Scene hierarchy and roles:
+    - hangarRoot contains the workshop.
+    - craneAssembly is the overhead gantry / trolley assembly.
+    - suspensionSpreader is a separate group beneath the trolley.
+    - suspensionCables are four dynamically oriented cylinder meshes.
+    - mechGroup contains the normalized GLB plus the four visible clamp groups.
+
+  The spreader is separate from craneAssembly so that cable start points remain
+  attached to the same moving crossbar rather than to the entire crane rails.
+
+  Four cable endpoints and four clamp points are currently derived from
+  normalized model bounds using the ratios in createSuspensionRig(bounds).
+  The points are approximate and are not bound to semantic GLB node names.
+
+  updateSuspensionRig():
+    - Converts each cable's start point from suspensionSpreader local space to
+      world space.
+    - Converts its end point from mechGroup local space to world space.
+    - Positions and rotates each cylinder between those two points.
+    - Updates cable length.
+
+  updateAnimation(dt):
+    - Applies a very small rotation on X and Z to mechGroup.
+    - Applies a very small vertical bob.
+    - Applies a subtle Z displacement to craneAssembly.
+    - Uses state.motionEnabled to hold the system stationary or enable motion.
+
+  UI:
+    - "Hold Position" toggles the sway off.
+    - "Resume Sway" enables it again.
+
+  Avoid large amplitudes or fast oscillations. Keep the four cables visually
+  taut and connected for the complete animation cycle.
+
+
+8. INTERACTIVE COMPONENT INSPECTION
+--------------------------------------------------------------------------------
+
+  The component index is defined in the INSPECTION_PARTS array near the top of
+  the application code. It currently contains nine records:
+
+    ID           Displayed part / system
+    ------------ -----------------------------------------------
+    head         HC-2000/BC SHADE EYE
+    core         CC-2000 ORBITER
+    arms         AC-2000 TOOL ARM
+    legs         2C-2000 CRAWLER
+    right-arm    RF-025 SCUDDER
+    left-arm     PB-033M ASHMEAD
+    right-back   SONGBIRDS
+    left-back    BML-G1/P32DUO-03
+    internal     BST-G1/P10 booster, FC-006 ABBOT FCS,
+                 DF-GN-02 LING-TAI generator
+
+  Each record contains:
+    - id: stable identifier used by UI and hotspot mapping
+    - n: displayed two-digit marker number
+    - label: short component name in the index
+    - system: technical slot / system heading
+    - part: part designation
+    - maker: manufacturer attribution
+    - category: component category
+    - a: normalized local-space anchor ratio [x, y, z]
+    - description: technical description
+    - intel: game/lore context
+    - facts: compact technical facts / selected statistics
+    - note: caveat, source context, or extra explanation
+
+  UI behavior:
+    - renderComponentIndex() creates sidebar buttons from INSPECTION_PARTS.
+    - createInspectionAnchors(bounds) converts normalized anchor ratios into
+      local-space coordinates within the normalized model bounding box.
+    - The function creates numbered DOM buttons in #hotspot-layer.
+    - updateInspectionHotspots() projects each local anchor through mechGroup
+      and camera into screen coordinates.
+    - selectInspectionPart(id) updates the active list button, marker, index,
+      and information panel.
+    - A user can select a part from the index or click its projected marker.
+    - pickInspectionPart(x, y) raycasts against the model, then selects the
+      nearest configured inspection anchor to the ray hit point.
+
+  Important limitation:
+    Inspection anchors are currently heuristic points derived from normalized
+    bounding-box ratios. They are NOT yet attached to exact GLB mesh nodes,
+    material groups, or named part objects. Clicking model geometry identifies
+    the nearest configured anchor, which is an approximation.
+
+    The actual GLB hierarchy has not yet been inspected and mapped to all nine
+    semantic components. Hotspot placement must be visually calibrated against
+    the real model in a browser. If the GLB contains useful node names or
+    separate meshes, a future improvement should map the inspection points to
+    actual nodes and use those nodes' world transforms / bounding boxes.
+
+  The "internal" system is not a distinct visible external mesh component. It
+  represents internal performance systems as a grouped dossier entry.
+
+
+9. CURRENT NIGHTFALL DATA & CONTENT GUIDANCE
+--------------------------------------------------------------------------------
+
+  The current UI content is written for NIGHTFALL and its Armored Core VI
+  assembly / lore context. It includes the C-2000 frame family, selected
+  frame part designations, weapon names, and internal systems.
+
+  Current records include:
+    Head:
+      HC-2000/BC SHADE EYE
+      Reuse and Development (RaD)
+
+    Core:
+      CC-2000 ORBITER
+      Reuse and Development (RaD)
+
+    Arms:
+      AC-2000 TOOL ARM
+      Reuse and Development (RaD)
+
+    Legs:
+      2C-2000 CRAWLER
+      Reuse and Development (RaD)
+
+    Right arm:
+      RF-025 SCUDDER
+      Balam Industries
+
+    Left arm:
+      PB-033M ASHMEAD
+      Balam Industries
+
+    Right back:
+      SONGBIRDS
+      Melinite
+
+    Left back:
+      BML-G1/P32DUO-03
+      Furlong Dynamics
+
+    Internal systems:
+      BST-G1/P10 booster
+      FC-006 ABBOT fire-control system
+      DF-GN-02 LING-TAI generator
+
+  Content integrity rules for future contributors:
+    - Distinguish confirmed in-game information from interpretation or flavor.
+    - Do not invent performance statistics, fictional part abilities, or canon.
+    - Weapon and frame balance values can change between game regulations.
+    - The currently displayed SHADE EYE statistics are explicitly labeled as
+      Regulation 1.09.1 in the UI data. Verify them before changing or
+      presenting them as current.
+    - For every numeric game statistic, include the game regulation / patch
+      context and verify the value from reliable sources before updating.
+    - Do not present stylized hangar labels or UI classification tags as
+      official canon unless verified.
+    - The current component anchor ratios are presentation coordinates, not
+      factual coordinates from the game.
+    - Clearly separate technical function, gameplay role, and narrative lore.
+    - Lore context may contain story spoilers; retain the warning in the UI.
+
+  If adding a component:
+    1. Verify its actual NIGHTFALL loadout designation.
+    2. Verify manufacturer and equipment slot.
+    3. Add a stable unique id and a two-digit display number.
+    4. Write a concise technical description.
+    5. Add a clearly grounded game / lore insight.
+    6. Add facts only where reliable values exist.
+    7. Calibrate its anchor against the loaded GLB.
+    8. Confirm list, hotspot, selected state, and detail panel all work.
+
+
+10. CAMERA, POINTER & VIEWPORT CONTROLS
+--------------------------------------------------------------------------------
+
+  Current interaction:
+    - Left mouse drag: orbit around the inspection target.
+    - Middle mouse drag: pan / shift the viewing target.
+    - Right mouse drag: also pans; context menu is suppressed on the canvas.
+    - Mouse wheel: zoom.
+    - One-finger touch drag: orbit.
+    - A short left click on the canvas: selects the nearest model inspection
+      anchor through raycasting.
+    - Clicking a numbered hotspot or component list entry selects that part.
+    - Recenter View restores the initial camera parameters.
+    - Collapse Panel hides the left dossier.
+    - The persistent open-panel icon restores it.
+    - Fullscreen is available through the panel and floating top-right control.
+
+  Camera state:
+    - theta: azimuth
+    - phi: polar angle
+    - radius: camera distance
+    - target: camera look-at point
+
+  Current camera defaults:
+    - theta = PI * 0.25
+    - phi = PI * 0.39
+    - radius = 19
+    - target = (1.4, 5.05, -0.4)
+
+  Limits:
+    - phi is clamped away from the poles.
+    - Pan target X: approximately -3.4 to 3.4.
+    - Pan target Y: approximately 2.4 to 7.7.
+    - Pan target Z: approximately -2.8 to 2.5.
+    - Camera radius: approximately 11.5 to 34.
+
+  Keep the mech discoverable and framed. Do not allow the pan / zoom limits to
+  send the object irretrievably off-screen. Recenter View must remain reliable
+  after model replacement, camera rotation, pan, and zoom.
+
+  If changing pointer handling, preserve the distinction between a click and a
+  drag so rotating the camera does not accidentally select a component.
+
+
+11. USER INTERFACE / VISUAL DESIGN
+--------------------------------------------------------------------------------
+
+  The UI is an in-universe inspection dossier, not the old control dashboard.
+
+  Main regions:
+    - Header: RAVEN / NIGHTFALL and hangar status.
+    - Identity card: NIGHTFALL name and small dossier / frame labels.
+    - Component Index: nine compact selectable entries.
+    - Selected Component: technical record, facts, and GAME INTEL.
+    - Suspension System: sway / hold-position control.
+    - Utility controls: Replace GLB, Recenter View, Collapse Panel, Fullscreen.
+    - Floating numbered hotspots overlay the canvas.
+
+  Visual system:
+    - Dark charcoal / graphite base.
+    - Muted gray-green secondary surfaces.
+    - Warm amber / copper highlight.
+    - Restrained green status light.
+    - Fine borders, compact typography, clear hierarchy.
+    - No large saturated gradients, oversized game-style buttons, or clutter.
+
+  Keep the UI responsive:
+    - Sidebar has a narrow-screen layout.
+    - Hotspots must remain clickable and not obscure each other unnecessarily.
+    - Selected component text must remain readable and scroll within the panel.
+    - Fullscreen hides the sidebar and watermark, but the fullscreen exit control
+      remains available.
+
+
+12. KNOWN LIMITATIONS & OPEN TECHNICAL WORK
+--------------------------------------------------------------------------------
+
+  Confirmed limitations:
+    1. No browser visual QA has yet been completed after the latest hangar
+       implementation with the owner's exact raven.glb file.
+    2. Inspection anchors are based on normalized bounding-box ratios rather
+       than actual GLB part nodes. Their screen positions need visual review.
+    3. Four suspension clamp / cable attachment points are also based on
+       normalized bounding-box ratios. Their exact physical attachment points
+       need calibration against the actual model.
+    4. The pickInspectionPart() method raycasts the model but maps the hit to
+       the nearest configured anchor; it does not yet identify the actual
+       semantic mesh or subassembly under the pointer.
+    5. Some values / in-game details in INSPECTION_PARTS require source and
+       regulation verification before being treated as authoritative.
+    6. The placeholder AC is only a basic fallback. It is not a substitute
+       for the supplied NIGHTFALL model.
+    7. The project keeps some legacy helper code from earlier iterations
+       inside index.html. Do not assume that every remaining function or
+       variable related to flames, time-of-day lighting, or dash controls is
+       part of the active UI or active render pipeline.
+
+  Suggested next development tasks (priority order):
+    P0 — Visual validation with the real GLB:
+      - Load raven.glb in Chrome / Edge.
+      - Check framing and the visual relationship between mech, hangar, crane,
+        cables, and four clamps.
+      - Confirm the model is not clipped or too dark.
+      - Confirm the hangar has a convincing depth / scale and does not compete
+        with the AC.
+      - Adjust camera and suspension heights if needed.
+
+    P1 — Correct model-aware inspection anchors:
+      - Inspect the GLB node hierarchy (names, types, mesh counts, bounds).
+      - Identify actual head, core, arms, legs, hand weapons, shoulder weapons,
+        and internal-system representative nodes where possible.
+      - Prefer named nodes / actual mesh groups over fixed bounding ratios.
+      - Build a robust fallback when a particular GLB has merged meshes.
+      - Keep normalized anchor mapping as a fallback, not as the primary path.
+      - Verify all nine hotspots from multiple camera angles.
+
+    P2 — Calibrate the suspension rig:
+      - Place each clamp at believable load-bearing hardpoints.
+      - Ensure the sling spreader, hoist, cables, clamps, and AC all meet.
+      - Cables must remain attached during the tiny sway animation.
+      - Check cable depth, visibility, thickness, and shadows.
+      - Avoid placing clamps on weapon barrels, antennae, or fragile protrusions.
+
+    P3 — Improve direct selection:
+      - Where the GLB has separate meshes, map mesh / ancestor node references
+        to part IDs and select the actual component under the cursor.
+      - Highlight the selected part subtly (outline, emissive accent, or
+        restrained callout) without permanently changing original materials.
+      - Ensure click selection and hotspot selection remain synchronized.
+
+    P4 — Content quality:
+      - Verify all frame and weapon designations for the exact NIGHTFALL loadout.
+      - Verify manufacturers, internal systems, part statistics, and regulation.
+      - Add trustworthy sources or in-game references to technical records.
+      - Separate canon, game mechanics, build interpretation, and narrative intel.
+
+    P5 — Professional polish:
+      - Add subtle camera focus / selection feedback.
+      - Consider a small component callout line between hotspot and model.
+      - Improve workshop material variation and local shadowing.
+      - Optimize render cost without reducing model clarity.
+      - Add keyboard accessibility and clear focus states to all UI controls.
+
+  These are candidate tasks, not claims that the work has already been done.
+
+
+13. DEBUGGING & VALIDATION CHECKLIST
+--------------------------------------------------------------------------------
+
+  Before committing changes:
+    [ ] Confirm all new source code, comments, and UI strings are English.
+    [ ] Confirm there are no duplicate HTML element IDs.
+    [ ] Confirm getElementById references resolve to existing UI elements.
+    [ ] Parse / syntax-check the full application script.
+    [ ] Confirm the Three.js and GLTFLoader script blocks are unchanged unless
+        the change specifically requires touching them.
+    [ ] Confirm there are no new external script or stylesheet dependencies.
+    [ ] Confirm the model still loads both from file:// and HTTP(S).
+    [ ] Confirm failed model loads show a useful error and do not break the UI.
+    [ ] Confirm model replacement clears old clamps, cables, hotspots, and data.
+    [ ] Confirm camera orbit, pan, zoom, click selection, and recenter work.
+    [ ] Confirm suspension motion can be held and resumed.
+    [ ] Confirm all nine component entries can be selected.
+    [ ] Confirm hotpots are visible, correctly placed, and clickable.
+    [ ] Confirm the scene remains usable at desktop and narrow viewport sizes.
+
+  Recommended browser QA:
+    - Chrome or Edge.
+    - Open DevTools Console and check for JavaScript / WebGL errors.
+    - Confirm the model load status changes to NIGHTFALL ONLINE.
+    - Click each list item and its corresponding 3D hotspot.
+    - Rotate to front, rear, both sides, and elevated viewing angles.
+    - Test replacement with the same GLB and another GLB if supported.
+    - Test fullscreen enter / exit.
+    - Test resize and narrow viewport behavior.
+
+  A successful JavaScript syntax check does not prove correct 3D placement or
+  professional visual quality. Always distinguish static checks from an
+  actual browser render / interaction test.
+
+
+14. SAFE DEVELOPMENT WORKFLOW
+--------------------------------------------------------------------------------
+
+  Before editing:
+    1. Fetch the latest main branch and current file contents.
+    2. Read this PROJECT_INFO.txt and relevant parts of index.html.
+    3. Understand the existing scene graph and coordinate assumptions.
+    4. Make the smallest cohesive change that improves the current concept.
+    5. Preserve the single-file offline runtime.
+
+  When working directly through GitHub:
+    - Use the GitHub repository connector / API tools.
+    - Fetch the current file and its current blob SHA before update.
+    - Update only the intended files.
+    - Do not overwrite a newer branch head with a stale copy.
+    - Verify the committed file and resulting commit after each write.
+    - Update README.md when user-facing behavior or controls materially change.
+    - Update this file when architecture, data structure, or known limitations
+      materially change.
+
+  When working locally:
+    - Pull latest main before making edits.
+    - Preserve raven.glb.
+    - Do not commit generated build output or temporary files.
+    - Keep the runtime dependency-free and self-contained.
+
+  The owner prefers changes committed directly to the GitHub repository when
+  GitHub access is available. After a commit, provide the exact commit URL and
+  the local git pull command.
+
+  Local Windows sync command:
+    cd "C:\Users\phint\Documents\WebGL Render"
+    git pull origin main
+
+
+15. CURRENT BASELINE
+--------------------------------------------------------------------------------
+
+  Current concept:
+    NIGHTFALL in an industrial maintenance hangar, suspended from a small
+    overhead gantry crane, with nine interactive component inspection records.
+
+  Current main implementation:
+    index.html
+
+  Model asset:
+    raven.glb
+
+  Libraries:
+    Three.js r128 (inlined)
+    GLTFLoader r128 (inlined)
+
+  Runtime:
+    HTML + CSS + vanilla JavaScript + WebGL
+    No build step, no separate JavaScript files, no backend.
+
+  Previous implementation to treat as obsolete:
+    - Free-flight mountain / star backdrop.
+    - Dash animation and forward lean.
+    - Procedural thruster flames.
+    - Time-of-day sunlight slider.
+    - Play / Pause / Restart controls.
+
+  Current intended interaction:
+    - Inspect components.
+    - Read technical and in-game information.
+    - Orbit / pan / zoom around NIGHTFALL.
+    - Hold or resume a subtle suspended sway.
+    - Recenter the view.
+    - Replace the GLB if needed.
 
 ================================================================================
-END
+END OF PROJECT HANDOVER
+================================================================================
