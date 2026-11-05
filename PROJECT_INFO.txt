@@ -44,13 +44,14 @@ FEATURES
   - Local GLB file selection for direct file:// use.
   - Automatic adjacent GLB loading when hosted over HTTP(S).
   - Procedural placeholder mech used if the model cannot be loaded.
-  - Dash animation with a forward lean; exhaust effects attach only to clearly named nozzle/thruster nodes.
-  - Play, pause, and restart controls.
-  - Collapsible sidebar and fullscreen mode.
-  - Adjustable time-of-day lighting from 0 to 24 hours.
+  - Industrial maintenance hangar with concrete floor, corrugated walls, roof trusses, service benches, tool cabinets, task lights, and floating dust.
+  - NIGHTFALL suspended beneath a workshop gantry crane by a four-point sling.
+  - Nine clickable inspection systems with technical records and Armored Core VI game intel.
+  - Component selection through both 3D hotspots and the component index.
+  - Optional low-frequency suspension sway with a hold-position control.
+  - Collapsible dossier panel and fullscreen inspection mode.
   - Orbit controls: left-drag to rotate, middle-mouse drag to pan within limits, wheel to zoom.
   - Touch support with one-finger rotation.
-  - Layered atmospheric mountain silhouettes, soft star/dust particles, and no visible ground plane or grid.
   - On-screen author watermark.
 
 MODEL CONFIGURATION
