@@ -1,6 +1,6 @@
 ================================================================================
 PROJECT HANDOVER & TECHNICAL REFERENCE
-PROJECT: TdoT-WebGL — ARMored Core VI: NIGHTFALL Inspection Viewer
+PROJECT: TdoT-WebGL — ARMORED CORE VI: NIGHTFALL Inspection Viewer
 ================================================================================
 
 DOCUMENT PURPOSE
@@ -626,7 +626,7 @@ DOCUMENT PURPOSE
     [ ] Confirm camera orbit, pan, zoom, click selection, and recenter work.
     [ ] Confirm suspension motion can be held and resumed.
     [ ] Confirm all nine component entries can be selected.
-    [ ] Confirm hotpots are visible, correctly placed, and clickable.
+    [ ] Confirm hotspots are visible, correctly placed, and clickable.
     [ ] Confirm the scene remains usable at desktop and narrow viewport sizes.
 
   Recommended browser QA:
