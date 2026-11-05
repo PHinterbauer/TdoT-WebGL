@@ -3870,7 +3870,7 @@ body.sidebar-collapsed .side-btn{display:flex}body.fullscreen #sidebar,body.full
   let scene,camera,renderer,mechGroup,bodyMesh,headMesh,thrusterGroup;
   let thrusterEffects=[],dustPoints=null,dustPositions=null,dustVelocities=[];
   let hemiLight,ambientLight,hangarRoot=null,craneAssembly=null;
-  let suspensionCables=[],suspensionBaseY=5.1,inspectionAnchors={},hotspotElements={},inspectionBounds=null;
+  let suspensionCables=[],suspensionSpreader=null,suspensionBaseY=5.1,inspectionAnchors={},hotspotElements={},inspectionBounds=null;
   const raycaster=new THREE.Raycaster(),pickPointer=new THREE.Vector2();
   let clock=new THREE.Clock();
 
@@ -3974,11 +3974,15 @@ body.sidebar-collapsed .side-btn{display:flex}body.fullscreen #sidebar,body.full
     suspensionCables.push({mesh:mesh,start:start.clone(),end:end.clone()});
   }
   function updateSuspensionRig(){
-    if(!mechGroup||!craneAssembly)return;const up=new THREE.Vector3(0,1,0);
+    if(!mechGroup||!suspensionSpreader)return;
+    const up=new THREE.Vector3(0,1,0);
     suspensionCables.forEach(function(c){
-      const start=craneAssembly.localToWorld(c.start.clone()),end=mechGroup.localToWorld(c.end.clone());
+      const start=suspensionSpreader.localToWorld(c.start.clone());
+      const end=mechGroup.localToWorld(c.end.clone());
       const dir=new THREE.Vector3().subVectors(end,start),len=dir.length();
-      c.mesh.position.copy(start).add(end).multiplyScalar(.5);c.mesh.quaternion.setFromUnitVectors(up,dir.normalize());c.mesh.scale.set(1,len,1);
+      c.mesh.position.copy(start).add(end).multiplyScalar(.5);
+      c.mesh.quaternion.setFromUnitVectors(up,dir.normalize());
+      c.mesh.scale.set(1,len,1);
     });
   }
   function createSuspensionRig(bounds){
@@ -3986,25 +3990,48 @@ body.sidebar-collapsed .side-btn{display:flex}body.fullscreen #sidebar,body.full
     const clampMat=new THREE.MeshStandardMaterial({color:0x59605b,metalness:.72,roughness:.38});
     const safety=new THREE.MeshStandardMaterial({color:0xb77b3e,metalness:.38,roughness:.48});
     const size=bounds.getSize(new THREE.Vector3());
-    craneAssembly=new THREE.Group();hangarRoot.add(craneAssembly);
-    addHangarBox(craneAssembly,4.2,.16,.24,0,10.48,0,steel);
-    addHangarBox(craneAssembly,.34,.35,.38,-1.9,10.36,0,clampMat);addHangarBox(craneAssembly,.34,.35,.38,1.9,10.36,0,clampMat);
-    addHangarBox(craneAssembly,.16,.32,.3,0,10.28,0,safety);
-    const hoist=new THREE.Mesh(new THREE.CylinderGeometry(.045,.045,1,10),steel);hoist.position.set(0,11.2,0);hoist.scale.y=1.45;craneAssembly.add(hoist);
-    const hook=new THREE.Mesh(new THREE.TorusGeometry(.17,.035,8,20,Math.PI*1.5),steel);hook.position.set(0,10.55,0);hook.rotation.z=Math.PI;craneAssembly.add(hook);
+    suspensionSpreader=new THREE.Group();
+    suspensionSpreader.position.set(0,10.48,-.65);
+    hangarRoot.add(suspensionSpreader);
+    addHangarBox(suspensionSpreader,4.2,.16,.24,0,0,0,steel);
+    addHangarBox(suspensionSpreader,.34,.35,.38,-1.9,-.12,0,clampMat);
+    addHangarBox(suspensionSpreader,.34,.35,.38,1.9,-.12,0,clampMat);
+    addHangarBox(suspensionSpreader,.16,.32,.3,0,-.2,0,safety);
+    const hoist=new THREE.Mesh(new THREE.CylinderGeometry(.045,.045,1,10),steel);
+    hoist.position.set(0,.72,0);suspensionSpreader.add(hoist);
+    const hook=new THREE.Mesh(new THREE.TorusGeometry(.17,.035,8,20,Math.PI*1.5),steel);
+    hook.position.set(0,.08,0);hook.rotation.z=Math.PI;suspensionSpreader.add(hook);
     const points=[[.28,.80,.22,-1.72,-.15],[.72,.80,.22,1.72,-.15],[.28,.80,.78,-1.72,.15],[.72,.80,.78,1.72,.15]];
     const cableMat=new THREE.MeshStandardMaterial({color:0x9b9d91,metalness:.9,roughness:.28});
     points.forEach(function(p){
       const end=new THREE.Vector3(bounds.min.x+size.x*p[0],bounds.min.y+size.y*p[1],bounds.min.z+size.z*p[2]);
-      const start=new THREE.Vector3(p[3],10.42,p[4]);createDynamicCable(start,end,.025,cableMat);
+      const start=new THREE.Vector3(p[3],-.06,p[4]);
+      createDynamicCable(start,end,.025,cableMat);
       const clamp=new THREE.Group();clamp.position.copy(end);
-      addHangarBox(clamp,.36,.16,.38,0,0,0,clampMat);addHangarBox(clamp,.13,.19,.4,0,-.015,0,safety);mechGroup.add(clamp);
+      addHangarBox(clamp,.36,.16,.38,0,0,0,clampMat);
+      addHangarBox(clamp,.13,.19,.4,0,-.015,0,safety);
+      mechGroup.add(clamp);
     });
     updateSuspensionRig();
   }
   function disposeSuspensionRig(){
-    suspensionCables.forEach(function(c){if(c.mesh.parent)c.mesh.parent.remove(c.mesh);c.mesh.geometry.dispose();if(c.mesh.material)c.mesh.material.dispose();});
-    suspensionCables=[];craneAssembly=null;
+    suspensionCables.forEach(function(c){
+      if(c.mesh.parent)c.mesh.parent.remove(c.mesh);
+      c.mesh.geometry.dispose();
+      if(c.mesh.material)c.mesh.material.dispose();
+    });
+    suspensionCables=[];
+    if(suspensionSpreader&&suspensionSpreader.parent){
+      suspensionSpreader.parent.remove(suspensionSpreader);
+      suspensionSpreader.traverse(function(child){
+        if(child.geometry)child.geometry.dispose();
+        if(child.material){
+          if(Array.isArray(child.material))child.material.forEach(function(m){m.dispose();});
+          else child.material.dispose();
+        }
+      });
+    }
+    suspensionSpreader=null;
   }
 
   // --------------------------------------------------------------------------
