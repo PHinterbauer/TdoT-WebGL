@@ -17,6 +17,8 @@ TdoT-WebGL is a self-contained, offline-capable WebGL 3D renderer that brings an
 
 The scene presents NIGHTFALL from Armored Core VI: Fires of Rubicon inside a clean industrial maintenance hangar. The AC is suspended from a workshop gantry by a four-point sling, with a travelling overhead crane, corrugated walls, roof trusses, concrete floor, and a single wall-mounted American flag. Nine inspection systems can be selected from numbered 3D hotspots to open a technical dossier with frame, weapon, and in-game context. A subtle, optional suspension sway replaces the former dash animation.
 
+The sidebar identity card presents a concise, HTL-oriented NIGHTFALL profile with project name, platform, modular construction, sensorics, actuators, energy/drive system, payload, and technical inspection notes.
+
 The real Raven model is loaded from raven.glb (GLTF/GLB). Set CONFIG.modelPath = null in the inline configuration in index.html to use the procedurally generated placeholder. See Model Format below.
 
 ---
@@ -30,11 +32,12 @@ The real Raven model is loaded from raven.glb (GLTF/GLB). Set CONFIG.modelPath =
 | Collapsible Sidebar | UI panel collapses/expands for unobstructed fullscreen viewing. |
 | Fullscreen Mode | Toggle fullscreen via button; UI chrome hides automatically. |
 | Suspension Motion | A subtle low-frequency sway can be held or resumed from the inspection panel. |
-| Kinematic Controls | Arm pose rotates the calibrated arm joints and keeps the hand-weapon assemblies attached to the hand hierarchy; crane travel increases sway amplitude. |
+| Kinematic Controls | Crane travel increases the suspension sway amplitude while hand-weapon assemblies remain attached to the hand hierarchy. |
 | Thruster Calibration | Calibrate one thruster position with mirrored X, shared Y/Z, and RX/RY/RZ rotation controls; enlarged ignition effects use the exported values. |
 | Hotspot Visibility | Hide or restore all numbered inspection nodes from the sidebar. |
 | Hangar Detail | A restrained wall-mounted American flag adds identity without obstructing the open hangar end. |
 | Orbit Controls | Left-drag rotate, middle-mouse drag pan with limits, scroll-wheel zoom; touch-drag supported. |
+| Exploration Mode | Walk through the hangar in first-person view with WASD, mouse look, and collision against the robot, walls, and workshop objects. |
 | Workshop Environment | Concrete floor, industrial walls, roof trusses, gantry crane, and a clear open hangar end with a wall-mounted American flag. |
 | Model Lighting | Invisible model-following front, cool side, and warm rim lights keep the robot readable without adding floating workshop fixtures. |
 | Calibration Utilities | PIN-protected temporary calibration mode for model, markers, thrusters, workshop visibility, XYZ orientation lines, and the four sling endpoints. The PIN is `1818`. |
@@ -55,6 +58,7 @@ The real Raven model is loaded from raven.glb (GLTF/GLB). Set CONFIG.modelPath =
    - Collapse the panel or press fullscreen for an unobstructed inspection view.
    - Open "Mesh kalibrieren", enter PIN `1818`, and align the model, markers, thrusters, and crane endpoints; the workshop can be hidden and XYZ guides enabled during calibration.
    - Orbit the camera: left-drag to rotate, hold the middle mouse button to pan, and use the wheel to zoom.
+   - Click the highlighted "Erkundungsmodus starten" action to enter the hangar on foot. The mouse is locked for looking around; move with WASD, hold Shift to sprint, and press Escape to return.
 
 No build step, package manager, local server, or internet connection is required. When opened via file://, the browser does not let the page read raven.glb by pathname, so the user selects the file once through the built-in file picker. The app then reads the selected file locally with FileReader and parses it with the embedded GLTFLoader. When hosted on HTTP(S), raven.glb loads automatically from the same folder.
 
@@ -79,6 +83,7 @@ No build step, package manager, local server, or internet connection is required
 | Crane Travel | Move the crane slider to translate the suspended assembly and amplify its sway response. |
 | Thrusters | Ignite or shut down the calibrated mirrored thruster effects; ignition adds a subtle robot wobble. |
 | Node Visibility | Hide or restore all inspection nodes from the sidebar. |
+| Exploration Mode | Enter the first-person hangar view from the sidebar; pointer-locked mouse look, standard WASD movement, Shift sprint, collision boundaries, and Escape exit are used. |
 
 ---
 

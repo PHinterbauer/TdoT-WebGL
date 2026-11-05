@@ -141,6 +141,10 @@ DOCUMENT PURPOSE
   The sidebar's "Replace GLB" action opens the same local file picker so a
   different .glb can be loaded without refreshing the page.
 
+  The sidebar identity card presents a concise HTL-oriented NIGHTFALL dossier
+  with project name, platform, modular construction, sensorics, actuators,
+  energy/drive system, payload, and technical inspection notes.
+
   Temporary calibration mode:
     - "Mesh kalibrieren" opens a non-show calibration panel.
     - Opening the panel requires the calibration PIN 1818.
@@ -182,6 +186,8 @@ DOCUMENT PURPOSE
       default is held position
     - selectedPart: current component ID, null until a 3D marker is clicked
     - isDragging / dragMoved / dragMode / lastMouse: pointer interaction state
+    - explorationMode / explorationPosition / explorationYaw / explorationPitch:
+      first-person hangar navigation state
 
   Important scene references:
     - scene, camera, renderer
@@ -194,6 +200,7 @@ DOCUMENT PURPOSE
     - inspectionAnchors: local-space component anchor positions
     - hotspotElements: DOM hotspot buttons corresponding to the component data
     - raycaster / pickPointer: model selection support
+    - collisionMeshes: procedural hangar collision sources for exploration mode
 
   The application logic is wrapped in an IIFE:
     (function () {
@@ -224,6 +231,17 @@ DOCUMENT PURPOSE
     - setupPointerControls()
     - updateCamera()
     - animate()
+
+  Exploration mode:
+    - "Erkundungsmodus" hides the sidebar and enters a first-person camera at
+      ground level.
+    - WASD moves relative to the camera heading; mouse movement changes heading
+      and pitch through pointer lock; Shift temporarily increases movement
+      speed; Escape restores the orbit view.
+    - Procedural workshop boxes are registered as collision sources when built.
+      The current robot bounds are tested as a dynamic collision source so
+      replacement GLB files are also blocked. An invisible boundary closes the
+      open front of the hangar so the player cannot leave the scene.
 
   The app boot sequence calls init() and setupPointerControls(). The render
   loop updates the animation, dust, suspension cables, camera, hotspot
@@ -558,7 +576,6 @@ DOCUMENT PURPOSE
     - Thruster calibration defaults to the current mirrored placement
       (X 0.35, Y 3.62, Z -2.66, RX 130 degrees) and uses depth-tested
       rendering so exhaust is occluded by the model correctly.
-    - Arm pose now includes recognized hand and shoulder weapon assemblies.
       Leg pose bends both sides on their local Z axis.
     - Thruster calibration uses one mirrored X position plus shared Y/Z
       coordinates and shared RX/RY/RZ rotation controls; the calibration

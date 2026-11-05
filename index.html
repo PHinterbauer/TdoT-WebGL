@@ -59,6 +59,18 @@ input[type=range] { width: 100%; accent-color: #e86b75; cursor: pointer; }
   backdrop-filter: blur(4px);
 }
 .side-btn:hover { background: rgba(30,30,40,0.98); border-color: #6b7280; }
+body.exploration-mode #sidebar, body.exploration-mode #hotspot-layer,
+body.exploration-mode #watermark, body.exploration-mode .fs-btn { display: none !important; }
+#exploration-hint {
+  display: none; position: fixed; top: 18px; left: 18px; z-index: 120;
+  padding: 9px 11px; border-left: 2px solid #d7a15c;
+  background: rgba(10,15,14,.78); color: #f0bd76;
+  font: 700 10px/1.35 Consolas, monospace; letter-spacing: .12em;
+  pointer-events: none; text-shadow: 0 1px 5px rgba(0,0,0,.8);
+}
+#exploration-hint span { color: #c5cdc5; font-size: 9px; }
+body.exploration-mode #exploration-hint { display: block; }
+body.exploration-mode #canvas-container canvas { cursor: none; }
 body.sidebar-collapsed .side-btn { display: flex; }
 body.fullscreen #sidebar, body.fullscreen #watermark { display: none !important; }
 body.fullscreen .side-btn { display: none !important; }
@@ -107,8 +119,8 @@ body.fullscreen .fs-btn { display: flex !important; }
 .hotspot:hover,.hotspot.active{transform:scale(1.14);background:#b77b3c;box-shadow:0 0 0 6px rgba(215,161,92,.17),0 0 18px rgba(215,161,92,.38)}
 .hotspot:hover:after,.hotspot.active:after{opacity:1}
 .hotspot.active:after{display:none}
-#sidebar{top:14px;left:14px;bottom:14px;width:370px;max-width:min(92vw,410px);display:flex;flex-direction:column;padding:20px 19px 15px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(215,161,92,.48) transparent;background:linear-gradient(155deg,rgba(18,24,24,.985),rgba(10,14,15,.975));border:1px solid rgba(190,195,178,.2);border-radius:9px;box-shadow:0 18px 65px rgba(0,0,0,.48);backdrop-filter:blur(15px)}
-#sidebar::-webkit-scrollbar{width:5px}
+#sidebar{top:14px;left:14px;bottom:14px;width:370px;max-width:min(92vw,410px);height:calc(100vh - 28px);min-height:0;display:flex;flex-direction:column;padding:20px 19px 15px;overflow-x:hidden;overflow-y:scroll;overscroll-behavior:contain;scrollbar-gutter:stable;scrollbar-width:auto;scrollbar-color:rgba(215,161,92,.65) rgba(7,11,10,.35);background:linear-gradient(155deg,rgba(18,24,24,.985),rgba(10,14,15,.975));border:1px solid rgba(190,195,178,.2);border-radius:9px;box-shadow:0 18px 65px rgba(0,0,0,.48);backdrop-filter:blur(15px)}
+#sidebar::-webkit-scrollbar{width:10px}
 #sidebar::-webkit-scrollbar-track{background:transparent}
 #sidebar::-webkit-scrollbar-thumb{border-radius:8px;background:rgba(215,161,92,.48)}
 #sidebar::-webkit-scrollbar-thumb:hover{background:rgba(240,189,118,.76)}
@@ -119,18 +131,29 @@ body.fullscreen .fs-btn { display: flex !important; }
 .sidebar-header h1 span{color:#a9b0aa;font-weight:500}
 .status{margin-left:auto;padding:5px 7px;border:1px solid rgba(141,185,160,.25);border-radius:3px;color:var(--green);background:rgba(72,116,88,.1);font:700 8px/1.2 Consolas,monospace;letter-spacing:.11em;text-transform:uppercase}
 .status[data-state=loading]{color:#e9bd76}.status[data-state=error]{color:#e78d7d}
-.identity-card{position:relative;margin:15px 0 18px;padding:13px;overflow:hidden;border:1px solid rgba(215,161,92,.28);border-radius:5px;background:linear-gradient(120deg,rgba(71,55,36,.32),rgba(21,27,26,.72))}
+.identity-card{position:relative;flex:0 0 auto;margin:15px 0 18px;padding:13px;overflow:hidden;border:1px solid rgba(215,161,92,.28);border-radius:5px;background:linear-gradient(120deg,rgba(71,55,36,.32),rgba(21,27,26,.72))}
 .identity-card:before{content:"";position:absolute;top:0;bottom:0;left:0;width:3px;background:var(--accent)}
-.identity-top{display:flex;justify-content:space-between;color:var(--bright);font:700 9px/1.3 Consolas,monospace;letter-spacing:.13em}
+.identity-top{display:flex;flex-wrap:wrap;gap:4px 12px;justify-content:space-between;color:var(--bright);font:700 9px/1.3 Consolas,monospace;letter-spacing:.13em}
 .identity-top span{color:#a0a99f}.identity-name{margin-top:8px;font-size:21px;font-weight:800;letter-spacing:.1em;color:#f1eee6}
+.identity-nine{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin-top:11px}
+.identity-nine div{min-width:0;padding:6px 5px;background:rgba(38,47,44,.5);border:1px solid rgba(173,186,178,.12);border-radius:3px}
+.identity-nine b{display:block;color:#e4c28e;font:700 8px/1.15 Consolas,monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.identity-nine small{display:block;margin-top:3px;color:#9aa59d;font-size:8px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .identity-card p{margin-top:8px;color:#aeb5ad;font-size:11px;line-height:1.5}
 .identity-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid rgba(215,161,92,.16)}
 .identity-stats b{display:block;color:#e9e8df;font:700 12px/1.2 Consolas,monospace}
 .identity-stats small{display:block;margin-top:4px;color:#808c87;font:700 8px/1.2 Inter,sans-serif;letter-spacing:.12em}
+.identity-dossier{margin-top:12px;padding-top:10px;border-top:1px solid rgba(215,161,92,.16)}
+.identity-dossier h3{margin-bottom:6px;color:#e5c084;font:800 8px/1.2 Inter,sans-serif;letter-spacing:.14em}
+.identity-dossier p{margin-top:6px;color:#aeb8af;font-size:10px;line-height:1.48}
 .telemetry{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px;padding-top:10px;border-top:1px solid rgba(215,161,92,.16)}
 .telemetry-item{min-width:0}.telemetry-item b{display:block;color:#e8c28d;font:700 10px/1.2 Consolas,monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.telemetry-item small{display:block;margin-top:4px;color:#808c87;font:700 7px/1.2 Inter,sans-serif;letter-spacing:.08em}
+.explore-action{display:flex;flex-direction:column;gap:6px;margin-top:12px;padding:10px;border:1px solid rgba(215,161,92,.42);border-radius:5px;background:linear-gradient(120deg,rgba(111,77,42,.28),rgba(38,47,44,.38))}
+.explore-action .btn{flex:none;width:100%;padding:11px 12px;color:#fff2df;background:linear-gradient(105deg,#895b32,#b77b3e);border-color:#e2aa66;box-shadow:0 0 16px rgba(215,161,92,.2)}
+.explore-action .btn:hover{background:linear-gradient(105deg,#a66b38,#d0944e);border-color:#ffd08c;box-shadow:0 0 20px rgba(215,161,92,.35)}
+.explore-action small{color:#d1b78e;font:700 8px/1.35 Consolas,monospace;letter-spacing:.08em;text-align:center}
 @media (max-width:900px){#sidebar{width:340px;padding-left:16px;padding-right:16px}}
-.section{margin-bottom:17px}.section-heading{display:flex;justify-content:space-between;margin-bottom:9px}
+.section{flex:0 0 auto;margin-bottom:17px}.section-heading{display:flex;justify-content:space-between;margin-bottom:9px}
 .section-heading h2{color:#aab2aa;font:800 9px/1.2 Inter,sans-serif;letter-spacing:.17em}
 .section-heading span{color:#68736e;font:700 9px/1.2 Consolas,monospace}
 .component-list{display:grid;grid-template-columns:1fr 1fr;gap:6px}
@@ -190,26 +213,47 @@ body.sidebar-collapsed .side-btn{display:flex}body.fullscreen #sidebar,body.full
 .calibration-row{display:grid;grid-template-columns:32px 1fr 52px;align-items:center;gap:7px;margin-top:7px}.calibration-row label{color:#9eaaa0;font:700 9px Consolas,monospace}.calibration-row input{width:100%;accent-color:var(--accent)}.calibration-row output{color:var(--bright);font:9px Consolas,monospace;text-align:right}
 #calibration-export{width:100%;min-height:84px;margin-top:8px;padding:8px;color:#bdc8bd;background:#08100e;border:1px solid rgba(173,186,178,.2);font:9px/1.35 Consolas,monospace;resize:vertical}
 .calibration-tools{display:flex;gap:7px;margin-top:8px}.calibration-tools .btn{flex:1}
-@media(max-width:680px){#sidebar{top:8px;left:8px;bottom:8px;width:min(355px,calc(100vw - 16px));padding:16px 14px 12px}.identity-card{margin:10px 0 13px}.section{margin-bottom:13px}.hotspot{width:26px;height:26px;margin:-13px}.fs-btn{top:10px;right:10px}.side-btn{top:10px;left:10px}}
+@media(max-width:680px){#sidebar{top:8px;left:8px;bottom:8px;width:min(355px,calc(100vw - 16px));height:calc(100vh - 16px);padding:16px 14px 12px}.identity-card{margin:10px 0 13px}.section{margin-bottom:13px}.hotspot{width:26px;height:26px;margin:-13px}.fs-btn{top:10px;right:10px}.side-btn{top:10px;left:10px}}
 </style>
 </head>
 <body>
 <div id="canvas-container"></div><div id="hotspot-layer" aria-label="Interactive NIGHTFALL inspection points"></div>
+<div id="exploration-hint">ERKUNDUNGSMODUS<br><span>ESC ZUM BEENDEN</span></div>
 <aside id="sidebar">
   <header class="sidebar-header"><div><div class="eyebrow">RUBICON // MOBILE WERKSTATT</div><h1>RAVEN <span>/ NIGHTFALL</span></h1></div><div class="status" id="anim-status" data-state="success">HANGAR 03</div></header>
   <section class="identity-card">
     <div class="identity-top"><span>AC // 51-016 GA</span><span>BAUREIHE</span></div><div class="identity-name">NIGHTFALL</div>
+    <div class="identity-nine">
+      <div><b>PROJEKTNAME</b><small>NIGHTFALL</small></div>
+      <div><b>PLATTFORM</b><small>C-2000 / AC</small></div>
+      <div><b>KONSTRUKTION</b><small>RaD // MODULAR</small></div>
+      <div><b>BEDIENUNG</b><small>PILOT // RAVEN</small></div>
+      <div><b>BAUART</b><small>LEICHTER ZWEIBEINER</small></div>
+      <div><b>SENSORIK</b><small>SHADE EYE</small></div>
+      <div><b>AKTUATOREN</b><small>CRAWLER-GELENKE</small></div>
+      <div><b>ENERGIE / ANTRIEB</b><small>BOOSTER // GENERATOR</small></div>
+      <div><b>NUTZLAST</b><small>4 WAFFENMODULE</small></div>
+    </div>
     <p>Armored-Core-Einheit des ursprünglichen Raven. Für die technische Systemprüfung in der Wartungsbucht aufgehängt.</p>
     <div class="identity-stats"><div><b>γ-3</b><small>ARENA-KLASSIFIKATION</small></div><div><b>C-2000</b><small>RAHMENHERKUNFT</small></div></div>
+    <div class="identity-dossier">
+      <h3>BAUREIHEN-DOSSIER // NIGHTFALL</h3>
+      <p>Der ausgestellte AC eignet sich als technisches Anschauungsobjekt für modulare Konstruktion: Rahmen, Sensorik, Aktuatoren, Energieversorgung und Nutzlast sind als getrennte Baugruppen erkennbar.</p>
+      <h3 style="margin-top:11px">EINSATZPROFIL</h3>
+      <p>Die Kombination aus SCUDDER, ASHMEAD und den beiden Rückeneinheiten zeigt, wie Tragstruktur, Antrieb, Schnittstellen und Nutzlast bei einem mobilen System zusammenspielen. Die Bauteile lassen sich dabei getrennt inspizieren und technisch dokumentieren.</p>
+      <h3 style="margin-top:11px">RAVEN // ARCHIVNOTIZ</h3>
+      <p>Die Bezeichnung Raven ist hier keine bloße Lackierung: NIGHTFALL ist mit der Legende des unabhängigen Söldners verbunden, dessen Name auf Rubicon weiterlebt. Die Ausstellung dokumentiert deshalb nicht nur Bauteile, sondern auch die Spur einer früheren Generation von AC-Piloten.</p>
+    </div>
     <div class="telemetry"><div class="telemetry-item"><b>09</b><small>INSPEKTIONSMARKER</small></div><div class="telemetry-item"><b>GLB</b><small>MODELLPIPELINE</small></div><div class="telemetry-item"><b>RT</b><small>LIVE-TELEMETRIE</small></div></div>
   </section>
   <section class="section"><div class="section-heading"><h2>AUFHÄNGUNGSSYSTEM</h2><span>PORTALKRAN 03</span></div>
     <div class="motion-panel"><div class="motion-copy"><span class="motion-led"></span><div><b>Niederfrequente Pendelbewegung</b><small>LAST GESICHERT // 4-PUNKT-ANSCHLAG</small></div></div><button id="btn-motion" class="btn active" type="button">Pendelbewegung starten</button></div>
-    <div class="control-panel"><div class="control-row"><label for="arm-pose">Armwinkel</label><input id="arm-pose" type="range" min="-100" max="100" value="0" step="1"><output id="arm-pose-value">0°</output></div><div class="control-row"><label for="crane-travel">Kranfahrt</label><input id="crane-travel" type="range" min="-100" max="100" value="0" step="1"><output id="crane-travel-value">0%</output></div><button id="btn-thrusters" class="btn" type="button">Triebwerke zünden</button><button id="btn-reset-controls" class="btn" type="button">Alle Werte zurücksetzen</button></div>
+    <div class="control-panel"><div class="control-row"><label for="crane-travel">Kranfahrt</label><input id="crane-travel" type="range" min="-100" max="100" value="0" step="1"><output id="crane-travel-value">0%</output></div><button id="btn-thrusters" class="btn" type="button">Triebwerke zünden</button><button id="btn-reset-controls" class="btn" type="button">Alle Werte zurücksetzen</button></div>
     <p class="hint">Linke Maustaste: Ansicht drehen. Mittlere Maustaste: verschieben. Mausrad: zoomen.</p>
   </section>
   <div class="actions"><button id="btn-load-model" class="btn" type="button">GLB ersetzen</button><button id="btn-recenter" class="btn" type="button">Ansicht zentrieren</button></div>
   <div class="actions"><button id="btn-toggle-nodes" class="btn" type="button">Nodes ausblenden</button><button id="btn-calibration-open" class="btn" type="button">Mesh kalibrieren</button></div>
+  <div class="explore-action"><button id="btn-explore" class="btn" type="button">&#9654; ERKUNDUNGSMODUS STARTEN</button><small>WASD BEWEGEN // MAUS UMSCHAUEN // SHIFT SPRINT</small></div>
   <div class="actions"><button id="btn-toggle-sidebar" class="btn" type="button">Panel einklappen</button><button id="btn-fullscreen" class="btn" type="button">Vollbild</button></div>
   <div class="footer-note">TECHNISCHES DOSSIER // AC6: FIRES OF RUBICON<br>HANDLUNGS- UND SPIELINFORMATIONEN KÖNNEN SPOILER ENTHALTEN.</div>
 </aside>
@@ -3937,6 +3981,7 @@ body.sidebar-collapsed .side-btn{display:flex}body.fullscreen #sidebar,body.full
   // --------------------------------------------------------------------------
   const state = {
     time: 0, showSidebar: true, fullscreen: false, motionEnabled: false,
+    explorationMode: false,
     selectedPart: null, isDragging: false, dragMoved: false, dragMode: null,
     lastMouse: new THREE.Vector2(),
   };
@@ -3949,6 +3994,9 @@ body.sidebar-collapsed .side-btn{display:flex}body.fullscreen #sidebar,body.full
   let hemiLight,ambientLight,calibrationLight,modelLighting=null,hangarRoot=null,craneAssembly=null,calibrationAxes=null,workshopVisible=true,axesVisible=false;
   let workshopBackground=new THREE.Color(0x101615),workshopFog=new THREE.Color(0x171d1b);
   let suspensionCables=[],suspensionSpreader=null,suspensionBaseY=6.15,inspectionAnchors={},hotspotElements={},inspectionBounds=null;
+  let collisionMeshes=[],explorationPosition=new THREE.Vector3(0,1.7,10),explorationYaw=0,explorationPitch=-.08;
+  const explorationKeys={};
+  const explorationSpeed=4.2,explorationSprintMultiplier=1.65,explorationRadius=.38,explorationHeight=1.7;
   let baseInspectionAnchors={},calibrationModel={scale:1,x:0,y:0,z:0,rx:0,ry:0,rz:0},calibrationMarker={id:'head',x:0,y:0,z:0},calibrationHooks=[{x:0,y:0,z:0},{x:0,y:0,z:0},{x:0,y:0,z:0},{x:0,y:0,z:0}];
   const CALIBRATION_PIN='1818';
   let calloutElement=null,thrustersEnabled=false,nodesVisible=true,thrusterCalibration={x:.35,y:3.62,z:-2.66,rx:130,ry:0,rz:0};
@@ -3966,7 +4014,7 @@ body.sidebar-collapsed .side-btn{display:flex}body.fullscreen #sidebar,body.full
     thruster:{x:.35,y:3.62,z:-2.66,rx:130,ry:0,rz:0}
   };
   const modelBasePosition=new THREE.Vector3();
-  let armPoseNodes=[],legPoseNodes=[],armPoseValue=0,legPoseValue=0,leftLegPoseValue=0,rightLegPoseValue=0,craneTravelValue=0;
+  let legPoseNodes=[],legPoseValue=0,leftLegPoseValue=0,rightLegPoseValue=0,craneTravelValue=0;
   const raycaster=new THREE.Raycaster(),pickPointer=new THREE.Vector2();
   let clock=new THREE.Clock();
 
@@ -3998,14 +4046,14 @@ body.sidebar-collapsed .side-btn{display:flex}body.fullscreen #sidebar,body.full
   };
   function addHangarBox(parent,w,h,d,x,y,z,material){
     const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);
-    mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;
+    mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);collisionMeshes.push(mesh);return mesh;
   }
   function addHangarBeam(parent,start,end,t,material){
     const direction=new THREE.Vector3().subVectors(end,start),length=direction.length();
     const mesh=new THREE.Mesh(new THREE.BoxGeometry(t,length,t),material);
     mesh.position.copy(start).add(end).multiplyScalar(.5);
     mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),direction.normalize());
-    mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;
+    mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);collisionMeshes.push(mesh);return mesh;
   }
   function makeConcreteTexture(){
     const canvas=document.createElement('canvas');canvas.width=512;canvas.height=512;
@@ -4068,14 +4116,9 @@ body.sidebar-collapsed .side-btn{display:flex}body.fullscreen #sidebar,body.full
       b.addEventListener('click',function(e){e.stopPropagation();toggleInspectionPart(p.id);});
       layer.appendChild(b);hotspotElements[p.id]=b;
     });
-    armPoseNodes=[];legPoseNodes=[];
+    legPoseNodes=[];
     if(model){
       model.updateMatrixWorld(true);
-      model.traverse(function(node){
-        const name=node.name||'';
-        if(!/^(L|R)_ArmJoint_\d+$/i.test(name))return;
-        armPoseNodes.push({node:node,base:node.rotation.z,side:name.charAt(0).toUpperCase()==='L'?-1:1});
-      });
       const leftHand=findNamedModelNode(model,/^L_Hand_037$/i)||findNamedModelNode(model,/^Root_L_Hand_036$/i);
       const rightHand=findNamedModelNode(model,/^R_Hand_062$/i)||findNamedModelNode(model,/^Root_R_Hand_061$/i);
       const leftWeapon=findNamedModelNode(model,/^L_Weapon_00_02$/i),rightWeapon=findNamedModelNode(model,/^R_Weapon_00_078$/i);
@@ -4343,16 +4386,16 @@ function createStudioEnvironment() {
     key.shadow.mapSize.set(1024,1024);key.shadow.camera.left=-16;key.shadow.camera.right=16;key.shadow.camera.top=18;key.shadow.camera.bottom=-12;key.shadow.bias=-.0004;scene.add(key);
     const fill=new THREE.DirectionalLight(0x637b70,.38);fill.position.set(10,8,8);scene.add(fill);
     const rim=new THREE.DirectionalLight(0xb06a3b,.42);rim.position.set(0,11,-10);scene.add(rim);
-    const inspectionLight=new THREE.PointLight(0xd89a58,5.5,18,1.8);inspectionLight.position.set(0,7.2,6.5);scene.add(inspectionLight);
+    const inspectionLight=new THREE.PointLight(0xb87948,2.4,18,1.8);inspectionLight.position.set(0,7.2,6.5);scene.add(inspectionLight);
   }
 
   function attachModelLighting(){
     if(modelLighting&&modelLighting.parent)modelLighting.parent.remove(modelLighting);
     if(!mechGroup)return;
-    modelLighting=new THREE.Group();modelLighting.name='Invisible model fill lights';
-    const front=new THREE.PointLight(0xffd7a1,7.2,17,1.45);front.position.set(0,5.2,5.5);
-    const left=new THREE.PointLight(0x9ec8ff,5.4,15,1.5);left.position.set(-5.5,4.2,1.8);
-    const right=new THREE.PointLight(0xffa45f,4.8,15,1.5);right.position.set(5.5,3.8,1.8);
+    modelLighting=new THREE.Group();modelLighting.name='Invisible model fill lights';modelLighting.visible=!state.explorationMode;
+    const front=new THREE.PointLight(0xc89162,3.1,17,1.45);front.position.set(0,5.2,5.5);
+    const left=new THREE.PointLight(0x7891a8,2.3,15,1.5);left.position.set(-5.5,4.2,1.8);
+    const right=new THREE.PointLight(0xc47743,2.2,15,1.5);right.position.set(5.5,3.8,1.8);
     modelLighting.add(front,left,right);mechGroup.add(modelLighting);
   }
 
@@ -4476,6 +4519,8 @@ function createStudioEnvironment() {
     const safety=new THREE.MeshStandardMaterial({color:0xb77b3e,roughness:.58,metalness:.34});
     const rubber=new THREE.MeshStandardMaterial({color:0x161b19,roughness:.98,metalness:.02});
     const floor=new THREE.Mesh(new THREE.PlaneGeometry(48,42),concrete);floor.rotation.x=-Math.PI/2;floor.position.set(0,-.12,-1);floor.receiveShadow=true;hangarRoot.add(floor);
+    const exitWall=new THREE.Mesh(new THREE.BoxGeometry(48,4,.5),new THREE.MeshBasicMaterial({visible:false}));
+    exitWall.position.set(0,2,15.2);hangarRoot.add(exitWall);collisionMeshes.push(exitWall);
 
     // Enclosed industrial workshop shell.
     addHangarBox(hangarRoot,.7,11.5,34,-17,5.55,-1,wall);addHangarBox(hangarRoot,.7,11.5,34,17,5.55,-1,wall);
@@ -4581,7 +4626,7 @@ function createStudioEnvironment() {
     if(mechGroup&&mechGroup.parent)mechGroup.parent.remove(mechGroup);disposeSuspensionRig();
     Object.keys(hotspotElements).forEach(function(id){const el=hotspotElements[id];if(el&&el.parentNode)el.parentNode.removeChild(el);});
     if(calloutElement&&calloutElement.parentNode)calloutElement.parentNode.removeChild(calloutElement);
-    hotspotElements={};inspectionAnchors={};inspectionBounds=null;mechGroup=null;modelRoot=null;bodyMesh=null;headMesh=null;thrusterGroup=null;thrusterEffects=[];    armPoseNodes=[];legPoseNodes=[];calloutElement=null;
+    hotspotElements={};inspectionAnchors={};inspectionBounds=null;mechGroup=null;modelRoot=null;bodyMesh=null;headMesh=null;thrusterGroup=null;thrusterEffects=[];legPoseNodes=[];calloutElement=null;
   }
 
   function showLocalModelDialog() {
@@ -5089,13 +5134,6 @@ function createStudioEnvironment() {
     });
   }
 
-  function applyArmPose(value){
-    armPoseValue=Number(value)||0;
-    const bend=armPoseValue*.004;
-    armPoseNodes.forEach(function(entry){entry.node.rotation.z=entry.base+entry.side*bend;});
-    const output=document.getElementById('arm-pose-value');if(output)output.textContent=Math.round(armPoseValue)+'°';
-  }
-
   function applySingleLegPose(side,value){
     const pose=Number(value)||0;
     legPoseNodes.forEach(function(entry){
@@ -5121,7 +5159,6 @@ function createStudioEnvironment() {
 
   function resetShowControls(){
     const controls=[
-      ['arm-pose','0',applyArmPose],
       ['crane-travel','0',applyCraneTravel]
     ];
     controls.forEach(function(entry){const input=document.getElementById(entry[0]);if(input){input.value=entry[1];entry[2](entry[1]);}});
@@ -5138,8 +5175,9 @@ function createStudioEnvironment() {
   function wireUI(){
     const sidebar=document.getElementById('sidebar'),toggle=document.getElementById('btn-toggle-sidebar'),open=document.getElementById('btn-open-sidebar');
     const fullscreen=document.getElementById('btn-fullscreen'),floating=document.getElementById('btn-fullscreen-fs');
+    const explore=document.getElementById('btn-explore');
     const load=document.getElementById('btn-load-model'),recenter=document.getElementById('btn-recenter'),motion=document.getElementById('btn-motion');
-    const armPose=document.getElementById('arm-pose'),craneTravel=document.getElementById('crane-travel'),thrusters=document.getElementById('btn-thrusters'),resetControls=document.getElementById('btn-reset-controls');
+    const craneTravel=document.getElementById('crane-travel'),thrusters=document.getElementById('btn-thrusters'),resetControls=document.getElementById('btn-reset-controls');
     const select=document.getElementById('btn-select-model'),placeholder=document.getElementById('btn-use-placeholder'),input=document.getElementById('model-file-input');
     const calibrationPanel=document.getElementById('calibration-panel'),calibrationOpen=document.getElementById('btn-calibration-open'),calibrationClose=document.getElementById('btn-calibration-close'),calibrationExport=document.getElementById('btn-calibration-export');
     const pinDialog=document.getElementById('pin-dialog'),pinForm=document.getElementById('pin-form'),pinInput=document.getElementById('calibration-pin'),pinError=document.getElementById('pin-dialog-error'),pinCancel=document.getElementById('btn-pin-cancel');
@@ -5152,8 +5190,8 @@ function createStudioEnvironment() {
     toggle.addEventListener('click',function(){setSidebar(!state.showSidebar);});open.addEventListener('click',function(){setSidebar(true);});
     fullscreen.addEventListener('click',toggleFullscreen);floating.addEventListener('click',toggleFullscreen);
     load.addEventListener('click',picker);select.addEventListener('click',picker);recenter.addEventListener('click',recenterView);
+    explore.addEventListener('click',enterExplorationMode);
     motion.addEventListener('click',function(){state.motionEnabled=!state.motionEnabled;motion.textContent=state.motionEnabled?'Pendelbewegung stoppen':'Pendelbewegung starten';motion.classList.toggle('active',!state.motionEnabled);});
-    armPose.addEventListener('input',function(){applyArmPose(armPose.value);});
     craneTravel.addEventListener('input',function(){applyCraneTravel(craneTravel.value);});
     thrusters.addEventListener('click',function(){thrustersEnabled=!thrustersEnabled;thrusters.textContent=thrustersEnabled?'Triebwerke abschalten':'Triebwerke zünden';thrusters.classList.toggle('active',thrustersEnabled);});
     resetControls.addEventListener('click',resetShowControls);
@@ -5231,6 +5269,68 @@ function createStudioEnvironment() {
     state.isDragging=false;state.dragMoved=false;state.dragMode=null;updateCamera();
   }
 
+  function isExplorationBlocked(position){
+    const playerMinY=position.y-explorationHeight;
+    const playerMaxY=position.y+.2;
+    const collides=function(box){
+      if(box.isEmpty()||box.max.y<playerMinY||box.min.y>playerMaxY)return false;
+      if(box.max.y-box.min.y<.12)return false;
+      return position.x+explorationRadius>box.min.x&&position.x-explorationRadius<box.max.x&&
+        position.z+explorationRadius>box.min.z&&position.z-explorationRadius<box.max.z;
+    };
+    for(let i=0;i<collisionMeshes.length;i++){
+      if(collides(new THREE.Box3().setFromObject(collisionMeshes[i])))return true;
+    }
+    if(mechGroup&&collides(new THREE.Box3().setFromObject(mechGroup)))return true;
+    return false;
+  }
+
+  function updateExploration(dt){
+    const movement=new THREE.Vector3();
+    if(explorationKeys.w)movement.z+=1;
+    if(explorationKeys.s)movement.z-=1;
+    if(explorationKeys.a)movement.x-=1;
+    if(explorationKeys.d)movement.x+=1;
+    if(movement.lengthSq()===0)return;
+    movement.normalize().multiplyScalar(explorationSpeed*(explorationKeys.shift?explorationSprintMultiplier:1)*dt);
+    const forwardX=Math.sin(explorationYaw),forwardZ=-Math.cos(explorationYaw);
+    const rightX=Math.cos(explorationYaw),rightZ=Math.sin(explorationYaw);
+    const delta=new THREE.Vector3(
+      movement.x*rightX+movement.z*forwardX,
+      0,
+      movement.x*rightZ+movement.z*forwardZ
+    );
+    const nextX=explorationPosition.clone();nextX.x+=delta.x;
+    if(!isExplorationBlocked(nextX))explorationPosition.x=nextX.x;
+    const nextZ=explorationPosition.clone();nextZ.z+=delta.z;
+    if(!isExplorationBlocked(nextZ))explorationPosition.z=nextZ.z;
+  }
+
+  function enterExplorationMode(){
+    state.explorationMode=true;state.isDragging=false;state.dragMode=null;
+    explorationPosition.set(0,1.7,10);explorationYaw=0;explorationPitch=-.08;
+    document.body.classList.add('exploration-mode');
+    if(modelLighting)modelLighting.visible=false;
+    ambientLight.intensity=.36;
+    hemiLight.intensity=.58;
+    renderer.toneMappingExposure=.52;
+    renderer.domElement.focus();
+    if(renderer.domElement.requestPointerLock)renderer.domElement.requestPointerLock();
+    updateCamera();
+  }
+
+  function exitExplorationMode(){
+    state.explorationMode=false;
+    Object.keys(explorationKeys).forEach(function(key){explorationKeys[key]=false;});
+    document.body.classList.remove('exploration-mode');
+    if(modelLighting)modelLighting.visible=true;
+    ambientLight.intensity=.52;
+    hemiLight.intensity=1;
+    renderer.toneMappingExposure=.68;
+    if(document.pointerLockElement===renderer.domElement&&document.exitPointerLock)document.exitPointerLock();
+    recenterView();
+  }
+
   // --------------------------------------------------------------------------
   // Simple orbit controls (left-drag rotate, middle-drag pan, wheel zoom)
   // --------------------------------------------------------------------------
@@ -5247,12 +5347,43 @@ function createStudioEnvironment() {
     dom.addEventListener('touchmove',function(e){if(!state.isDragging||e.touches.length!==1)return;e.preventDefault();const dx=e.touches[0].clientX-state.lastMouse.x,dy=e.touches[0].clientY-state.lastMouse.y;if(Math.abs(dx)+Math.abs(dy)>3)state.dragMoved=true;state.lastMouse.set(e.touches[0].clientX,e.touches[0].clientY);orbit.theta-=dx*.006;orbit.phi-=dy*.006;orbit.phi=Math.max(.16,Math.min(Math.PI-.16,orbit.phi));},{passive:false});
     dom.addEventListener('touchend',function(e){if(!state.dragMoved&&e.changedTouches&&e.changedTouches.length)pickInspectionPart(e.changedTouches[0].clientX,e.changedTouches[0].clientY);state.isDragging=false;state.dragMode=null;});
     dom.addEventListener('touchcancel',function(){state.isDragging=false;state.dragMode=null;});
+    window.addEventListener('keydown',function(e){
+      if(!state.explorationMode)return;
+      const key=e.key.toLowerCase();
+      if(key==='w'||key==='a'||key==='s'||key==='d'||key==='shift'){explorationKeys[key]=true;e.preventDefault();}
+      if(key==='escape')exitExplorationMode();
+    });
+    window.addEventListener('keyup',function(e){
+      const key=e.key.toLowerCase();
+      if(key==='w'||key==='a'||key==='s'||key==='d'||key==='shift')explorationKeys[key]=false;
+    });
+    window.addEventListener('blur',function(){Object.keys(explorationKeys).forEach(function(key){explorationKeys[key]=false;});});
+    window.addEventListener('mousemove',function(e){
+      if(!state.explorationMode)return;
+      if(document.pointerLockElement!==renderer.domElement)return;
+      explorationYaw+=e.movementX*.0025;
+      explorationPitch=THREE.MathUtils.clamp(explorationPitch-e.movementY*.0025,-.85,.65);
+      updateCamera();
+    });
+    document.addEventListener('pointerlockchange',function(){
+      if(state.explorationMode&&document.pointerLockElement!==renderer.domElement)exitExplorationMode();
+    });
   }
 
   // --------------------------------------------------------------------------
   // Camera update + render
   // --------------------------------------------------------------------------
   function updateCamera(){
+    if(state.explorationMode){
+      camera.position.copy(explorationPosition);
+      const lookDirection=new THREE.Vector3(
+        Math.sin(explorationYaw)*Math.cos(explorationPitch),
+        Math.sin(explorationPitch),
+        -Math.cos(explorationYaw)*Math.cos(explorationPitch)
+      );
+      camera.lookAt(explorationPosition.clone().add(lookDirection));
+      return;
+    }
     const x=orbit.radius*Math.sin(orbit.phi)*Math.sin(orbit.theta),y=orbit.radius*Math.cos(orbit.phi),z=orbit.radius*Math.sin(orbit.phi)*Math.cos(orbit.theta);
     camera.position.set(orbit.target.x+x,orbit.target.y+y,orbit.target.z+z);camera.lookAt(orbit.target);
   }
@@ -5268,7 +5399,7 @@ function createStudioEnvironment() {
   // --------------------------------------------------------------------------
   function animate(){
     requestAnimationFrame(animate);const dt=clock.getDelta();state.time+=dt;
-    updateAnimation(dt);updateBackdrop(dt);updateSuspensionRig();updateCalibrationAxes();updateCamera();updateInspectionHotspots();renderer.render(scene,camera);
+    updateAnimation(dt);updateExploration(dt);updateBackdrop(dt);updateSuspensionRig();updateCalibrationAxes();updateCamera();updateInspectionHotspots();renderer.render(scene,camera);
   }
 
   // --------------------------------------------------------------------------
