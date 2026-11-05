@@ -32,22 +32,23 @@ The real Raven model is loaded from raven.glb (GLTF/GLB). Set CONFIG.modelPath =
 | Adjustable Sunlight | Time-of-Day slider (0-24h) shifts sun color, position, intensity, sky gradient, ground color, and fog (night to dawn to day to dusk to night). |
 | Orbit Controls | Left-drag rotate, right-drag pan, scroll-wheel zoom; touch-drag supported. |
 | Minimalistic Backdrop | Gradient sky sphere, dark ground plane, subtle grid — never distracts from the mech. |
-| Single-File / Offline | index.html embeds Three.js (r128), its matching GLTFLoader, and all application code. Runs without external libraries or an internet connection. |
+| Single-File / Offline | index.html embeds Three.js (r128), its matching GLTFLoader, and all application code. The adjacent raven.glb can be selected locally when opened via file://. |
 | Watermark | Semi-transparent credit in the corner: Paul Hinterbauer 5BHWII @ TGM HWI. |
 
 ---
 
 ## Quick Start
 
-1. Clone or download this repository.
-2. Open index.html in any modern browser (Chrome, Firefox, Edge, Safari).
-3. Interact:
+1. Clone or download this repository, keeping index.html and raven.glb in the same folder.
+2. Double-click index.html to open it in a modern browser (Chrome, Firefox, Edge, Safari).
+3. When the page opens directly from your computer, click "Choose raven.glb" and select the raven.glb file from that folder. This one-time selection is required by browser security.
+4. Interact:
    - Use the sidebar to play/pause/restart the dash animation.
    - Drag the Time-of-Day slider to change lighting.
    - Collapse the sidebar or press the fullscreen button for an immersive view.
    - Orbit the camera: left-drag rotate right-drag pan scroll zoom.
 
-No build step, package manager, or internet connection is required. A local static server is recommended because browsers can block GLB loading from file:// URLs.
+No build step, package manager, local server, or internet connection is required. When opened via file://, the browser does not let the page read raven.glb by pathname, so the user selects the file once through the built-in file picker. The app then reads the selected file locally with FileReader and parses it with the embedded GLTFLoader. When hosted on HTTP(S), raven.glb loads automatically from the same folder.
 
 ---
 
@@ -55,13 +56,14 @@ No build step, package manager, or internet connection is required. A local stat
 
 | Input | Action |
 |-------|--------|
-| Play / Pause / Restart | Sideboard buttons — control the dash animation. |
-| Time of Day | Sideboard slider — adjust sunlight/lighting (0-24h). |
-| Collapse / Expand | Sideboard toggle — hide/show the UI panel. |
-| Fullscreen | Floating top-right button or sideboard button. |
+| Play / Pause / Restart | Sidebar buttons — control the dash animation. |
+| Time of Day | Sidebar slider — adjust sunlight/lighting (0-24h). |
+| Collapse / Expand | Sidebar toggle — hide/show the UI panel. |
+| Fullscreen | Floating top-right button or sidebar button. |
 | Rotate Camera | Left mouse drag (or one-finger touch drag). |
 | Pan Camera | Right mouse drag. |
 | Zoom | Mouse wheel / pinch. |
+| Load Model | Click Load Raven Model and select a local .glb file. |
 
 ---
 
@@ -89,7 +91,7 @@ To replace the placeholder mech with the actual Raven from Armored Core VI: Fire
    };
    ```
 
-4. The matching Three.js r128 GLTFLoader is embedded directly in index.html. The app falls back to the placeholder if the model fails to load.
+4. The matching Three.js r128 GLTFLoader is embedded directly in index.html. When opened via file://, use the built-in file picker to select raven.glb; when hosted on HTTP(S), the file loads automatically. The app falls back to the placeholder if loading fails.
 
 ### Recommended model source
 

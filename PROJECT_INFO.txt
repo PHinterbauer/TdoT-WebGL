@@ -26,16 +26,23 @@ DOCUMENTATION
 
 HOW TO RUN
   1. Keep index.html and raven.glb in the same folder.
-  2. Start a local static web server in this folder (for example, VS Code Live
-     Server).
-  3. Open the served index.html in a modern browser.
+  2. Double-click index.html to open it in a modern browser.
+  3. When opened directly from file://, click "Choose raven.glb" and select
+     raven.glb from the same folder.
+  4. The model is read locally from the user-selected File object and parsed
+     by the embedded Three.js r128 GLTFLoader.
 
-  No build step, package manager, external JavaScript file, or internet
-  connection is required. A local server is recommended because browsers can
-  block GLB loading from file:// URLs.
+  No local server, build step, package manager, or internet connection is
+  required. Browsers do not allow a file:// page to read adjacent files by
+  pathname, so the explicit file selection is required.
+
+  When hosted on HTTP(S), raven.glb is loaded automatically from the same
+  folder as index.html.
 
 FEATURES
   - Raven GLB model loaded with the embedded Three.js r128 GLTFLoader.
+  - Local GLB file selection for direct file:// use.
+  - Automatic adjacent GLB loading when hosted over HTTP(S).
   - Procedural placeholder mech used if the model cannot be loaded.
   - Dash animation with forward lean and animated thruster flames.
   - Play, pause, and restart controls.
@@ -60,6 +67,7 @@ MODEL CONFIGURATION
 CONTROLS
   - Play / Pause / Restart: control the dash animation.
   - Time of Day: adjust sunlight and scene lighting.
+  - Load Raven Model: select a local GLB file.
   - Collapse / Expand: hide or show the sidebar.
   - Fullscreen: use the sidebar button or floating top-right button.
   - Rotate: left mouse drag or one-finger touch drag.

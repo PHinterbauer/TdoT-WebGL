@@ -74,6 +74,23 @@ body.fullscreen .fs-btn { display: flex !important; }
   box-shadow: 0 5px 22px rgba(0,0,0,0.35); pointer-events: none;
 }
 #model-error.visible { display: block; }
+.model-dialog {
+  display: none; position: fixed; inset: 0; z-index: 150;
+  align-items: center; justify-content: center;
+  padding: 20px; background: rgba(3, 4, 8, 0.78);
+  backdrop-filter: blur(7px);
+}
+.model-dialog.visible { display: flex; }
+.model-dialog-card {
+  width: min(460px, 100%); padding: 26px;
+  border: 1px solid #454a5e; border-radius: 12px;
+  background: rgba(20, 20, 29, 0.98);
+  box-shadow: 0 18px 60px rgba(0,0,0,0.6);
+}
+.model-dialog-card h2 { margin-bottom: 12px; color: #ff5a5a; font-size: 20px; }
+.model-dialog-card p { color: #c4cada; font-size: 13px; line-height: 1.6; }
+.model-dialog-actions { display: flex; gap: 10px; margin-top: 20px; }
+.model-dialog-note { margin-top: 14px; color: #858da3 !important; font-size: 11px !important; }
 .hint { font-size: 11.5px; color: #8a92a8; margin-top: 6px; line-height: 1.45; }
 </style>
 </head>
@@ -98,18 +115,38 @@ body.fullscreen .fs-btn { display: flex !important; }
     <input type="range" id="slider-tod" min="0" max="24" step="1" value="12">
     <div class="tod-label"><span id="tod-value">12:00</span></div>
   </div>
+  <div class="section">
+    <h3>Model</h3>
+    <button id="btn-load-model" class="btn" type="button">Load Raven Model</button>
+    <p class="hint">Choose raven.glb from the same folder when opening this page directly.</p>
+  </div>
   <div class="section actions">
     <button id="btn-toggle-sidebar" class="btn">&#9654; Expand</button>
     <button id="btn-fullscreen" class="btn">Fullscreen</button>
   </div>
   <div class="footer-note">
-    Loading Raven model from raven.glb...
+    Raven model is loaded from raven.glb. When opened directly, select the file once.
   </div>
 </div>
 <button id="btn-open-sidebar" class="side-btn" type="button" title="Open sidebar" aria-label="Open sidebar">&#x2630;</button>
 <button id="btn-fullscreen-fs" class="fs-btn" type="button" title="Enter fullscreen" aria-label="Enter fullscreen">&#x26F6;</button>
 <div id="watermark"></div>
 <div id="model-error" role="alert" aria-live="polite"></div>
+<div id="local-model-dialog" class="model-dialog" role="dialog" aria-modal="true" aria-labelledby="local-model-title">
+  <div class="model-dialog-card">
+    <h2 id="local-model-title">Load Raven Model</h2>
+    <p>
+      You opened this page directly from your computer. Select <strong>raven.glb</strong>
+      from the same folder to load the 3D model.
+    </p>
+    <div class="model-dialog-actions">
+      <button id="btn-select-model" class="btn active" type="button">Choose raven.glb</button>
+      <button id="btn-use-placeholder" class="btn" type="button">Use Placeholder</button>
+    </div>
+    <p class="model-dialog-note">This one-time selection is required by browser security. No server or upload is involved.</p>
+  </div>
+</div>
+<input id="model-file-input" type="file" accept=".glb,model/gltf-binary" hidden>
 <script>
 // ==== THREE.JS (inlined for offline use) ====
 
@@ -4060,7 +4097,7 @@ body.fullscreen .fs-btn { display: flex !important; }
   }
 
   // --------------------------------------------------------------------------
-  // Model loading (GLTF/GLB) - swap in when you provide raven.glb
+  // Model loading (GLTF/GLB)
   // --------------------------------------------------------------------------
   function setModelStatus(label, stateName) {
     const status = document.getElementById('anim-status');
@@ -4078,102 +4115,187 @@ body.fullscreen .fs-btn { display: flex !important; }
     }
   }
 
+  function clearCurrentModel() {
+    if (mechGroup && mechGroup.parent) {
+      mechGroup.parent.remove(mechGroup);
+    }
+
+    flameMeshes.forEach(function (flame) {
+      if (flame.parent) flame.parent.remove(flame);
+      if (flame.geometry) flame.geometry.dispose();
+      if (flame.material) {
+        if (Array.isArray(flame.material)) {
+          flame.material.forEach(function (material) { material.dispose(); });
+        } else {
+          flame.material.dispose();
+        }
+      }
+    });
+
+    flameMeshes = [];
+    mechGroup = null;
+    bodyMesh = null;
+    headMesh = null;
+    thrusterGroup = null;
+  }
+
+  function showLocalModelDialog() {
+    const dialog = document.getElementById('local-model-dialog');
+    if (dialog) dialog.classList.add('visible');
+  }
+
+  function hideLocalModelDialog() {
+    const dialog = document.getElementById('local-model-dialog');
+    if (dialog) dialog.classList.remove('visible');
+  }
+
+  function handleModelLoadError(error, sourceName) {
+    const errorMessage = error && error.message ? error.message : String(error || 'Unknown error');
+    console.error('Failed to load Raven model from ' + sourceName + ':', error);
+    setModelStatus('Model error', 'error');
+    showModelLoadError(
+      'Could not load ' + sourceName + ': ' + errorMessage +
+      '. Use Load Raven Model to select the GLB file again.'
+    );
+
+    if (!mechGroup) createPlaceholderMech();
+  }
+
+  function handleModelLoaded(gltf, sourceName) {
+    try {
+      if (!gltf || !gltf.scene) {
+        throw new Error('The GLB file did not contain a scene.');
+      }
+
+      const model = gltf.scene;
+      model.traverse(function (child) {
+        if (child.isMesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
+        }
+      });
+
+      // Center and scale the model to fit the scene.
+      const box = new THREE.Box3().setFromObject(model);
+      const center = box.getCenter(new THREE.Vector3());
+      const size = box.getSize(new THREE.Vector3());
+      const maxDim = Math.max(size.x, size.y, size.z);
+
+      if (!Number.isFinite(maxDim) || maxDim <= 0) {
+        throw new Error('The GLB scene contains no visible geometry.');
+      }
+
+      clearCurrentModel();
+
+      const scale = 8 / maxDim;
+      model.scale.setScalar(scale);
+      model.position.sub(center.multiplyScalar(scale));
+      model.position.y = 0;
+      model.rotation.y = Math.PI * 0.15;
+
+      mechGroup = model;
+      scene.add(mechGroup);
+
+      // Add simple thruster flames if the model has no animated thrusters.
+      attachPlaceholderFlames();
+
+      setModelStatus('Raven loaded', 'success');
+      const errorPanel = document.getElementById('model-error');
+      if (errorPanel) errorPanel.classList.remove('visible');
+      const footerNote = document.querySelector('.footer-note');
+      if (footerNote) footerNote.textContent = 'Raven model loaded successfully from ' + sourceName + '.';
+      hideLocalModelDialog();
+      console.info('Raven model loaded successfully:', sourceName);
+    } catch (error) {
+      handleModelLoadError(error, sourceName);
+    }
+  }
+
+  function loadModelFromFile(file) {
+    if (!file) return;
+
+    if (!/\.glb$/i.test(file.name)) {
+      handleModelLoadError(new Error('Please select a .glb file'), file.name);
+      return;
+    }
+
+    hideLocalModelDialog();
+    const reader = new FileReader();
+    setModelStatus('Reading Raven...', 'loading');
+
+    reader.onprogress = function (event) {
+      if (event.lengthComputable && event.total > 0) {
+        const percent = Math.round((event.loaded / event.total) * 100);
+        setModelStatus('Reading ' + percent + '%', 'loading');
+      }
+    };
+
+    reader.onerror = function () {
+      handleModelLoadError(reader.error || new Error('The selected file could not be read'), file.name);
+    };
+
+    reader.onload = function () {
+      setModelStatus('Parsing Raven...', 'loading');
+      try {
+        const loader = new THREE.GLTFLoader();
+        loader.parse(
+          reader.result,
+          '',
+          function (gltf) {
+            handleModelLoaded(gltf, file.name);
+          },
+          function (error) {
+            handleModelLoadError(error, file.name);
+          }
+        );
+      } catch (error) {
+        handleModelLoadError(error, file.name);
+      }
+    };
+
+    reader.readAsArrayBuffer(file);
+  }
+
   function loadModel(path) {
     if (typeof THREE.GLTFLoader !== 'function') {
-      const message = 'GLTFLoader is unavailable. Check the embedded loader in index.html.';
-      console.error(message);
-      setModelStatus('Model error', 'error');
-      showModelLoadError(message);
-      createPlaceholderMech();
+      handleModelLoadError(
+        new Error('The embedded GLTFLoader is unavailable'),
+        'raven.glb'
+      );
+      return;
+    }
+
+    // Browsers protect file:// pages from reading adjacent files by pathname.
+    // Ask the user to select the GLB, then parse the explicitly granted File object.
+    if (window.location.protocol === 'file:') {
+      setModelStatus('Select raven.glb', 'loading');
+      showLocalModelDialog();
       return;
     }
 
     setModelStatus('Loading Raven...', 'loading');
-
-    // Resolve the model relative to this HTML file, including when hosted in a subfolder.
     const modelUrl = new URL(path, document.baseURI).href;
     const loader = new THREE.GLTFLoader();
 
-    function failModelLoad(error) {
-      const httpStatus = error && error.target && error.target.status;
-      const errorMessage = error && error.message
-        ? error.message
-        : (httpStatus ? 'HTTP ' + httpStatus : 'Unknown loading error');
-
-      console.error('Failed to load Raven model from ' + modelUrl + ':', error);
-      setModelStatus('Placeholder', 'error');
-
-      if (window.location.protocol === 'file:') {
-        showModelLoadError(
-          'The browser blocks automatic GLB loading from file:// URLs. ' +
-          'Open this folder with VS Code Live Server, then reload the page.'
-        );
-      } else {
-        showModelLoadError(
-          'Could not load raven.glb (' + errorMessage + '). ' +
-          'Check that raven.glb is beside index.html and inspect the browser console.'
-        );
-      }
-
-      createPlaceholderMech();
+    try {
+      loader.load(
+        modelUrl,
+        function (gltf) {
+          handleModelLoaded(gltf, 'raven.glb');
+        },
+        function (progress) {
+          if (progress && progress.total > 0) {
+            const percent = Math.round((progress.loaded / progress.total) * 100);
+            setModelStatus('Loading ' + percent + '%', 'loading');
+          }
+        },
+        function (error) {
+          handleModelLoadError(error, modelUrl);
+        }
+      );
+    } catch (error) {
+      handleModelLoadError(error, modelUrl);
     }
-
-    loader.load(
-      modelUrl,
-      function (gltf) {
-        try {
-          if (!gltf || !gltf.scene) {
-            throw new Error('The GLB file did not contain a scene.');
-          }
-
-          const model = gltf.scene;
-          model.traverse(function (child) {
-            if (child.isMesh) {
-              child.castShadow = true;
-              child.receiveShadow = true;
-            }
-          });
-
-          // Center and scale the model to fit the scene.
-          const box = new THREE.Box3().setFromObject(model);
-          const center = box.getCenter(new THREE.Vector3());
-          const size = box.getSize(new THREE.Vector3());
-          const maxDim = Math.max(size.x, size.y, size.z);
-
-          if (!Number.isFinite(maxDim) || maxDim <= 0) {
-            throw new Error('The GLB scene contains no visible geometry.');
-          }
-
-          const scale = 8 / maxDim;
-          model.scale.setScalar(scale);
-          model.position.sub(center.multiplyScalar(scale));
-          model.position.y = 0;
-          model.rotation.y = Math.PI * 0.15;
-
-          mechGroup = model;
-          scene.add(mechGroup);
-
-          // Add simple thruster flames if the model has no animated thrusters.
-          attachPlaceholderFlames();
-
-          setModelStatus('Raven loaded', 'success');
-          const errorPanel = document.getElementById('model-error');
-          if (errorPanel) errorPanel.classList.remove('visible');
-          const footerNote = document.querySelector('.footer-note');
-          if (footerNote) footerNote.textContent = 'Raven model loaded successfully from raven.glb.';
-          console.info('Raven model loaded successfully:', modelUrl);
-        } catch (error) {
-          failModelLoad(error);
-        }
-      },
-      function (progress) {
-        if (progress && progress.total > 0) {
-          const percent = Math.round((progress.loaded / progress.total) * 100);
-          setModelStatus('Loading ' + percent + '%', 'loading');
-        }
-      },
-      failModelLoad
-    );
   }
 
   function attachPlaceholderFlames() {
@@ -4386,6 +4508,10 @@ body.fullscreen .fs-btn { display: flex !important; }
     const btnOpenSidebar = document.getElementById('btn-open-sidebar');
     const btnFullscreen = document.getElementById('btn-fullscreen');
     const btnFullscreenFloating = document.getElementById('btn-fullscreen-fs');
+    const btnLoadModel = document.getElementById('btn-load-model');
+    const btnSelectModel = document.getElementById('btn-select-model');
+    const btnUsePlaceholder = document.getElementById('btn-use-placeholder');
+    const modelFileInput = document.getElementById('model-file-input');
     const sliderTOD = document.getElementById('slider-tod');
     const sidebar = document.getElementById('sidebar');
 
@@ -4404,6 +4530,11 @@ body.fullscreen .fs-btn { display: flex !important; }
       btnOpenSidebar.setAttribute('aria-expanded', String(visible));
     }
 
+    function openModelPicker() {
+      modelFileInput.value = '';
+      modelFileInput.click();
+    }
+
     btnPlay.addEventListener('click', function () { setPlaying(true); });
     btnPause.addEventListener('click', function () { setPlaying(false); });
     btnRestart.addEventListener('click', function () {
@@ -4420,6 +4551,19 @@ body.fullscreen .fs-btn { display: flex !important; }
 
     btnFullscreen.addEventListener('click', toggleFullscreen);
     btnFullscreenFloating.addEventListener('click', toggleFullscreen);
+    btnLoadModel.addEventListener('click', openModelPicker);
+    btnSelectModel.addEventListener('click', openModelPicker);
+
+    btnUsePlaceholder.addEventListener('click', function () {
+      hideLocalModelDialog();
+      if (!mechGroup) createPlaceholderMech();
+      setModelStatus('Placeholder', '');
+    });
+
+    modelFileInput.addEventListener('change', function (event) {
+      const file = event.target.files && event.target.files[0];
+      if (file) loadModelFromFile(file);
+    });
 
     sliderTOD.addEventListener('input', function (event) {
       updateTimeOfDay(parseFloat(event.target.value));
