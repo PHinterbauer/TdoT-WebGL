@@ -1,6 +1,6 @@
 # TdoT-WebGL — Armored Core 6: Raven WebGL Renderer
 
-A clean, single-file, offline WebGL 3D renderer of an Armored Core (placeholder for Raven from Armored Core VI: Fires of Rubicon), built with HTML5, WebGL, Three.js, and vanilla JavaScript.
+A clean, single-file, offline WebGL 3D renderer of Raven from Armored Core VI: Fires of Rubicon, built with HTML5, WebGL, Three.js, and vanilla JavaScript.
 
 [![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/HTML)
 [![WebGL](https://img.shields.io/badge/WebGL-990000?style=for-the-badge&logo=webgl&logoColor=white)](https://www.khronos.org/webgl/)
@@ -15,9 +15,9 @@ A clean, single-file, offline WebGL 3D renderer of an Armored Core (placeholder 
 
 TdoT-WebGL is a self-contained, offline-capable WebGL 3D renderer that brings an Armored Core-style mech to the browser in a single HTML file. Three.js (r128) is fully inlined, so there are no external dependencies, no build step, and no internet required — just open index.html in any modern browser.
 
-The scene features a placeholder Armored Core mech (dark armor with Raven-red accents) performing a dash animation: it leans forward slightly while its back thrusters flare with animated flames. A minimalistic backdrop (gradient sky sphere + dark ground + subtle grid) keeps the focus on the model, while an adjustable sunlight slider lets you test different time-of-day lighting scenarios.
+The scene features Raven from Armored Core VI: Fires of Rubicon (dark armor with Raven-red accents) performing a dash animation: the mech leans forward slightly while its back thrusters flare with animated flames. A minimalistic backdrop (gradient sky sphere + dark ground + subtle grid) keeps the focus on the model, while an adjustable sunlight slider lets you test different time-of-day lighting scenarios.
 
-Placeholder model: The current render uses a procedurally generated placeholder mech. To load the real Raven model, drop a raven.glb (GLTF/GLB) file into this folder and set CONFIG.modelPath = './raven.glb' in app.js. See Model Format below.
+The real Raven model is loaded from raven.glb (GLTF/GLB). Set CONFIG.modelPath = null in app.js to fall back to the procedurally generated placeholder. See Model Format below.
 
 ---
 
