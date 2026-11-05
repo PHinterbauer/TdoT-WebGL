@@ -14,9 +14,9 @@
   // Configuration
   // --------------------------------------------------------------------------
   const CONFIG = {
-    // Set this to './raven.glb' once you provide the Armored Core model.
+    // Path to the real Raven model (GLTF/GLB). Set to './raven.glb' to load it.
     // Required format: GLTF / GLB (.glb recommended — single binary file).
-    modelPath: null,
+    modelPath: './raven.glb',
 
     // Placeholder mech colors
     mechColor: 0x1a1a1a,      // dark armor
