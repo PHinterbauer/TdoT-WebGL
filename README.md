@@ -17,7 +17,7 @@ TdoT-WebGL is a self-contained, offline-capable WebGL 3D renderer that brings an
 
 The scene features Raven from Armored Core VI: Fires of Rubicon (dark armor with Raven-red accents) performing a dash animation: the mech leans forward slightly while its back thrusters flare with animated flames. A minimalistic backdrop (gradient sky sphere + dark ground + subtle grid) keeps the focus on the model, while an adjustable sunlight slider lets you test different time-of-day lighting scenarios.
 
-The real Raven model is loaded from raven.glb (GLTF/GLB). Set CONFIG.modelPath = null in app.js to fall back to the procedurally generated placeholder. See Model Format below.
+The real Raven model is loaded from raven.glb (GLTF/GLB). Set CONFIG.modelPath = null in the inline configuration in index.html to use the procedurally generated placeholder. See Model Format below.
 
 ---
 
@@ -27,12 +27,12 @@ The real Raven model is loaded from raven.glb (GLTF/GLB). Set CONFIG.modelPath =
 |---------|-------------|
 | Dash Animation | Mech leans forward and back thrusters shoot animated flame pulses. |
 | Playback Controls | Play / Pause / Restart buttons for the animation cycle. |
-| Collapsible Sideboard | UI panel collapses/expands for unobstructed fullscreen viewing. |
+| Collapsible Sidebar | UI panel collapses/expands for unobstructed fullscreen viewing. |
 | Fullscreen Mode | Toggle fullscreen via button; UI chrome hides automatically. |
 | Adjustable Sunlight | Time-of-Day slider (0-24h) shifts sun color, position, intensity, sky gradient, ground color, and fog (night to dawn to day to dusk to night). |
 | Orbit Controls | Left-drag rotate, right-drag pan, scroll-wheel zoom; touch-drag supported. |
 | Minimalistic Backdrop | Gradient sky sphere, dark ground plane, subtle grid — never distracts from the mech. |
-| Single-File / Offline | index.html inlines Three.js (r128) and all app code. Runs entirely offline. |
+| Single-File / Offline | index.html embeds Three.js (r128), its matching GLTFLoader, and all application code. Runs without external libraries or an internet connection. |
 | Watermark | Semi-transparent credit in the corner: Paul Hinterbauer 5BHWII @ TGM HWI. |
 
 ---
@@ -42,12 +42,12 @@ The real Raven model is loaded from raven.glb (GLTF/GLB). Set CONFIG.modelPath =
 1. Clone or download this repository.
 2. Open index.html in any modern browser (Chrome, Firefox, Edge, Safari).
 3. Interact:
-   - Use the sideboard to play/pause/restart the dash animation.
+   - Use the sidebar to play/pause/restart the dash animation.
    - Drag the Time-of-Day slider to change lighting.
    - Collapse the sidebar or press the fullscreen button for an immersive view.
    - Orbit the camera: left-drag rotate right-drag pan scroll zoom.
 
-No server, no npm install, no internet connection required.
+No build step, package manager, or internet connection is required. A local static server is recommended because browsers can block GLB loading from file:// URLs.
 
 ---
 
@@ -71,7 +71,7 @@ To replace the placeholder mech with the actual Raven from Armored Core VI: Fire
 
 1. Obtain a GLTF / GLB model (.glb recommended — single binary containing geometry, materials, and animations).
 2. Save it as raven.glb next to index.html.
-3. In app.js, change:
+3. In the inline CONFIG object near the top of index.html, change:
 
    ```js
    const CONFIG = {
@@ -89,7 +89,7 @@ To replace the placeholder mech with the actual Raven from Armored Core VI: Fire
    };
    ```
 
-4. The app uses THREE.GLTFLoader and falls back gracefully to the placeholder if the model fails to load.
+4. The matching Three.js r128 GLTFLoader is embedded directly in index.html. The app falls back to the placeholder if the model fails to load.
 
 ### Recommended model source
 
@@ -116,12 +116,11 @@ Download in GLB format and place it in this folder.
 
 ```
 TdoT-WebGL/
-├── index.html          Single self-contained HTML file (Three.js + app inlined)
-├── three.min.js        Three.js r128 UMD library (reference copy; inlined in index.html)
-├── app.js              Application source (inlined in index.html)
-├── PROJECT_INFO.txt    Persistent project notes & model format instructions
-├── README.md           This file
-└── LICENSE             MIT License
+├── index.html          Single self-contained HTML file (Three.js + GLTFLoader + app code)
+├── raven.glb            Raven 3D model
+├── README.md            Project documentation
+├── PROJECT_INFO.txt     Project notes and model instructions
+└── LICENSE              MIT License
 ```
 
 ---
@@ -142,7 +141,7 @@ This lets you quickly test how the mech looks under different lighting scenarios
 
 ## Credits and Attribution
 
-- Three.js (r128): Copyright 2010-2021 Three.js Authors. MIT License.
+- Three.js (r128) and GLTFLoader (r128): Copyright 2010-2021 Three.js Authors. MIT License.
 - Placeholder mech: Procedurally generated with Three.js primitives.
 - Watermark: Paul Hinterbauer 5BHWII @ TGM HWI
 - Model inspiration: Raven from Armored Core VI: Fires of Rubicon (FromSoftware / Bandai Namco).
@@ -185,4 +184,4 @@ Watermark included in-render: Paul Hinterbauer 5BHWII @ TGM HWI
 
 ---
 
-Built for offline, single-file WebGL rendering. No build step. No dependencies. Just open and run.
+Built for offline, single-file WebGL rendering. No build step or external JavaScript files. Serve the folder locally and open index.html.
