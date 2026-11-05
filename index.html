@@ -120,6 +120,11 @@ body.fullscreen .fs-btn { display: flex !important; }
     <button id="btn-load-model" class="btn" type="button">Load Raven Model</button>
     <p class="hint">Choose raven.glb from the same folder when opening this page directly.</p>
   </div>
+  <div class="section">
+    <h3>View</h3>
+    <button id="btn-recenter" class="btn" type="button">Recenter View</button>
+    <p class="hint">Left-drag to rotate. Hold the middle mouse button to move the view slightly.</p>
+  </div>
   <div class="section actions">
     <button id="btn-toggle-sidebar" class="btn">&#9654; Expand</button>
     <button id="btn-fullscreen" class="btn">Fullscreen</button>
@@ -3850,10 +3855,13 @@ body.fullscreen .fs-btn { display: flex !important; }
   // --------------------------------------------------------------------------
   let scene, camera, renderer;
   let mechGroup, bodyMesh, headMesh, thrusterGroup;
-  let flameMeshes = [];       // thruster flame cones
+  let thrusterEffects = [];
+  let flameTexture, flameGlowTexture;
+  let dustPoints = null;
+  let dustPositions = null;
+  let dustVelocities = [];
   let sunLight, hemiLight, ambientLight;
   let skySphere;
-  let ground;
   let clock = new THREE.Clock();
 
   // Camera orbit state (simple custom controls)
@@ -4064,36 +4072,148 @@ body.fullscreen .fs-btn { display: flex !important; }
   }
 
   // --------------------------------------------------------------------------
-  // Backdrop (minimalistic: gradient sky sphere + dark ground)
+  // Backdrop (deep-sky flight environment with distant silhouettes and dust)
   // --------------------------------------------------------------------------
   function createBackdrop() {
-    // Sky sphere (rendered inside-out)
-    const skyGeo = new THREE.SphereGeometry(500, 60, 40);
+    scene.background = new THREE.Color(0x020309);
+    scene.fog = new THREE.FogExp2(0x050812, 0.0017);
+
+    // A large inside-out sky sphere keeps the background dark and atmospheric.
+    const skyGeo = new THREE.SphereGeometry(700, 48, 32);
     const skyMat = new THREE.MeshBasicMaterial({
       side: THREE.BackSide,
-      map: createGradientSkyTexture(0x7fb3d5, 0xbfe3fd),
+      map: createGradientSkyTexture(0x02040b, 0x111827),
+      depthWrite: false,
     });
     skySphere = new THREE.Mesh(skyGeo, skyMat);
     skySphere.scale.x = -1;
+    skySphere.frustumCulled = false;
     scene.add(skySphere);
 
-    // Ground plane
-    const groundGeo = new THREE.PlaneGeometry(200, 200);
-    const groundMat = new THREE.MeshStandardMaterial({
-      color: 0x121212,
-      roughness: 0.9,
-      metalness: 0.1,
+    // Distant mountain silhouettes form a subtle horizon without a visible floor.
+    const farMountainMat = new THREE.MeshBasicMaterial({
+      color: 0x0b111b,
+      fog: true,
+      depthWrite: true,
     });
-    ground = new THREE.Mesh(groundGeo, groundMat);
-    ground.rotation.x = -Math.PI / 2;
-    ground.receiveShadow = true;
-    scene.add(ground);
+    const nearMountainMat = new THREE.MeshBasicMaterial({
+      color: 0x070c14,
+      fog: true,
+      depthWrite: true,
+    });
 
-    // Subtle grid on ground
-    const grid = new THREE.GridHelper(200, 40, 0x333344, 0x111118);
-    grid.material.transparent = true;
-    grid.material.opacity = 0.35;
-    scene.add(grid);
+    for (let i = 0; i < 34; i++) {
+      const angle = (i / 34) * Math.PI * 2 + (Math.random() - 0.5) * 0.12;
+      const distance = 250 + Math.random() * 150;
+      const height = 18 + Math.random() * 38;
+      const width = 24 + Math.random() * 38;
+      const geometry = new THREE.ConeGeometry(1, 1, 5 + Math.floor(Math.random() * 3), 1);
+      const mountain = new THREE.Mesh(geometry, i % 3 === 0 ? nearMountainMat : farMountainMat);
+      mountain.position.set(
+        Math.cos(angle) * distance,
+        -20 + height * 0.5,
+        Math.sin(angle) * distance
+      );
+      mountain.scale.set(width, height, width * (0.55 + Math.random() * 0.25));
+      mountain.rotation.y = Math.random() * Math.PI;
+      mountain.frustumCulled = false;
+      scene.add(mountain);
+    }
+
+    // Sparse, very distant pine silhouettes add scale to the background.
+    const treeMat = new THREE.MeshBasicMaterial({
+      color: 0x080e15,
+      fog: true,
+      depthWrite: true,
+    });
+    for (let i = 0; i < 22; i++) {
+      const angle = (i / 22) * Math.PI * 2 + (Math.random() - 0.5) * 0.18;
+      const distance = 155 + Math.random() * 70;
+      const height = 5 + Math.random() * 9;
+      const tree = new THREE.Group();
+      const tiers = 3;
+      for (let tier = 0; tier < tiers; tier++) {
+        const tierHeight = height * (0.48 - tier * 0.08);
+        const crown = new THREE.Mesh(
+          new THREE.ConeGeometry(1, 1, 5, 1),
+          treeMat
+        );
+        crown.scale.set(height * (0.18 - tier * 0.025), tierHeight, height * (0.18 - tier * 0.025));
+        crown.position.y = tierHeight * 0.5 + tier * height * 0.2;
+        tree.add(crown);
+      }
+      tree.position.set(Math.cos(angle) * distance, -9, Math.sin(angle) * distance);
+      tree.rotation.y = Math.random() * Math.PI;
+      tree.frustumCulled = false;
+      scene.add(tree);
+    }
+
+    // Fine distant stars.
+    const starCount = 900;
+    const starPositions = new Float32Array(starCount * 3);
+    for (let i = 0; i < starCount; i++) {
+      const radius = 300 + Math.random() * 350;
+      const azimuth = Math.random() * Math.PI * 2;
+      const elevation = (Math.random() - 0.5) * Math.PI * 0.85;
+      starPositions[i * 3] = Math.cos(azimuth) * Math.cos(elevation) * radius;
+      starPositions[i * 3 + 1] = Math.sin(elevation) * radius;
+      starPositions[i * 3 + 2] = Math.sin(azimuth) * Math.cos(elevation) * radius;
+    }
+    const starGeometry = new THREE.BufferGeometry();
+    starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+    const starMaterial = new THREE.PointsMaterial({
+      color: 0x9eb5d0,
+      size: 1.05,
+      transparent: true,
+      opacity: 0.28,
+      sizeAttenuation: false,
+      depthWrite: false,
+    });
+    const stars = new THREE.Points(starGeometry, starMaterial);
+    stars.frustumCulled = false;
+    scene.add(stars);
+
+    // Dust motes drift through the flight space around the mech.
+    const dustCount = 520;
+    const positions = new Float32Array(dustCount * 3);
+    dustVelocities = [];
+    for (let i = 0; i < dustCount; i++) {
+      positions[i * 3] = (Math.random() - 0.5) * 170;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 100;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 220;
+      dustVelocities.push(2.5 + Math.random() * 8);
+    }
+    const dustGeometry = new THREE.BufferGeometry();
+    dustGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    dustGeometry.attributes.position.setUsage(THREE.DynamicDrawUsage);
+    const dustMaterial = new THREE.PointsMaterial({
+      color: 0xa4b6c8,
+      size: 1.25,
+      transparent: true,
+      opacity: 0.32,
+      sizeAttenuation: true,
+      depthWrite: false,
+    });
+    dustPoints = new THREE.Points(dustGeometry, dustMaterial);
+    dustPoints.frustumCulled = false;
+    dustPositions = positions;
+    scene.add(dustPoints);
+  }
+
+  function updateBackdrop(dt) {
+    if (!dustPoints || !dustPositions) return;
+
+    for (let i = 0; i < dustVelocities.length; i++) {
+      const zIndex = i * 3 + 2;
+      dustPositions[zIndex] += dustVelocities[i] * dt;
+      if (dustPositions[zIndex] > 115) {
+        dustPositions[i * 3] = (Math.random() - 0.5) * 170;
+        dustPositions[i * 3 + 1] = (Math.random() - 0.5) * 100;
+        dustPositions[zIndex] = -115 - Math.random() * 40;
+      }
+    }
+
+    dustPoints.geometry.attributes.position.needsUpdate = true;
   }
 
   // --------------------------------------------------------------------------
@@ -4120,19 +4240,21 @@ body.fullscreen .fs-btn { display: flex !important; }
       mechGroup.parent.remove(mechGroup);
     }
 
-    flameMeshes.forEach(function (flame) {
-      if (flame.parent) flame.parent.remove(flame);
-      if (flame.geometry) flame.geometry.dispose();
-      if (flame.material) {
-        if (Array.isArray(flame.material)) {
-          flame.material.forEach(function (material) { material.dispose(); });
-        } else {
-          flame.material.dispose();
+    thrusterEffects.forEach(function (effect) {
+      if (effect.group.parent) effect.group.parent.remove(effect.group);
+      effect.group.traverse(function (child) {
+        if (child.geometry) child.geometry.dispose();
+        if (child.material) {
+          if (Array.isArray(child.material)) {
+            child.material.forEach(function (material) { material.dispose(); });
+          } else {
+            child.material.dispose();
+          }
         }
-      }
+      });
     });
 
-    flameMeshes = [];
+    thrusterEffects = [];
     mechGroup = null;
     bodyMesh = null;
     headMesh = null;
@@ -4168,10 +4290,15 @@ body.fullscreen .fs-btn { display: flex !important; }
       }
 
       const model = gltf.scene;
+      model.updateMatrixWorld(true);
       model.traverse(function (child) {
         if (child.isMesh) {
           child.castShadow = true;
           child.receiveShadow = true;
+
+          // Imported GLB bounds can be unreliable for unusual or transformed meshes.
+          // Disabling frustum culling prevents individual parts from popping in/out.
+          child.frustumCulled = false;
         }
       });
 
@@ -4196,8 +4323,8 @@ body.fullscreen .fs-btn { display: flex !important; }
       mechGroup = model;
       scene.add(mechGroup);
 
-      // Add simple thruster flames if the model has no animated thrusters.
-      attachPlaceholderFlames();
+      // Attach thruster effects to named engine/nozzle objects, with a geometry-based fallback.
+      attachModelThrusterEffects(model);
 
       setModelStatus('Raven loaded', 'success');
       const errorPanel = document.getElementById('model-error');
@@ -4298,10 +4425,238 @@ body.fullscreen .fs-btn { display: flex !important; }
     }
   }
 
-  function attachPlaceholderFlames() {
-    // If the loaded model has no thrusters, add simple flame cones at the back
-    const backPos = new THREE.Vector3(0, 0.6, -1.2);
-    createFlamePair(backPos);
+  function createFlameTextures() {
+    if (flameTexture && flameGlowTexture) return;
+
+    const flameCanvas = document.createElement('canvas');
+    flameCanvas.width = 128;
+    flameCanvas.height = 256;
+    const flameContext = flameCanvas.getContext('2d');
+
+    const plume = flameContext.createLinearGradient(0, 256, 0, 0);
+    plume.addColorStop(0.00, 'rgba(255,255,255,0)');
+    plume.addColorStop(0.12, 'rgba(255,120,45,0.35)');
+    plume.addColorStop(0.32, 'rgba(255,190,105,0.78)');
+    plume.addColorStop(0.52, 'rgba(100,205,255,0.94)');
+    plume.addColorStop(0.72, 'rgba(225,250,255,0.95)');
+    plume.addColorStop(0.88, 'rgba(255,255,255,0.30)');
+    plume.addColorStop(1.00, 'rgba(255,255,255,0)');
+    flameContext.fillStyle = plume;
+    flameContext.fillRect(0, 0, 128, 256);
+
+    const core = flameContext.createRadialGradient(64, 174, 3, 64, 174, 60);
+    core.addColorStop(0, 'rgba(255,255,255,0.8)');
+    core.addColorStop(0.35, 'rgba(120,220,255,0.38)');
+    core.addColorStop(1, 'rgba(30,130,255,0)');
+    flameContext.globalCompositeOperation = 'screen';
+    flameContext.fillStyle = core;
+    flameContext.fillRect(0, 0, 128, 256);
+
+    flameTexture = new THREE.CanvasTexture(flameCanvas);
+    flameTexture.encoding = THREE.sRGBEncoding;
+
+    const glowCanvas = document.createElement('canvas');
+    glowCanvas.width = 128;
+    glowCanvas.height = 128;
+    const glowContext = glowCanvas.getContext('2d');
+    const glow = glowContext.createRadialGradient(64, 64, 2, 64, 64, 62);
+    glow.addColorStop(0, 'rgba(225,250,255,0.95)');
+    glow.addColorStop(0.22, 'rgba(90,195,255,0.55)');
+    glow.addColorStop(0.58, 'rgba(40,115,255,0.16)');
+    glow.addColorStop(1, 'rgba(0,30,100,0)');
+    glowContext.fillStyle = glow;
+    glowContext.fillRect(0, 0, 128, 128);
+
+    flameGlowTexture = new THREE.CanvasTexture(glowCanvas);
+    flameGlowTexture.encoding = THREE.sRGBEncoding;
+  }
+
+  function createThrusterEffect(parent, position, sizeFactor) {
+    createFlameTextures();
+
+    const group = new THREE.Group();
+    group.position.copy(position);
+    group.renderOrder = 20;
+
+    const outerMaterial = new THREE.MeshBasicMaterial({
+      map: flameTexture,
+      color: 0xff7a36,
+      transparent: true,
+      opacity: 0,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+    });
+    const innerMaterial = new THREE.MeshBasicMaterial({
+      map: flameTexture,
+      color: 0x9feaff,
+      transparent: true,
+      opacity: 0,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+    });
+
+    const outer = new THREE.Mesh(
+      new THREE.ConeGeometry(0.19 * sizeFactor, 1.35 * sizeFactor, 32, 10, true),
+      outerMaterial
+    );
+    outer.rotation.x = -Math.PI / 2;
+    outer.position.z = -0.675 * sizeFactor;
+    outer.frustumCulled = false;
+    group.add(outer);
+
+    const inner = new THREE.Mesh(
+      new THREE.ConeGeometry(0.095 * sizeFactor, 0.92 * sizeFactor, 32, 10, true),
+      innerMaterial
+    );
+    inner.rotation.x = -Math.PI / 2;
+    inner.position.z = -0.48 * sizeFactor;
+    inner.frustumCulled = false;
+    group.add(inner);
+
+    const glow = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: flameGlowTexture,
+      color: 0x79dfff,
+      transparent: true,
+      opacity: 0,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    }));
+    glow.position.z = 0.04 * sizeFactor;
+    glow.scale.set(0.72 * sizeFactor, 0.72 * sizeFactor, 1);
+    group.add(glow);
+
+    parent.add(group);
+    thrusterEffects.push({
+      group: group,
+      outer: outer,
+      inner: inner,
+      glow: glow,
+      phase: Math.random() * Math.PI * 2,
+      sizeFactor: sizeFactor,
+    });
+  }
+
+  function getObjectLocalBounds(object, root) {
+    root.updateMatrixWorld(true);
+    const worldBounds = new THREE.Box3().setFromObject(object);
+    if (worldBounds.isEmpty()) return null;
+
+    const inverseRoot = new THREE.Matrix4().copy(root.matrixWorld).invert();
+    const localBounds = new THREE.Box3();
+    for (let x = 0; x <= 1; x++) {
+      for (let y = 0; y <= 1; y++) {
+        for (let z = 0; z <= 1; z++) {
+          const corner = new THREE.Vector3(
+            x ? worldBounds.max.x : worldBounds.min.x,
+            y ? worldBounds.max.y : worldBounds.min.y,
+            z ? worldBounds.max.z : worldBounds.min.z
+          );
+          corner.applyMatrix4(inverseRoot);
+          localBounds.expandByPoint(corner);
+        }
+      }
+    }
+    return localBounds;
+  }
+
+  function findModelThrusterAnchors(model) {
+    const modelBounds = getObjectLocalBounds(model, model);
+    if (!modelBounds) return [];
+
+    const modelSize = modelBounds.getSize(new THREE.Vector3());
+    const namePattern = /(thruster|booster|vernier|nozzle|exhaust|engine|jet)/i;
+    const candidates = [];
+
+    model.traverse(function (node) {
+      if (!node || node === model || !namePattern.test(node.name || '')) return;
+
+      // Ignore named children nested inside another named engine object.
+      let ancestor = node.parent;
+      while (ancestor && ancestor !== model) {
+        if (namePattern.test(ancestor.name || '')) return;
+        ancestor = ancestor.parent;
+      }
+
+      const bounds = getObjectLocalBounds(node, model);
+      if (!bounds) return;
+
+      const size = bounds.getSize(new THREE.Vector3());
+      const center = bounds.getCenter(new THREE.Vector3());
+      if (size.length() < 0.01) return;
+
+      // Place the plume just behind the named engine/nozzle geometry.
+      const position = new THREE.Vector3(
+        center.x,
+        center.y,
+        bounds.min.z - Math.max(size.z * 0.08, modelSize.z * 0.006)
+      );
+
+      for (let i = 0; i < candidates.length; i++) {
+        if (candidates[i].position.distanceTo(position) < Math.max(modelSize.length() * 0.012, 0.04)) {
+          return;
+        }
+      }
+
+      candidates.push({
+        position: position,
+        sizeFactor: THREE.MathUtils.clamp(Math.sqrt(size.x * size.y) * 1.2, 0.55, 1.8),
+      });
+    });
+
+    candidates.sort(function (a, b) {
+      return a.position.x - b.position.x;
+    });
+
+    if (candidates.length > 0) {
+      return candidates.slice(0, 8);
+    }
+
+    // Fallback for models without semantic node names: place a pair along the
+    // rear extent of the model instead of using fixed world-space coordinates.
+    const center = modelBounds.getCenter(new THREE.Vector3());
+    const rearZ = modelBounds.min.z + modelSize.z * 0.025;
+    const anchorY = modelBounds.min.y + modelSize.y * 0.34;
+    const offsetX = Math.max(modelSize.x * 0.22, 0.12);
+
+    return [
+      {
+        position: new THREE.Vector3(center.x - offsetX, anchorY, rearZ),
+        sizeFactor: THREE.MathUtils.clamp(modelSize.x * 0.12, 0.55, 1.5),
+      },
+      {
+        position: new THREE.Vector3(center.x + offsetX, anchorY, rearZ),
+        sizeFactor: THREE.MathUtils.clamp(modelSize.x * 0.12, 0.55, 1.5),
+      },
+    ];
+  }
+
+  function attachModelThrusterEffects(model) {
+    const anchors = findModelThrusterAnchors(model);
+    anchors.forEach(function (anchor) {
+      createThrusterEffect(model, anchor.position, anchor.sizeFactor);
+    });
+
+    if (anchors.length > 0) {
+      console.info('Attached ' + anchors.length + ' model-relative thruster effects.');
+    } else {
+      console.warn('No model thruster positions could be identified.');
+    }
+  }
+
+  function createFlamePair(centerPos) {
+    // The placeholder mech uses the same smooth exhaust effect as the GLB model.
+    createThrusterEffect(
+      mechGroup,
+      new THREE.Vector3(centerPos.x - 0.35, centerPos.y, centerPos.z),
+      1
+    );
+    createThrusterEffect(
+      mechGroup,
+      new THREE.Vector3(centerPos.x + 0.35, centerPos.y, centerPos.z),
+      1
+    );
   }
 
   // --------------------------------------------------------------------------
@@ -4473,15 +4828,22 @@ body.fullscreen .fs-btn { display: flex !important; }
 
     // Thrusters flare during dash
     const flameStrength = dashIntensity;
-    flameMeshes.forEach(function (flame, i) {
-      flame.visible = flameStrength > 0.02;
-      if (flameStrength > 0.02) {
-        // Scale flame length & opacity with intensity
-        const s = 0.6 + flameStrength * 1.4;
-        flame.scale.set(s, s, s);
-        flame.material.opacity = 0.35 + flameStrength * 0.55;
-        // additive flicker
-        flame.material.opacity += Math.sin(t * CONFIG.flamePulseSpeed + i) * 0.12 * flameStrength;
+    thrusterEffects.forEach(function (effect) {
+      const flicker = 0.92 + Math.sin(t * CONFIG.flamePulseSpeed + effect.phase) * 0.08;
+      effect.group.visible = flameStrength > 0.015;
+
+      if (flameStrength > 0.015) {
+        const length = (0.72 + flameStrength * 0.78) * flicker;
+        effect.outer.scale.set(1, 1, length);
+        effect.inner.scale.set(1, 1, length * 0.82);
+        effect.outer.material.opacity = (0.18 + flameStrength * 0.58) * flicker;
+        effect.inner.material.opacity = (0.22 + flameStrength * 0.68) * flicker;
+        effect.glow.material.opacity = 0.16 + flameStrength * 0.62;
+        effect.glow.scale.set(
+          (0.55 + flameStrength * 0.55) * effect.sizeFactor,
+          (0.55 + flameStrength * 0.55) * effect.sizeFactor,
+          1
+        );
       }
     });
 
@@ -4509,6 +4871,7 @@ body.fullscreen .fs-btn { display: flex !important; }
     const btnFullscreen = document.getElementById('btn-fullscreen');
     const btnFullscreenFloating = document.getElementById('btn-fullscreen-fs');
     const btnLoadModel = document.getElementById('btn-load-model');
+    const btnRecenter = document.getElementById('btn-recenter');
     const btnSelectModel = document.getElementById('btn-select-model');
     const btnUsePlaceholder = document.getElementById('btn-use-placeholder');
     const modelFileInput = document.getElementById('model-file-input');
@@ -4552,6 +4915,7 @@ body.fullscreen .fs-btn { display: flex !important; }
     btnFullscreen.addEventListener('click', toggleFullscreen);
     btnFullscreenFloating.addEventListener('click', toggleFullscreen);
     btnLoadModel.addEventListener('click', openModelPicker);
+    btnRecenter.addEventListener('click', recenterView);
     btnSelectModel.addEventListener('click', openModelPicker);
 
     btnUsePlaceholder.addEventListener('click', function () {
@@ -4607,16 +4971,34 @@ body.fullscreen .fs-btn { display: flex !important; }
   document.addEventListener('fullscreenchange', syncFullscreenState);
 
   // --------------------------------------------------------------------------
-  // Simple orbit controls (drag rotate, scroll zoom, right-drag pan)
+  // Camera navigation
+  // --------------------------------------------------------------------------
+  function recenterView() {
+    orbit.theta = Math.PI * 0.25;
+    orbit.phi = Math.PI * 0.35;
+    orbit.radius = 14;
+    orbit.target.set(0, 1, 0);
+    state.isDragging = false;
+    delete state.dragMode;
+    updateCamera();
+  }
+
+  // --------------------------------------------------------------------------
+  // Simple orbit controls (left-drag rotate, middle-drag pan, wheel zoom)
   // --------------------------------------------------------------------------
   function setupPointerControls() {
     const dom = renderer.domElement;
 
-    dom.addEventListener('mousedown', function (e) {
+    dom.addEventListener('mousedown', function (event) {
+      if (event.button === 1 || event.button === 2) event.preventDefault();
+
       state.isDragging = true;
-      state.lastMouse.set(e.clientX, e.clientY);
-      if (e.button === 2) state.dragMode = 'pan';
-      else state.dragMode = 'rotate';
+      state.lastMouse.set(event.clientX, event.clientY);
+      state.dragMode = (event.button === 1 || event.button === 2) ? 'pan' : 'rotate';
+    }, false);
+
+    dom.addEventListener('contextmenu', function (event) {
+      event.preventDefault();
     }, false);
 
     window.addEventListener('mouseup', function () {
@@ -4624,20 +5006,22 @@ body.fullscreen .fs-btn { display: flex !important; }
       delete state.dragMode;
     }, false);
 
-    dom.addEventListener('mousemove', function (e) {
+    dom.addEventListener('mousemove', function (event) {
       if (!state.isDragging) return;
-      const dx = e.clientX - state.lastMouse.x;
-      const dy = e.clientY - state.lastMouse.y;
-      state.lastMouse.set(e.clientX, e.clientY);
+      const dx = event.clientX - state.lastMouse.x;
+      const dy = event.clientY - state.lastMouse.y;
+      state.lastMouse.set(event.clientX, event.clientY);
 
       if (state.dragMode === 'rotate') {
         orbit.theta -= dx * 0.004;
         orbit.phi -= dy * 0.004;
         orbit.phi = Math.max(0.1, Math.min(Math.PI - 0.1, orbit.phi));
       } else if (state.dragMode === 'pan') {
-        const panSpeed = 0.001;
-        orbit.target.x += -dx * panSpeed;
-        orbit.target.y += dy * panSpeed;
+        // Keep the target close to the mech so it cannot be lost while panning.
+        const panSpeed = 0.003;
+        orbit.target.x = THREE.MathUtils.clamp(orbit.target.x - dx * panSpeed, -3.2, 3.2);
+        orbit.target.y = THREE.MathUtils.clamp(orbit.target.y + dy * panSpeed, -1.0, 3.2);
+        orbit.target.z = THREE.MathUtils.clamp(orbit.target.z, -2.0, 2.0);
       }
     }, false);
 
@@ -4672,6 +5056,11 @@ body.fullscreen .fs-btn { display: flex !important; }
       state.isDragging = false;
       delete state.dragMode;
     }, false);
+
+    dom.addEventListener('touchcancel', function () {
+      state.isDragging = false;
+      delete state.dragMode;
+    }, false);
   }
 
   // --------------------------------------------------------------------------
@@ -4701,6 +5090,7 @@ body.fullscreen .fs-btn { display: flex !important; }
     state.time += dt * state.speed;
 
     updateAnimation(dt);
+    updateBackdrop(dt);
     updateCamera();
 
     renderer.render(scene, camera);

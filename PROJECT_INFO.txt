@@ -48,9 +48,9 @@ FEATURES
   - Play, pause, and restart controls.
   - Collapsible sidebar and fullscreen mode.
   - Adjustable time-of-day lighting from 0 to 24 hours.
-  - Orbit controls: left-drag to rotate, right-drag to pan, wheel to zoom.
+  - Orbit controls: left-drag to rotate, middle-mouse drag to pan within limits, wheel to zoom.
   - Touch support with one-finger rotation.
-  - Gradient sky, dark ground plane, and subtle grid.
+  - Dark flight backdrop with distant mountain/tree silhouettes, stars, and drifting dust. No visible ground plane.
   - On-screen author watermark.
 
 MODEL CONFIGURATION
@@ -68,10 +68,11 @@ CONTROLS
   - Play / Pause / Restart: control the dash animation.
   - Time of Day: adjust sunlight and scene lighting.
   - Load Raven Model: select a local GLB file.
+  - Recenter View: restore the initial camera position and framing.
   - Collapse / Expand: hide or show the sidebar.
   - Fullscreen: use the sidebar button or floating top-right button.
   - Rotate: left mouse drag or one-finger touch drag.
-  - Pan: right mouse drag.
+  - Pan: hold the middle mouse button and drag. Movement is clamped to keep the model in view.
   - Zoom: mouse wheel.
 
 ANIMATION

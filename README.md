@@ -15,7 +15,7 @@ A clean, single-file, offline WebGL 3D renderer of Raven from Armored Core VI: F
 
 TdoT-WebGL is a self-contained, offline-capable WebGL 3D renderer that brings an Armored Core-style mech to the browser in a single HTML file. Three.js (r128) is fully inlined, so there are no external dependencies, no build step, and no internet required — just open index.html in any modern browser.
 
-The scene features Raven from Armored Core VI: Fires of Rubicon (dark armor with Raven-red accents) performing a dash animation: the mech leans forward slightly while its back thrusters flare with animated flames. A minimalistic backdrop (gradient sky sphere + dark ground + subtle grid) keeps the focus on the model, while an adjustable sunlight slider lets you test different time-of-day lighting scenarios.
+The scene features Raven from Armored Core VI: Fires of Rubicon (dark armor with Raven-red accents) performing a dash animation: the mech leans forward slightly while its back thrusters flare with animated flames. A distant flight backdrop (gradient sky sphere + dark ground + subtle grid) keeps the focus on the model, while an adjustable sunlight slider lets you test different time-of-day lighting scenarios.
 
 The real Raven model is loaded from raven.glb (GLTF/GLB). Set CONFIG.modelPath = null in the inline configuration in index.html to use the procedurally generated placeholder. See Model Format below.
 
@@ -30,8 +30,8 @@ The real Raven model is loaded from raven.glb (GLTF/GLB). Set CONFIG.modelPath =
 | Collapsible Sidebar | UI panel collapses/expands for unobstructed fullscreen viewing. |
 | Fullscreen Mode | Toggle fullscreen via button; UI chrome hides automatically. |
 | Adjustable Sunlight | Time-of-Day slider (0-24h) shifts sun color, position, intensity, sky gradient, ground color, and fog (night to dawn to day to dusk to night). |
-| Orbit Controls | Left-drag rotate, right-drag pan, scroll-wheel zoom; touch-drag supported. |
-| Minimalistic Backdrop | Gradient sky sphere, dark ground plane, subtle grid — never distracts from the mech. |
+| Orbit Controls | Left-drag rotate, middle-mouse drag pan with limits, scroll-wheel zoom; touch-drag supported. |
+| Flight Backdrop | Deep black sky, distant mountain and tree silhouettes, stars, and drifting dust. No visible ground plane. |
 | Single-File / Offline | index.html embeds Three.js (r128), its matching GLTFLoader, and all application code. The adjacent raven.glb can be selected locally when opened via file://. |
 | Watermark | Semi-transparent credit in the corner: Paul Hinterbauer 5BHWII @ TGM HWI. |
 
@@ -46,7 +46,7 @@ The real Raven model is loaded from raven.glb (GLTF/GLB). Set CONFIG.modelPath =
    - Use the sidebar to play/pause/restart the dash animation.
    - Drag the Time-of-Day slider to change lighting.
    - Collapse the sidebar or press the fullscreen button for an immersive view.
-   - Orbit the camera: left-drag rotate right-drag pan scroll zoom.
+   - Orbit the camera: left-drag to rotate, hold the middle mouse button to pan slightly, and use the wheel to zoom.
 
 No build step, package manager, local server, or internet connection is required. When opened via file://, the browser does not let the page read raven.glb by pathname, so the user selects the file once through the built-in file picker. The app then reads the selected file locally with FileReader and parses it with the embedded GLTFLoader. When hosted on HTTP(S), raven.glb loads automatically from the same folder.
 
@@ -61,9 +61,10 @@ No build step, package manager, local server, or internet connection is required
 | Collapse / Expand | Sidebar toggle — hide/show the UI panel. |
 | Fullscreen | Floating top-right button or sidebar button. |
 | Rotate Camera | Left mouse drag (or one-finger touch drag). |
-| Pan Camera | Right mouse drag. |
+| Pan Camera | Hold the middle mouse button and drag. Panning is limited to keep Raven in view. |
 | Zoom | Mouse wheel / pinch. |
 | Load Model | Click Load Raven Model and select a local .glb file. |
+| Recenter View | Restore the initial camera position and framing. |
 
 ---
 
