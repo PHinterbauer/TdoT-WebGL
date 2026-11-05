@@ -93,65 +93,100 @@ body.fullscreen .fs-btn { display: flex !important; }
 .model-dialog-note { margin-top: 14px; color: #858da3 !important; font-size: 11px !important; }
 .hint { font-size: 11.5px; color: #8a92a8; margin-top: 6px; line-height: 1.45; }
 </style>
+<style>
+:root{--ink:#e6e8e4;--line:rgba(173,186,178,.17);--accent:#d7a15c;--bright:#f0bd76;--green:#8db9a0}
+#canvas-container{z-index:1}
+#hotspot-layer{position:fixed;inset:0;z-index:30;pointer-events:none;overflow:hidden}
+.hotspot{position:absolute;width:30px;height:30px;margin:-15px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(245,194,128,.92);border-radius:50%;color:#fff4df;background:rgba(21,25,24,.88);box-shadow:0 0 0 4px rgba(215,161,92,.12),0 2px 12px rgba(0,0,0,.55);font:700 10px/1 Consolas,monospace;cursor:pointer;pointer-events:auto;transition:transform .18s,background .18s}
+.hotspot:after{content:attr(data-label);position:absolute;left:34px;top:50%;transform:translateY(-50%);opacity:0;white-space:nowrap;padding:6px 9px;border:1px solid var(--line);border-radius:4px;background:rgba(11,15,15,.96);color:#e7e9e4;font:700 10px/1.2 Inter,sans-serif;pointer-events:none}
+.hotspot:hover,.hotspot.active{transform:scale(1.14);background:#b77b3c;box-shadow:0 0 0 6px rgba(215,161,92,.17),0 0 18px rgba(215,161,92,.38)}
+.hotspot:hover:after,.hotspot.active:after{opacity:1}
+#sidebar{top:14px;left:14px;bottom:14px;width:370px;max-width:min(92vw,410px);display:flex;flex-direction:column;padding:20px 19px 15px;overflow-y:auto;overscroll-behavior:contain;background:linear-gradient(155deg,rgba(18,24,24,.985),rgba(10,14,15,.975));border:1px solid rgba(190,195,178,.2);border-radius:9px;box-shadow:0 18px 65px rgba(0,0,0,.48);backdrop-filter:blur(15px)}
+#sidebar.collapsed{transform:translateX(calc(-100% - 22px));opacity:.25;pointer-events:none}
+.sidebar-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:15px;border-bottom:1px solid var(--line)}
+.eyebrow{margin-bottom:5px;color:var(--accent);font:700 9px/1.2 Consolas,monospace;letter-spacing:.2em}
+.sidebar-header h1{color:#f0f0e9;font-size:18px;letter-spacing:.035em;font-weight:800}
+.sidebar-header h1 span{color:#a9b0aa;font-weight:500}
+.status{margin-left:auto;padding:5px 7px;border:1px solid rgba(141,185,160,.25);border-radius:3px;color:var(--green);background:rgba(72,116,88,.1);font:700 8px/1.2 Consolas,monospace;letter-spacing:.11em;text-transform:uppercase}
+.status[data-state=loading]{color:#e9bd76}.status[data-state=error]{color:#e78d7d}
+.identity-card{position:relative;margin:15px 0 18px;padding:13px;overflow:hidden;border:1px solid rgba(215,161,92,.28);border-radius:5px;background:linear-gradient(120deg,rgba(71,55,36,.32),rgba(21,27,26,.72))}
+.identity-card:before{content:"";position:absolute;top:0;bottom:0;left:0;width:3px;background:var(--accent)}
+.identity-top{display:flex;justify-content:space-between;color:var(--bright);font:700 9px/1.3 Consolas,monospace;letter-spacing:.13em}
+.identity-top span{color:#a0a99f}.identity-name{margin-top:8px;font-size:21px;font-weight:800;letter-spacing:.1em;color:#f1eee6}
+.identity-card p{margin-top:8px;color:#aeb5ad;font-size:11px;line-height:1.5}
+.identity-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid rgba(215,161,92,.16)}
+.identity-stats b{display:block;color:#e9e8df;font:700 12px/1.2 Consolas,monospace}
+.identity-stats small{display:block;margin-top:4px;color:#808c87;font:700 8px/1.2 Inter,sans-serif;letter-spacing:.12em}
+.section{margin-bottom:17px}.section-heading{display:flex;justify-content:space-between;margin-bottom:9px}
+.section-heading h2{color:#aab2aa;font:800 9px/1.2 Inter,sans-serif;letter-spacing:.17em}
+.section-heading span{color:#68736e;font:700 9px/1.2 Consolas,monospace}
+.component-list{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.component-button{display:flex;align-items:center;gap:8px;min-width:0;padding:8px;text-align:left;color:#cbd0c9;background:rgba(38,47,44,.42);border:1px solid rgba(173,186,178,.12);border-radius:4px;cursor:pointer}
+.component-button:hover{border-color:rgba(215,161,92,.5)}.component-button.active{border-color:rgba(215,161,92,.78);background:rgba(111,77,42,.28);color:#fff2df}
+.component-number{flex:0 0 23px;width:23px;height:23px;display:grid;place-items:center;border:1px solid rgba(215,161,92,.25);border-radius:3px;color:var(--bright);font:700 9px/1 Consolas,monospace}
+.component-copy{min-width:0}.component-copy b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px}
+.component-copy small{display:block;margin-top:3px;color:#85908a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:700 8px/1.15 Consolas,monospace}
+.detail-shell{min-height:172px;padding:13px;border:1px solid rgba(173,186,178,.16);border-radius:5px;background:linear-gradient(145deg,rgba(31,39,36,.72),rgba(17,22,22,.78))}
+.detail-kicker{color:var(--accent);font:700 9px/1.3 Consolas,monospace;letter-spacing:.14em}
+.detail-title{margin-top:6px;color:#f1f1e9;font-size:16px;font-weight:800;overflow-wrap:anywhere}
+.detail-maker{margin-top:5px;color:#9da79f;font:700 9px/1.35 Inter,sans-serif;letter-spacing:.09em;text-transform:uppercase}
+.detail-description{margin-top:10px;color:#c2c9c1;font-size:11px;line-height:1.58}
+.detail-subhead{margin-top:12px;color:#89958d;font:800 8px/1.2 Inter,sans-serif;letter-spacing:.16em}
+.detail-intel{margin-top:5px;padding-left:9px;border-left:2px solid rgba(215,161,92,.54);color:#b6bcb3;font-size:10px;line-height:1.55}
+.detail-facts{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:11px}
+.detail-fact{padding:7px 6px;background:rgba(6,10,10,.42);border:1px solid rgba(173,186,178,.1);border-radius:3px}
+.detail-fact b{display:block;color:#e8c28d;font:700 11px/1.2 Consolas,monospace;overflow-wrap:anywhere}
+.detail-fact small{display:block;margin-top:4px;color:#7f8b84;font:700 7px/1.2 Inter,sans-serif;letter-spacing:.08em}
+.detail-disclaimer{margin-top:9px;color:#78827c;font-size:9px;line-height:1.45}
+.motion-panel{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px;border:1px solid rgba(173,186,178,.14);border-radius:4px;background:rgba(24,31,29,.66)}
+.motion-copy{display:flex;align-items:center;gap:8px}.motion-led{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 9px rgba(141,185,160,.62)}
+.motion-copy b{display:block;color:#d9ded5;font-size:10px}.motion-copy small{display:block;margin-top:3px;color:#7d8982;font:700 8px/1.2 Consolas,monospace}
+.btn{padding:9px 10px;color:#d7ddd4;background:rgba(48,58,53,.72);border:1px solid rgba(173,186,178,.2);border-radius:4px;font-size:10px;font-weight:750;cursor:pointer}
+.btn:hover{color:#fff3df;border-color:rgba(215,161,92,.55)}.btn.active{color:var(--bright);border-color:rgba(215,161,92,.68);background:rgba(111,77,42,.24)}
+.actions{display:flex;gap:7px;margin-top:8px}.actions .btn{flex:1}
+.hint{margin-top:8px;color:#7f8a83;font-size:9px;line-height:1.5}
+.footer-note{margin-top:auto;padding-top:13px;border-top:1px solid var(--line);color:#6f7b73;font:8px/1.55 Consolas,monospace}
+.fs-btn,.side-btn{position:fixed;top:15px;z-index:120;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(207,213,197,.22);border-radius:50%;color:#e7e9df;background:rgba(16,21,20,.86);cursor:pointer;backdrop-filter:blur(8px)}
+.fs-btn{right:15px;font-size:17px}.side-btn{left:15px;display:none;font-size:18px}
+.fs-btn:hover,.side-btn:hover{color:var(--bright);border-color:rgba(215,161,92,.58)}
+body.sidebar-collapsed .side-btn{display:flex}body.fullscreen #sidebar,body.fullscreen #watermark{display:none!important}body.fullscreen .side-btn{display:none!important}
+#model-error{display:none;position:fixed;left:50%;bottom:18px;z-index:90;transform:translateX(-50%);max-width:min(760px,calc(100vw - 32px));padding:11px 15px;border:1px solid rgba(231,141,125,.5);border-radius:6px;background:rgba(35,16,14,.96);color:#ffd9d0;font-size:11px;line-height:1.45}
+#model-error.visible{display:block}
+.model-dialog{display:none;position:fixed;inset:0;z-index:150;align-items:center;justify-content:center;padding:20px;background:rgba(3,5,5,.82);backdrop-filter:blur(8px)}
+.model-dialog.visible{display:flex}.model-dialog-card{width:min(460px,100%);padding:25px;border:1px solid rgba(215,161,92,.42);border-radius:8px;background:rgba(17,23,22,.98)}
+.model-dialog-card h2{margin-bottom:12px;color:var(--bright);font-size:18px}.model-dialog-card p{color:#c4ccc3;font-size:12px;line-height:1.6}
+.model-dialog-actions{display:flex;gap:10px;margin-top:18px}.model-dialog-note{margin-top:13px;color:#858f87!important;font-size:10px!important}
+@media(max-width:680px){#sidebar{top:8px;left:8px;bottom:8px;width:min(355px,calc(100vw - 16px));padding:16px 14px 12px}.identity-card{margin:10px 0 13px}.section{margin-bottom:13px}.hotspot{width:26px;height:26px;margin:-13px}.fs-btn{top:10px;right:10px}.side-btn{top:10px;left:10px}}
+</style>
 </head>
 <body>
-<div id="canvas-container"></div>
-<div id="sidebar">
-  <div class="sidebar-header">
-    <h2>Raven Control</h2>
-    <div class="status" id="anim-status">Playing</div>
-  </div>
-  <div class="section">
-    <h3>Animation</h3>
-    <div class="btn-row">
-      <button id="btn-play" class="btn active">Play</button>
-      <button id="btn-pause" class="btn">Pause</button>
-      <button id="btn-restart" class="btn">Restart</button>
-    </div>
-    <p class="hint">Dash cycle: the mech leans forward; exhaust appears only on recognized nozzle nodes.</p>
-  </div>
-  <div class="section">
-    <h3>Sunlight (Time of Day)</h3>
-    <input type="range" id="slider-tod" min="0" max="24" step="1" value="12">
-    <div class="tod-label"><span id="tod-value">12:00</span></div>
-  </div>
-  <div class="section">
-    <h3>Model</h3>
-    <button id="btn-load-model" class="btn" type="button">Load Raven Model</button>
-    <p class="hint">Choose raven.glb from the same folder when opening this page directly.</p>
-  </div>
-  <div class="section">
-    <h3>View</h3>
-    <button id="btn-recenter" class="btn" type="button">Recenter View</button>
-    <p class="hint">Left-drag to rotate. Hold the middle mouse button to move the view slightly.</p>
-  </div>
-  <div class="section actions">
-    <button id="btn-toggle-sidebar" class="btn">&#9654; Expand</button>
-    <button id="btn-fullscreen" class="btn">Fullscreen</button>
-  </div>
-  <div class="footer-note">
-    Raven model is loaded from raven.glb. When opened directly, select the file once.
-  </div>
-</div>
-<button id="btn-open-sidebar" class="side-btn" type="button" title="Open sidebar" aria-label="Open sidebar">&#x2630;</button>
+<div id="canvas-container"></div><div id="hotspot-layer" aria-label="Interactive NIGHTFALL inspection points"></div>
+<aside id="sidebar">
+  <header class="sidebar-header"><div><div class="eyebrow">RUBICON // MOBILE WORKSHOP</div><h1>RAVEN <span>/ NIGHTFALL</span></h1></div><div class="status" id="anim-status" data-state="success">HANGAR 03</div></header>
+  <section class="identity-card">
+    <div class="identity-top"><span>AC // 51-016 GA</span><span>BRANCH</span></div><div class="identity-name">NIGHTFALL</div>
+    <p>Original Raven's Armored Core. Suspended in the maintenance bay for a full system inspection.</p>
+    <div class="identity-stats"><div><b>γ-3</b><small>ARENA CLASSIFICATION</small></div><div><b>C-2000</b><small>FRAME LINEAGE</small></div></div>
+  </section>
+  <section class="section"><div class="section-heading"><h2>COMPONENT INDEX</h2><span>09 SYSTEMS</span></div><div class="component-list" id="component-list"></div><p class="hint">Select a system here or click its numbered marker on the 3D model.</p></section>
+  <section class="section"><div class="section-heading"><h2>SELECTED COMPONENT</h2><span id="selected-index">00 / 09</span></div><div class="detail-shell" id="part-info" aria-live="polite"><div class="placeholder-copy"><h3>Inspection ready</h3><p>Choose a component to open its technical record and game intel.</p></div></div></section>
+  <section class="section"><div class="section-heading"><h2>SUSPENSION SYSTEM</h2><span>GANTRY 03</span></div>
+    <div class="motion-panel"><div class="motion-copy"><span class="motion-led"></span><div><b>Low-frequency sway</b><small>LOAD SECURED // 4-POINT SLING</small></div></div><button id="btn-motion" class="btn active" type="button">Hold Position</button></div>
+    <p class="hint">Left-drag to orbit. Hold the middle mouse button to pan. Scroll to zoom. Camera movement is bounded around the mech.</p>
+  </section>
+  <div class="actions"><button id="btn-load-model" class="btn" type="button">Replace GLB</button><button id="btn-recenter" class="btn" type="button">Recenter View</button></div>
+  <div class="actions"><button id="btn-toggle-sidebar" class="btn" type="button">Collapse Panel</button><button id="btn-fullscreen" class="btn" type="button">Fullscreen</button></div>
+  <div class="footer-note">FIELD DOSSIER // AC6: FIRES OF RUBICON<br>STORY INTEL MAY CONTAIN SPOILERS. PART BALANCE VALUES FOLLOW THE LISTED GAME REGULATION.</div>
+</aside>
+<button id="btn-open-sidebar" class="side-btn" type="button" title="Open inspection panel" aria-label="Open inspection panel">&#x2630;</button>
 <button id="btn-fullscreen-fs" class="fs-btn" type="button" title="Enter fullscreen" aria-label="Enter fullscreen">&#x26F6;</button>
-<div id="watermark"></div>
 <div id="model-error" role="alert" aria-live="polite"></div>
-<div id="local-model-dialog" class="model-dialog" role="dialog" aria-modal="true" aria-labelledby="local-model-title">
-  <div class="model-dialog-card">
-    <h2 id="local-model-title">Load Raven Model</h2>
-    <p>
-      You opened this page directly from your computer. Select <strong>raven.glb</strong>
-      from the same folder to load the 3D model.
-    </p>
-    <div class="model-dialog-actions">
-      <button id="btn-select-model" class="btn active" type="button">Choose raven.glb</button>
-      <button id="btn-use-placeholder" class="btn" type="button">Use Placeholder</button>
-    </div>
-    <p class="model-dialog-note">This one-time selection is required by browser security. No server or upload is involved.</p>
-  </div>
-</div>
-<input id="model-file-input" type="file" accept=".glb,model/gltf-binary" hidden>
+<div id="local-model-dialog" class="model-dialog" role="dialog" aria-modal="true" aria-labelledby="local-model-title"><div class="model-dialog-card">
+  <h2 id="local-model-title">Load NIGHTFALL model</h2><p>You opened this page directly from your computer. Select <strong>raven.glb</strong> from the same folder to load the 3D model.</p>
+  <div class="model-dialog-actions"><button id="btn-select-model" class="btn active" type="button">Choose raven.glb</button><button id="btn-use-placeholder" class="btn" type="button">Use Placeholder</button></div>
+  <p class="model-dialog-note">This one-time selection is required by browser security. The file is read locally and is not uploaded.</p>
+</div></div>
+<input id="model-file-input" type="file" accept=".glb,model/gltf-binary" hidden><span id="tod-value" hidden></span>
 <script>
 // ==== THREE.JS (inlined for offline use) ====
 
@@ -3818,107 +3853,173 @@ body.fullscreen .fs-btn { display: flex !important; }
   // --------------------------------------------------------------------------
   // Configuration
   // --------------------------------------------------------------------------
-  const CONFIG = {
-    // Path to the real Raven model (GLTF/GLB). Set to './raven.glb' to load it.
-    // Required format: GLTF / GLB (.glb recommended - single binary file).
-    modelPath: './raven.glb',
-
-    // Placeholder mech colors
-    mechColor: 0x1a1a1a,      // dark armor
-    accentColor: 0xff1a1a,    // raven red accent
-    glowColor: 0xff4d4d,
-    flameColor: 0xff3300,
-
-    // Animation
-    dashDuration: 1.6,        // seconds for one dash cycle
-    leanAngle: 0.25,          // radians forward lean during dash
-    flamePulseSpeed: 12,
-  };
+  const CONFIG = { modelPath: './raven.glb' };
 
   // --------------------------------------------------------------------------
   // State
   // --------------------------------------------------------------------------
   const state = {
-    isPlaying: true,
-    time: 0,                  // animation time (seconds)
-    speed: 1.0,
-    timeOfDay: 12,            // 0 - 24 hours
-    showSidebar: true,
-    fullscreen: false,
-    mouse: new THREE.Vector2(),
-    isDragging: false,
+    time: 0, showSidebar: true, fullscreen: false, motionEnabled: true,
+    selectedPart: null, isDragging: false, dragMoved: false, dragMode: null,
     lastMouse: new THREE.Vector2(),
   };
 
   // --------------------------------------------------------------------------
   // Three.js internals
   // --------------------------------------------------------------------------
-  let scene, camera, renderer;
-  let mechGroup, bodyMesh, headMesh, thrusterGroup;
-  let thrusterEffects = [];
-  let flameTexture, flameGlowTexture;
-  let dustPoints = null;
-  let dustPositions = null;
-  let dustVelocities = [];
-  let sunLight, hemiLight, ambientLight;
-  let skySphere;
-  let clock = new THREE.Clock();
+  let scene,camera,renderer,mechGroup,bodyMesh,headMesh,thrusterGroup;
+  let thrusterEffects=[],dustPoints=null,dustPositions=null,dustVelocities=[];
+  let hemiLight,ambientLight,hangarRoot=null,craneAssembly=null;
+  let suspensionCables=[],suspensionBaseY=5.1,inspectionAnchors={},hotspotElements={},inspectionBounds=null;
+  const raycaster=new THREE.Raycaster(),pickPointer=new THREE.Vector2();
+  let clock=new THREE.Clock();
 
   // Camera orbit state (simple custom controls)
-  const orbit = {
-    theta: Math.PI * 0.25,    // azimuth
-    phi: Math.PI * 0.35,      // polar
-    radius: 12,
-    target: new THREE.Vector3(0, 1, 0),
-  };
+  const orbit={theta:Math.PI*.25,phi:Math.PI*.39,radius:19,target:new THREE.Vector3(1.4,5.05,-.4)};
+
+
+  const INSPECTION_PARTS=[
+    {id:'head',n:'01',label:'Head',system:'HEAD UNIT',part:'HC-2000/BC SHADE EYE',maker:'Reuse and Development (RaD)',category:'Frame component',a:[.5,.87,.76],description:'A rebuilt scout-AC head unit. RaD’s original survey design was comprehensively reworked for combat by an anonymous independent mercenary group.',intel:'In-game, SHADE EYE flips its visor over the eyes when the pilot activates Target Assist or Assault Boost.',facts:[['770','AP'],['472','STABILITY'],['450','SCAN RANGE']],note:'Regulation 1.09.1 values. The custom rebuild trades the original minimalist profile for a more combat-focused sensor and protection package.'},
+    {id:'core',n:'02',label:'Core',system:'CORE',part:'CC-2000 ORBITER',maker:'Reuse and Development (RaD)',category:'Frame component',a:[.5,.66,.79],description:'The central C-2000 chassis section. ORBITER originated as a lightweight civilian platform rather than a purpose-built corporate war machine.',intel:'NIGHTFALL keeps the C-2000 family identity, but the original Raven’s machine is a modified combat build—not an untouched survey unit.',facts:[['RaD','MAKER'],['C-2000','FRAME FAMILY'],['LIGHT','DESIGN BIAS']],note:'The C-2000 family was conceived for exploration and utility work. Its parts were adapted for combat on Rubicon.'},
+    {id:'arms',n:'03',label:'Arms',system:'ARM UNITS',part:'AC-2000 TOOL ARM',maker:'Reuse and Development (RaD)',category:'Frame component',a:[.5,.5,.78],description:'Utility arms built around handling and salvage work. Their presence on NIGHTFALL is a reminder that the C-2000 platform began life outside the front line.',intel:'The same TOOL ARM family is also used by C4-621’s starting AC, LOADER 4. NIGHTFALL shares a visible piece of its frame lineage with the player’s early machine.',facts:[['1,990','AP'],['RaD','MAKER'],['UTILITY','ORIGIN']],note:'NIGHTFALL uses the AC-2000 TOOL ARM frame part. The weapon mounted in each hand is a separate assembly slot.'},
+    {id:'legs',n:'04',label:'Legs',system:'LEG UNITS',part:'2C-2000 CRAWLER',maker:'Reuse and Development (RaD)',category:'Frame component',a:[.5,.19,.78],description:'A lightweight bipedal leg frame from the C-2000 line. It provides the familiar humanoid AC stance while retaining the frame’s utility-first heritage.',intel:'The original C-2000 platform was designed for exploration and space-related work. NIGHTFALL turns that civilian architecture into a combat machine through its weapon loadout and custom systems.',facts:[['BIPED','LEG TYPE'],['C-2000','FRAME FAMILY'],['LIGHT','DESIGN BIAS']],note:'The legs are a frame part, not a weapon system. Their load and mobility trade-offs are part of the overall AC assembly.'},
+    {id:'right-arm',n:'05',label:'R-Hand',system:'RIGHT ARM WEAPON',part:'RF-025 SCUDDER',maker:'Balam Industries',category:'Arm weapon',a:[.8,.51,.96],description:'A conventional kinetic assault rifle. SCUDDER supplies reliable direct-fire pressure while the heavier shoulder systems and pile bunker cover burst damage.',intel:'NIGHTFALL’s ranged weapon gives the build a practical way to maintain pressure while approaching for the ASHMEAD strike or setting up an explosive stagger.',facts:[['KINETIC','DAMAGE'],['ASSAULT','CLASS'],['BALAM','MAKER']],note:'Performance numbers depend on the game regulation; this dossier focuses on the confirmed NIGHTFALL loadout and weapon role.'},
+    {id:'left-arm',n:'06',label:'L-Hand',system:'LEFT ARM WEAPON',part:'PB-033M ASHMEAD',maker:'Balam Industries',category:'Arm weapon',a:[.2,.47,.96],description:'A pile bunker: a close-range kinetic weapon that drives a heavy stake into the target. It is built around commitment and impact rather than sustained fire.',intel:'The ASHMEAD is the threat that makes close range dangerous. A stagger window is the ideal moment to commit to the pile-bunker hit.',facts:[['KINETIC','DAMAGE'],['PILE BUNKER','CLASS'],['BALAM','MAKER']],note:'This is a melee weapon, not a conventional blade. Its effectiveness is tied to timing and landing the strike at close range.'},
+    {id:'right-back',n:'07',label:'R-Back',system:'RIGHT BACK UNIT',part:'SONGBIRDS',maker:'Melinite',category:'Back weapon',a:[.76,.82,.28],description:'A shoulder-mounted grenade cannon. It adds explosive impact and burst damage to the relatively light C-2000 frame.',intel:'SONGBIRDS is a familiar AC6 pressure tool: explosive hits can rapidly build ACS strain, making it useful for creating the opening that a close-range weapon needs.',facts:[['EXPLOSIVE','DAMAGE'],['GRENADE','CLASS'],['MELINITE','MAKER']],note:'Mounted on the right back hardpoint of the original NIGHTFALL assembly.'},
+    {id:'left-back',n:'08',label:'L-Back',system:'LEFT BACK UNIT',part:'BML-G1/P32DUO-03',maker:'Furlong Dynamics',category:'Back weapon',a:[.24,.82,.28],description:'A shoulder-mounted dual missile launcher. It gives NIGHTFALL a guided ranged option alongside the direct-fire rifle and explosive cannon.',intel:'The DUO designation identifies this as a paired missile system. It is the build’s tracking pressure rather than another close-range commitment.',facts:[['MISSILE','DAMAGE'],['DUAL','LAUNCHER'],['FURLONG','MAKER']],note:'Mounted on the left back hardpoint of the original NIGHTFALL assembly.'},
+    {id:'internal',n:'09',label:'Internal',system:'INTERNAL SYSTEMS',part:'BOOSTER / FCS / GENERATOR',maker:'RaD · Balam · Dafeng',category:'Propulsion and control',a:[.5,.56,.16],description:'NIGHTFALL’s documented internal setup combines the BST-G1/P10 booster, FC-006 ABBOT fire-control system, and DF-GN-02 LING-TAI generator.',intel:'The original Raven’s NIGHTFALL keeps the C-2000 frame but upgrades key internal systems. LING-TAI is a Dafeng generator commissioned by Balam, while ABBOT is a Balam FCS tuned toward close-range assistance.',facts:[['BST-G1/P10','BOOSTER'],['FC-006','FCS'],['DF-GN-02','GENERATOR']],note:'These three internal units are grouped because they are not distinct exterior mesh parts in the supplied model.'}
+  ];
+  function addHangarBox(parent,w,h,d,x,y,z,material){
+    const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);
+    mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;
+  }
+  function addHangarBeam(parent,start,end,t,material){
+    const direction=new THREE.Vector3().subVectors(end,start),length=direction.length();
+    const mesh=new THREE.Mesh(new THREE.BoxGeometry(t,length,t),material);
+    mesh.position.copy(start).add(end).multiplyScalar(.5);
+    mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),direction.normalize());
+    mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;
+  }
+  function makeConcreteTexture(){
+    const canvas=document.createElement('canvas');canvas.width=512;canvas.height=512;
+    const ctx=canvas.getContext('2d');ctx.fillStyle='#353b39';ctx.fillRect(0,0,512,512);
+    const gradient=ctx.createLinearGradient(0,0,512,512);
+    gradient.addColorStop(0,'rgba(150,155,142,.12)');gradient.addColorStop(.5,'rgba(15,20,18,0)');gradient.addColorStop(1,'rgba(6,9,8,.25)');
+    ctx.fillStyle=gradient;ctx.fillRect(0,0,512,512);
+    for(let i=0;i<4200;i++){ctx.fillStyle='rgba(210,214,198,'+(Math.random()*.12).toFixed(3)+')';const d=Math.random()*2+.3;ctx.fillRect(Math.random()*512,Math.random()*512,d,d);}
+    for(let i=0;i<7;i++){const x=Math.random()*512,y=Math.random()*512,r=18+Math.random()*38;const g=ctx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,'rgba(13,17,15,.24)');g.addColorStop(1,'rgba(13,17,15,0)');ctx.fillStyle=g;ctx.fillRect(x-r,y-r,r*2,r*2);}
+    ctx.strokeStyle='rgba(180,184,164,.09)';ctx.lineWidth=1;
+    for(let x=0;x<=512;x+=128){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,512);ctx.stroke();}
+    for(let y=0;y<=512;y+=128){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(512,y);ctx.stroke();}
+    const texture=new THREE.CanvasTexture(canvas);texture.wrapS=THREE.RepeatWrapping;texture.wrapT=THREE.RepeatWrapping;texture.repeat.set(5,5);texture.encoding=THREE.sRGBEncoding;return texture;
+  }
+  function createInspectionAnchors(bounds){
+    const size=bounds.getSize(new THREE.Vector3());inspectionBounds=bounds.clone();inspectionAnchors={};
+    INSPECTION_PARTS.forEach(function(p){inspectionAnchors[p.id]=new THREE.Vector3(bounds.min.x+size.x*p.a[0],bounds.min.y+size.y*p.a[1],bounds.min.z+size.z*p.a[2]);});
+    const layer=document.getElementById('hotspot-layer');if(!layer)return;
+    layer.innerHTML='';hotspotElements={};
+    INSPECTION_PARTS.forEach(function(p){
+      const b=document.createElement('button');b.type='button';b.className='hotspot';b.textContent=p.n;b.dataset.part=p.id;b.dataset.label=p.label+' / '+p.part;
+      b.setAttribute('aria-label','Inspect '+p.system+': '+p.part);
+      b.addEventListener('click',function(e){e.stopPropagation();selectInspectionPart(p.id);});
+      layer.appendChild(b);hotspotElements[p.id]=b;
+    });
+    selectInspectionPart('head');
+  }
+  function selectInspectionPart(id){
+    const p=INSPECTION_PARTS.find(function(x){return x.id===id;});if(!p)return;state.selectedPart=id;
+    const list=document.getElementById('component-list');
+    if(list)list.querySelectorAll('[data-part]').forEach(function(b){b.classList.toggle('active',b.dataset.part===id);});
+    Object.keys(hotspotElements).forEach(function(k){hotspotElements[k].classList.toggle('active',k===id);});
+    const idx=document.getElementById('selected-index');if(idx)idx.textContent=String(INSPECTION_PARTS.indexOf(p)+1).padStart(2,'0')+' / 09';
+    const target=document.getElementById('part-info');if(!target)return;
+    const facts=p.facts.map(function(f){return '<div class="detail-fact"><b>'+f[0]+'</b><small>'+f[1]+'</small></div>';}).join('');
+    target.innerHTML='<div class="detail-kicker">'+p.system+' // '+p.category.toUpperCase()+'</div>'+
+      '<div class="detail-title">'+p.part+'</div><div class="detail-maker">'+p.maker+'</div>'+
+      '<p class="detail-description">'+p.description+'</p><div class="detail-subhead">TECHNICAL RECORD</div>'+
+      '<div class="detail-facts">'+facts+'</div><div class="detail-subhead">GAME INTEL</div>'+
+      '<p class="detail-intel">'+p.intel+'</p><p class="detail-disclaimer">'+p.note+'</p>';
+  }
+  function renderComponentIndex(){
+    const list=document.getElementById('component-list');if(!list)return;list.innerHTML='';
+    INSPECTION_PARTS.forEach(function(p){
+      const b=document.createElement('button');b.type='button';b.className='component-button';b.dataset.part=p.id;
+      b.innerHTML='<span class="component-number">'+p.n+'</span><span class="component-copy"><b>'+p.label+'</b><small>'+p.part+'</small></span>';
+      b.addEventListener('click',function(){selectInspectionPart(p.id);});list.appendChild(b);
+    });
+  }
+  function updateInspectionHotspots(){
+    if(!mechGroup||!renderer||!camera)return;
+    const w=renderer.domElement.clientWidth,h=renderer.domElement.clientHeight;
+    INSPECTION_PARTS.forEach(function(p){
+      const el=hotspotElements[p.id],anchor=inspectionAnchors[p.id];if(!el||!anchor)return;
+      const v=mechGroup.localToWorld(anchor.clone()).project(camera);
+      const visible=v.z>-1&&v.z<1&&v.x>-1.15&&v.x<1.15&&v.y>-1.15&&v.y<1.15;
+      el.style.display=visible?'flex':'none';
+      if(visible){el.style.left=((v.x*.5+.5)*w)+'px';el.style.top=((-v.y*.5+.5)*h)+'px';}
+    });
+  }
+  function pickInspectionPart(x,y){
+    if(!mechGroup||!renderer||!camera)return;
+    const rect=renderer.domElement.getBoundingClientRect();
+    pickPointer.set(((x-rect.left)/rect.width)*2-1,-((y-rect.top)/rect.height)*2+1);
+    raycaster.setFromCamera(pickPointer,camera);
+    const hits=raycaster.intersectObjects(mechGroup.children,true);if(!hits.length)return;
+    const point=mechGroup.worldToLocal(hits[0].point.clone());let id=null,best=Infinity;
+    Object.keys(inspectionAnchors).forEach(function(k){const d=inspectionAnchors[k].distanceTo(point);if(d<best){best=d;id=k;}});
+    if(id)selectInspectionPart(id);
+  }
+  function createDynamicCable(start,end,radius,material){
+    const mesh=new THREE.Mesh(new THREE.CylinderGeometry(radius,radius,1,8),material);mesh.castShadow=true;hangarRoot.add(mesh);
+    suspensionCables.push({mesh:mesh,start:start.clone(),end:end.clone()});
+  }
+  function updateSuspensionRig(){
+    if(!mechGroup||!craneAssembly)return;const up=new THREE.Vector3(0,1,0);
+    suspensionCables.forEach(function(c){
+      const start=craneAssembly.localToWorld(c.start.clone()),end=mechGroup.localToWorld(c.end.clone());
+      const dir=new THREE.Vector3().subVectors(end,start),len=dir.length();
+      c.mesh.position.copy(start).add(end).multiplyScalar(.5);c.mesh.quaternion.setFromUnitVectors(up,dir.normalize());c.mesh.scale.set(1,len,1);
+    });
+  }
+  function createSuspensionRig(bounds){
+    const steel=new THREE.MeshStandardMaterial({color:0x69716d,metalness:.84,roughness:.32});
+    const clampMat=new THREE.MeshStandardMaterial({color:0x59605b,metalness:.72,roughness:.38});
+    const safety=new THREE.MeshStandardMaterial({color:0xb77b3e,metalness:.38,roughness:.48});
+    const size=bounds.getSize(new THREE.Vector3());
+    craneAssembly=new THREE.Group();hangarRoot.add(craneAssembly);
+    addHangarBox(craneAssembly,4.2,.16,.24,0,10.48,0,steel);
+    addHangarBox(craneAssembly,.34,.35,.38,-1.9,10.36,0,clampMat);addHangarBox(craneAssembly,.34,.35,.38,1.9,10.36,0,clampMat);
+    addHangarBox(craneAssembly,.16,.32,.3,0,10.28,0,safety);
+    const hoist=new THREE.Mesh(new THREE.CylinderGeometry(.045,.045,1,10),steel);hoist.position.set(0,11.2,0);hoist.scale.y=1.45;craneAssembly.add(hoist);
+    const hook=new THREE.Mesh(new THREE.TorusGeometry(.17,.035,8,20,Math.PI*1.5),steel);hook.position.set(0,10.55,0);hook.rotation.z=Math.PI;craneAssembly.add(hook);
+    const points=[[.28,.80,.22,-1.72,-.15],[.72,.80,.22,1.72,-.15],[.28,.80,.78,-1.72,.15],[.72,.80,.78,1.72,.15]];
+    const cableMat=new THREE.MeshStandardMaterial({color:0x9b9d91,metalness:.9,roughness:.28});
+    points.forEach(function(p){
+      const end=new THREE.Vector3(bounds.min.x+size.x*p[0],bounds.min.y+size.y*p[1],bounds.min.z+size.z*p[2]);
+      const start=new THREE.Vector3(p[3],10.42,p[4]);createDynamicCable(start,end,.025,cableMat);
+      const clamp=new THREE.Group();clamp.position.copy(end);
+      addHangarBox(clamp,.36,.16,.38,0,0,0,clampMat);addHangarBox(clamp,.13,.19,.4,0,-.015,0,safety);mechGroup.add(clamp);
+    });
+    updateSuspensionRig();
+  }
+  function disposeSuspensionRig(){
+    suspensionCables.forEach(function(c){if(c.mesh.parent)c.mesh.parent.remove(c.mesh);c.mesh.geometry.dispose();if(c.mesh.material)c.mesh.material.dispose();});
+    suspensionCables=[];craneAssembly=null;
+  }
 
   // --------------------------------------------------------------------------
   // Initialization
   // --------------------------------------------------------------------------
-  function init() {
-    // Scene
-    scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x080810, 0.018);
-
-    // Camera
-    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 2000);
-    camera.position.set(0, 3, 12);
-
-    // Renderer
-    renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    renderer.outputEncoding = THREE.sRGBEncoding;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.12;
+  function init(){
+    scene=new THREE.Scene();scene.background=new THREE.Color(0x111716);scene.fog=new THREE.Fog(0x171d1b,30,64);
+    camera=new THREE.PerspectiveCamera(43,window.innerWidth/window.innerHeight,.1,250);camera.position.set(12,10,15);
+    renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(window.innerWidth,window.innerHeight);
+    renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputEncoding=THREE.sRGBEncoding;
+    renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.08;
     document.getElementById('canvas-container').appendChild(renderer.domElement);
-
-    // Lights
-    createLights();
-
-    // Backdrop (minimalistic sky + ground)
-    createBackdrop();
-
-    // Model / placeholder
-    if (CONFIG.modelPath) {
-      loadModel(CONFIG.modelPath);
-    } else {
-      createPlaceholderMech();
-    }
-
-    // UI wiring
-    wireUI();
-
-    // Resize
-    window.addEventListener('resize', onWindowResize, false);
-
-    // Watermark (slightly transparent, corner)
-    createWatermark();
-
-    // Start loop
-    animate();
+    createLights();createBackdrop();if(CONFIG.modelPath)loadModel(CONFIG.modelPath);else createPlaceholderMech();
+    wireUI();window.addEventListener('resize',onWindowResize,false);createWatermark();recenterView();animate();
   }
 
   function createWatermark() {
@@ -3987,42 +4088,14 @@ function createStudioEnvironment() {
   // --------------------------------------------------------------------------
   // Lights
   // --------------------------------------------------------------------------
-  function createLights() {
+  function createLights(){
     createStudioEnvironment();
-
-    ambientLight = new THREE.AmbientLight(0x8298b7, 0.78);
-    scene.add(ambientLight);
-
-    hemiLight = new THREE.HemisphereLight(0xa9c9ef, 0x30394a, 0.9);
-    scene.add(hemiLight);
-
-    // Fixed studio lights keep the mech readable even at night.
-    const keyLight = new THREE.DirectionalLight(0xe2edff, 1.55);
-    keyLight.position.set(-9, 12, 14);
-    scene.add(keyLight);
-
-    const fillLight = new THREE.DirectionalLight(0x6f91c3, 0.82);
-    fillLight.position.set(11, 4, 8);
-    scene.add(fillLight);
-
-    const rimLight = new THREE.DirectionalLight(0x6896d0, 1.35);
-    rimLight.position.set(5, 10, -13);
-    scene.add(rimLight);
-
-    sunLight = new THREE.DirectionalLight(0xffffff, 0.5);
-    sunLight.castShadow = true;
-    sunLight.shadow.mapSize.width = 2048;
-    sunLight.shadow.mapSize.height = 2048;
-    sunLight.shadow.camera.near = 0.5;
-    sunLight.shadow.camera.far = 100;
-    sunLight.shadow.camera.left = -30;
-    sunLight.shadow.camera.right = 30;
-    sunLight.shadow.camera.top = 30;
-    sunLight.shadow.camera.bottom = -30;
-    sunLight.shadow.bias = -0.0005;
-    scene.add(sunLight);
-
-    updateTimeOfDay(state.timeOfDay);
+    ambientLight=new THREE.AmbientLight(0xb4b8a8,.78);scene.add(ambientLight);
+    hemiLight=new THREE.HemisphereLight(0xd3c6a7,0x353a35,.82);scene.add(hemiLight);
+    const key=new THREE.DirectionalLight(0xffd6a3,2.1);key.position.set(-8,14,9);key.castShadow=true;
+    key.shadow.mapSize.set(2048,2048);key.shadow.camera.left=-16;key.shadow.camera.right=16;key.shadow.camera.top=18;key.shadow.camera.bottom=-12;key.shadow.bias=-.0004;scene.add(key);
+    const fill=new THREE.DirectionalLight(0x9ab7bd,1.15);fill.position.set(10,8,8);scene.add(fill);
+    const rim=new THREE.DirectionalLight(0xd39a58,1.45);rim.position.set(0,11,-10);scene.add(rim);
   }
 
   function updateTimeOfDay(hour) {
@@ -4133,159 +4206,77 @@ function createStudioEnvironment() {
   // --------------------------------------------------------------------------
   // Backdrop (deep-sky flight environment with distant silhouettes and dust)
   // --------------------------------------------------------------------------
-  function createBackdrop() {
-    scene.background = new THREE.Color(0x050a14);
-    scene.fog = new THREE.FogExp2(0x091321, 0.00135);
+  function createBackdrop(){
+    scene.background=new THREE.Color(0x101615);scene.fog=new THREE.Fog(0x171d1b,28,62);hangarRoot=new THREE.Group();scene.add(hangarRoot);
+    const concrete=new THREE.MeshStandardMaterial({color:0x858b80,map:makeConcreteTexture(),roughness:.94,metalness:.04});
+    const wall=new THREE.MeshStandardMaterial({color:0x303936,roughness:.86,metalness:.34});
+    const dark=new THREE.MeshStandardMaterial({color:0x202927,roughness:.88,metalness:.4});
+    const steel=new THREE.MeshStandardMaterial({color:0x454e4b,roughness:.5,metalness:.82});
+    const lightSteel=new THREE.MeshStandardMaterial({color:0x68716a,roughness:.44,metalness:.78});
+    const timber=new THREE.MeshStandardMaterial({color:0x554333,roughness:.88,metalness:.05});
+    const rust=new THREE.MeshStandardMaterial({color:0x754b31,roughness:.82,metalness:.32});
+    const safety=new THREE.MeshStandardMaterial({color:0xb77b3e,roughness:.58,metalness:.34});
+    const rubber=new THREE.MeshStandardMaterial({color:0x161b19,roughness:.98,metalness:.02});
+    const floor=new THREE.Mesh(new THREE.PlaneGeometry(48,42),concrete);floor.rotation.x=-Math.PI/2;floor.position.set(0,-.12,-1);floor.receiveShadow=true;hangarRoot.add(floor);
 
-    const skyGeometry = new THREE.SphereGeometry(900, 48, 32);
-    const skyMaterial = new THREE.MeshBasicMaterial({
-      side: THREE.BackSide,
-      map: createGradientSkyTexture(0x030711, 0x17283b),
-      depthWrite: false,
-    });
-    skySphere = new THREE.Mesh(skyGeometry, skyMaterial);
-    skySphere.scale.x = -1;
-    skySphere.frustumCulled = false;
-    scene.add(skySphere);
+    // Enclosed industrial workshop shell.
+    addHangarBox(hangarRoot,.7,11.5,34,-17,5.55,-1,wall);addHangarBox(hangarRoot,.7,11.5,34,17,5.55,-1,wall);
+    addHangarBox(hangarRoot,34,11.5,.7,0,5.55,-17,dark);
+    for(let z=-15;z<=13;z+=4){addHangarBox(hangarRoot,.34,11.7,.38,-16.55,5.7,z,timber);addHangarBox(hangarRoot,.34,11.7,.38,16.55,5.7,z,timber);}
+    for(let z=-15.5;z<=13.5;z+=.9){addHangarBox(hangarRoot,.08,10.4,.05,-16.58,5.6,z,steel);addHangarBox(hangarRoot,.08,10.4,.05,16.58,5.6,z,steel);}
+    // Rear roller door.
+    addHangarBox(hangarRoot,12.8,8.8,.14,0,4.75,-16.58,dark);addHangarBox(hangarRoot,13.2,.22,.34,0,9.25,-16.25,lightSteel);
+    addHangarBox(hangarRoot,.2,9.2,.35,-6.65,4.65,-16.25,lightSteel);addHangarBox(hangarRoot,.2,9.2,.35,6.65,4.65,-16.25,lightSteel);
+    for(let y=.65;y<9;y+=.72)addHangarBox(hangarRoot,12.5,.06,.12,0,y,-16.36,lightSteel);
+    // Exposed roof trusses.
+    addHangarBox(hangarRoot,.55,.52,34,0,14.65,-1,timber);addHangarBox(hangarRoot,.45,.42,34,-16,10.5,-1,steel);addHangarBox(hangarRoot,.45,.42,34,16,10.5,-1,steel);
+    for(let z=-15;z<=13;z+=4){addHangarBeam(hangarRoot,new THREE.Vector3(-16,10.55,z),new THREE.Vector3(0,14.55,z),.32,timber);addHangarBeam(hangarRoot,new THREE.Vector3(16,10.55,z),new THREE.Vector3(0,14.55,z),.32,timber);addHangarBeam(hangarRoot,new THREE.Vector3(-16,10.55,z),new THREE.Vector3(16,10.55,z),.28,steel);}
+    for(let x=-12;x<=12;x+=4)addHangarBox(hangarRoot,.16,.16,34,x,12.25+(12-Math.abs(x))*.16,-1,steel);
 
-    // Layered ridge silhouettes keep the horizon natural without introducing a floor.
-    function addMountainRange(radius, baseY, peakHeight, phase, color, opacity) {
-      const segments = 240;
-      const positions = [];
-      const indices = [];
+    // Overhead crane rails and travelling trolley.
+    craneAssembly=new THREE.Group();hangarRoot.add(craneAssembly);
+    addHangarBox(craneAssembly,.3,.34,26,-4.8,12.15,-1,lightSteel);addHangarBox(craneAssembly,.3,.34,26,4.8,12.15,-1,lightSteel);
+    addHangarBox(craneAssembly,10.3,.48,.64,0,12,-.65,safety);addHangarBox(craneAssembly,9.9,.25,.42,0,12.32,-.65,lightSteel);
+    addHangarBox(craneAssembly,1.25,.54,1.12,0,11.58,-.65,steel);addHangarBox(craneAssembly,.72,.28,.78,0,11.18,-.65,rubber);
+    addHangarBox(craneAssembly,.32,.20,1.35,0,11.48,-.65,safety);
+    for(let side=-1;side<=1;side+=2){addHangarBox(craneAssembly,.34,.24,.46,side*.55,12.36,-.65,rubber);addHangarBox(craneAssembly,.22,.18,.42,side*.55,11.94,-.65,lightSteel);}
 
-      for (let i = 0; i <= segments; i++) {
-        const angle = (i / segments) * Math.PI * 2;
-        const broadPeaks = Math.sin(angle * 3 + phase) * 0.42
-          + Math.sin(angle * 6.5 - phase * 0.7) * 0.22
-          + Math.sin(angle * 11 + phase * 1.8) * 0.10
-          + Math.sin(angle * 17 - phase) * 0.045;
-        const radiusVariation = Math.sin(angle * 5 + phase) * 4
-          + Math.sin(angle * 9 - phase) * 2;
-        const crestY = baseY + peakHeight * (0.52 + broadPeaks);
-
-        const topRadius = radius + radiusVariation;
-        const bottomRadius = radius + 34 + radiusVariation;
-        const x = Math.cos(angle);
-        const z = Math.sin(angle);
-
-        positions.push(x * topRadius, crestY, z * topRadius);
-        positions.push(x * bottomRadius, -58, z * bottomRadius);
-
-        if (i < segments) {
-          const a = i * 2;
-          const b = a + 1;
-          const c = a + 2;
-          const d = a + 3;
-          indices.push(a, b, c, b, d, c);
-        }
-      }
-
-      const geometry = new THREE.BufferGeometry();
-      geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-      geometry.setIndex(indices);
-      geometry.computeVertexNormals();
-
-      const material = new THREE.MeshBasicMaterial({
-        color: color,
-        side: THREE.DoubleSide,
-        transparent: opacity < 1,
-        opacity: opacity,
-        fog: true,
-        depthWrite: true,
-      });
-      const range = new THREE.Mesh(geometry, material);
-      range.frustumCulled = false;
-      scene.add(range);
+    // Service benches, lockers and salvage crates.
+    for(let side=-1;side<=1;side+=2){const x=side*12.7;
+      addHangarBox(hangarRoot,3.2,.22,1.4,x,1.18,-3,timber);addHangarBox(hangarRoot,.2,1.15,.2,x-1.35,.58,-3,steel);addHangarBox(hangarRoot,.2,1.15,.2,x+1.35,.58,-3,steel);
+      addHangarBox(hangarRoot,2.4,1.1,.85,x,.58,-10,dark);addHangarBox(hangarRoot,2.45,.12,.9,x,1.18,-10,safety);
+      for(let d=0;d<3;d++)addHangarBox(hangarRoot,2.18,.06,.04,x,.35+d*.3,-9.54,lightSteel);
+      addHangarBox(hangarRoot,1,.85,.85,x+side*2,.45,3,rust);addHangarBox(hangarRoot,1.05,.09,.9,x+side*2,.91,3,steel);addHangarBox(hangarRoot,.8,.7,.7,x-side*1.5,.38,8,dark);
     }
 
-    addMountainRange(300, -19, 13, 0.8, 0x1b2b3e, 0.9);
-    addMountainRange(205, -27, 14, 2.6, 0x101b2a, 1.0);
-
-    // A radial alpha texture turns WebGL points into soft particles instead of square pixels.
-    const particleCanvas = document.createElement('canvas');
-    particleCanvas.width = 64;
-    particleCanvas.height = 64;
-    const particleContext = particleCanvas.getContext('2d');
-    const particleGradient = particleContext.createRadialGradient(32, 32, 0, 32, 32, 31);
-    particleGradient.addColorStop(0, 'rgba(255,255,255,0.95)');
-    particleGradient.addColorStop(0.18, 'rgba(255,255,255,0.62)');
-    particleGradient.addColorStop(0.55, 'rgba(255,255,255,0.16)');
-    particleGradient.addColorStop(1, 'rgba(255,255,255,0)');
-    particleContext.fillStyle = particleGradient;
-    particleContext.fillRect(0, 0, 64, 64);
-    const particleTexture = new THREE.CanvasTexture(particleCanvas);
-
-    const starCount = 420;
-    const starPositions = new Float32Array(starCount * 3);
-    for (let i = 0; i < starCount; i++) {
-      const radius = 420 + Math.random() * 420;
-      const azimuth = Math.random() * Math.PI * 2;
-      const elevation = (Math.random() - 0.5) * Math.PI * 0.82;
-      starPositions[i * 3] = Math.cos(azimuth) * Math.cos(elevation) * radius;
-      starPositions[i * 3 + 1] = Math.sin(elevation) * radius;
-      starPositions[i * 3 + 2] = Math.sin(azimuth) * Math.cos(elevation) * radius;
-    }
-    const starGeometry = new THREE.BufferGeometry();
-    starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
-    const starMaterial = new THREE.PointsMaterial({
-      color: 0xb6c9df,
-      map: particleTexture,
-      size: 1.8,
-      sizeAttenuation: false,
-      transparent: true,
-      opacity: 0.22,
-      depthWrite: false,
-      blending: THREE.AdditiveBlending,
+    // Warm task lights.
+    const lamps=[[-10.5,9.4,-4.5],[10.5,9.4,-4.5],[-10.5,9.4,7],[10.5,9.4,7]];
+    lamps.forEach(function(p,i){
+      const fixture=new THREE.Mesh(new THREE.BoxGeometry(1.5,.12,.36),new THREE.MeshStandardMaterial({color:0xd4b27f,emissive:0xf6bd76,emissiveIntensity:1.1,roughness:.28}));
+      fixture.position.set(p[0],p[1],p[2]);hangarRoot.add(fixture);
+      const point=new THREE.PointLight(i%2===0?0xffd2a0:0xc1d5cc,18,22,1.6);point.position.set(p[0],p[1]-.5,p[2]);hangarRoot.add(point);
     });
-    const stars = new THREE.Points(starGeometry, starMaterial);
-    stars.frustumCulled = false;
-    scene.add(stars);
+    // Painted inspection bay perimeter.
+    const stripe=new THREE.MeshStandardMaterial({color:0xc18a46,roughness:.75,metalness:.08});
+    addHangarBox(hangarRoot,.12,.018,13,-5.2,-.095,-.5,stripe);addHangarBox(hangarRoot,.12,.018,13,5.2,-.095,-.5,stripe);
+    addHangarBox(hangarRoot,10.4,.018,.12,0,-.095,5.8,stripe);addHangarBox(hangarRoot,10.4,.018,.12,0,-.095,-6.8,stripe);
 
-    // Small, low-contrast motes add depth without competing with the model.
-    const dustCount = 220;
-    const positions = new Float32Array(dustCount * 3);
-    dustVelocities = [];
-    for (let i = 0; i < dustCount; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 150;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 82;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 210;
-      dustVelocities.push(1.1 + Math.random() * 3.4);
-    }
-
-    const dustGeometry = new THREE.BufferGeometry();
-    dustGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    dustGeometry.attributes.position.setUsage(THREE.DynamicDrawUsage);
-    const dustMaterial = new THREE.PointsMaterial({
-      color: 0x9db8d4,
-      map: particleTexture,
-      size: 2.2,
-      sizeAttenuation: false,
-      transparent: true,
-      opacity: 0.12,
-      depthWrite: false,
-      blending: THREE.AdditiveBlending,
-    });
-    dustPoints = new THREE.Points(dustGeometry, dustMaterial);
-    dustPoints.frustumCulled = false;
-    dustPositions = positions;
-    scene.add(dustPoints);
+    // Fine dust suspended in the workshop air.
+    const canvas=document.createElement('canvas');canvas.width=32;canvas.height=32;const ctx=canvas.getContext('2d');
+    const glow=ctx.createRadialGradient(16,16,0,16,16,15);glow.addColorStop(0,'rgba(255,237,205,.8)');glow.addColorStop(.28,'rgba(255,224,180,.36)');glow.addColorStop(1,'rgba(255,224,180,0)');
+    ctx.fillStyle=glow;ctx.fillRect(0,0,32,32);const tex=new THREE.CanvasTexture(canvas),count=150;
+    dustPositions=new Float32Array(count*3);dustVelocities=[];
+    for(let i=0;i<count;i++){dustPositions[i*3]=(Math.random()-.5)*27;dustPositions[i*3+1]=.5+Math.random()*9.4;dustPositions[i*3+2]=-13+Math.random()*24;dustVelocities.push(.06+Math.random()*.16);}
+    const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(dustPositions,3));geo.attributes.position.setUsage(THREE.DynamicDrawUsage);
+    const mat=new THREE.PointsMaterial({color:0xffd9a8,map:tex,size:.12,sizeAttenuation:true,transparent:true,opacity:.24,depthWrite:false,blending:THREE.AdditiveBlending});
+    dustPoints=new THREE.Points(geo,mat);dustPoints.frustumCulled=false;hangarRoot.add(dustPoints);
   }
 
-  function updateBackdrop(dt) {
-    if (!dustPoints || !dustPositions) return;
-
-    for (let i = 0; i < dustVelocities.length; i++) {
-      const zIndex = i * 3 + 2;
-      dustPositions[zIndex] += dustVelocities[i] * dt;
-      if (dustPositions[zIndex] > 110) {
-        dustPositions[i * 3] = (Math.random() - 0.5) * 150;
-        dustPositions[i * 3 + 1] = (Math.random() - 0.5) * 82;
-        dustPositions[zIndex] = -110 - Math.random() * 70;
-      }
-    }
-
-    dustPoints.geometry.attributes.position.needsUpdate = true;
+  function updateBackdrop(dt){
+    if(!dustPoints||!dustPositions)return;
+    for(let i=0;i<dustVelocities.length;i++){const x=i*3,y=x+1,z=x+2;dustPositions[y]+=dustVelocities[i]*dt;dustPositions[x]+=Math.sin(state.time*.3+i)*dt*.025;
+      if(dustPositions[y]>10.2){dustPositions[y]=.3;dustPositions[x]=(Math.random()-.5)*27;dustPositions[z]=-13+Math.random()*24;}}
+    dustPoints.geometry.attributes.position.needsUpdate=true;
   }
 
     // --------------------------------------------------------------------------
@@ -4307,30 +4298,10 @@ function createStudioEnvironment() {
     }
   }
 
-  function clearCurrentModel() {
-    if (mechGroup && mechGroup.parent) {
-      mechGroup.parent.remove(mechGroup);
-    }
-
-    thrusterEffects.forEach(function (effect) {
-      if (effect.group.parent) effect.group.parent.remove(effect.group);
-      effect.group.traverse(function (child) {
-        if (child.geometry) child.geometry.dispose();
-        if (child.material) {
-          if (Array.isArray(child.material)) {
-            child.material.forEach(function (material) { material.dispose(); });
-          } else {
-            child.material.dispose();
-          }
-        }
-      });
-    });
-
-    thrusterEffects = [];
-    mechGroup = null;
-    bodyMesh = null;
-    headMesh = null;
-    thrusterGroup = null;
+  function clearCurrentModel(){
+    if(mechGroup&&mechGroup.parent)mechGroup.parent.remove(mechGroup);disposeSuspensionRig();
+    Object.keys(hotspotElements).forEach(function(id){const el=hotspotElements[id];if(el&&el.parentNode)el.parentNode.removeChild(el);});
+    hotspotElements={};inspectionAnchors={};inspectionBounds=null;mechGroup=null;bodyMesh=null;headMesh=null;thrusterGroup=null;thrusterEffects=[];
   }
 
   function showLocalModelDialog() {
@@ -4355,59 +4326,20 @@ function createStudioEnvironment() {
     if (!mechGroup) createPlaceholderMech();
   }
 
-  function handleModelLoaded(gltf, sourceName) {
-    try {
-      if (!gltf || !gltf.scene) {
-        throw new Error('The GLB file did not contain a scene.');
-      }
-
-      const model = gltf.scene;
-      model.updateMatrixWorld(true);
-      model.traverse(function (child) {
-        if (child.isMesh) {
-          child.castShadow = true;
-          child.receiveShadow = true;
-
-          // Imported GLB bounds can be unreliable for unusual or transformed meshes.
-          // Disabling frustum culling prevents individual parts from popping in/out.
-          child.frustumCulled = false;
-        }
-      });
-
-      // Center and scale the model to fit the scene.
-      const box = new THREE.Box3().setFromObject(model);
-      const center = box.getCenter(new THREE.Vector3());
-      const size = box.getSize(new THREE.Vector3());
-      const maxDim = Math.max(size.x, size.y, size.z);
-
-      if (!Number.isFinite(maxDim) || maxDim <= 0) {
-        throw new Error('The GLB scene contains no visible geometry.');
-      }
-
-      clearCurrentModel();
-
-      const scale = 9 / maxDim;
-      model.scale.setScalar(scale);
-      model.position.sub(center.multiplyScalar(scale));
-      model.position.y = 0;
-      model.rotation.y = Math.PI * 0.15;
-
-      mechGroup = model;
-      scene.add(mechGroup);
-
-      // Attach exhaust effects only to compact, explicitly named nozzle nodes. Never guess from the full model bounds.
-      attachModelThrusterEffects(model);
-
-      setModelStatus('Raven loaded', 'success');
-      const errorPanel = document.getElementById('model-error');
-      if (errorPanel) errorPanel.classList.remove('visible');
-      const footerNote = document.querySelector('.footer-note');
-      if (footerNote) footerNote.textContent = 'Raven model loaded successfully from ' + sourceName + '.';
-      hideLocalModelDialog();
-      console.info('Raven model loaded successfully:', sourceName);
-    } catch (error) {
-      handleModelLoadError(error, sourceName);
-    }
+  function handleModelLoaded(gltf,sourceName){
+    try{
+      if(!gltf||!gltf.scene)throw new Error('The GLB file did not contain a scene.');
+      const model=gltf.scene;model.updateMatrixWorld(true);
+      model.traverse(function(child){if(child.isMesh){child.castShadow=true;child.receiveShadow=true;child.frustumCulled=false;}});
+      const box=new THREE.Box3().setFromObject(model),center=box.getCenter(new THREE.Vector3()),size=box.getSize(new THREE.Vector3());
+      const max=Math.max(size.x,size.y,size.z);if(!Number.isFinite(max)||max<=0)throw new Error('The GLB scene contains no visible geometry.');
+      clearCurrentModel();const scale=9/max;model.scale.setScalar(scale);model.position.set(-center.x*scale,-center.y*scale,-center.z*scale);model.rotation.y=0;model.updateMatrixWorld(true);
+      const bounds=new THREE.Box3().setFromObject(model);mechGroup=new THREE.Group();mechGroup.position.set(0,suspensionBaseY,-.65);mechGroup.rotation.y=Math.PI*.075;mechGroup.add(model);scene.add(mechGroup);
+      createInspectionAnchors(bounds);createSuspensionRig(bounds);setModelStatus('NIGHTFALL ONLINE','success');
+      const panel=document.getElementById('model-error');if(panel)panel.classList.remove('visible');
+      const footer=document.querySelector('.footer-note');if(footer)footer.innerHTML='FIELD DOSSIER // AC6: FIRES OF RUBICON<br>MODEL SOURCE // '+sourceName.toUpperCase()+'<br>INTERACTIVE COMPONENT INSPECTION ENABLED';
+      hideLocalModelDialog();recenterView();console.info('NIGHTFALL model loaded successfully:',sourceName);
+    }catch(error){handleModelLoadError(error,sourceName);}
   }
 
   function loadModelFromFile(file) {
@@ -4713,247 +4645,52 @@ function createStudioEnvironment() {
   // --------------------------------------------------------------------------
   // Placeholder mech (built from primitives) + thruster flames
   // --------------------------------------------------------------------------
-  function createPlaceholderMech() {
-    mechGroup = new THREE.Group();
-
-    const matBody = new THREE.MeshStandardMaterial({
-      color: CONFIG.mechColor,
-      roughness: 0.35,
-      metalness: 0.85,
-    });
-    const matAccent = new THREE.MeshStandardMaterial({
-      color: CONFIG.accentColor,
-      emissive: CONFIG.glowColor,
-      emissiveIntensity: 0.6,
-      roughness: 0.2,
-      metalness: 0.6,
-    });
-    const matGlass = new THREE.MeshStandardMaterial({
-      color: 0x224466,
-      transparent: true,
-      opacity: 0.55,
-      metalness: 0.1,
-      roughness: 0.1,
-    });
-
-    // --- Body (torso) ---
-    bodyMesh = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2.0, 1.1), matBody);
-    bodyMesh.position.y = 0.9;
-    bodyMesh.castShadow = true;
-    bodyMesh.receiveShadow = true;
-    mechGroup.add(bodyMesh);
-
-    // Chest accent
-    const chest = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.5, 0.6), matAccent);
-    chest.position.set(0, 0.95, 0.56);
-    chest.castShadow = true;
-    mechGroup.add(chest);
-
-    // --- Head / cockpit ---
-    headMesh = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.8, 0.7), matBody);
-    headMesh.position.set(0, 2.15, 0.1);
-    headMesh.castShadow = true;
-    mechGroup.add(headMesh);
-
-    const visor = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.35, 0.4), matGlass);
-    visor.position.set(0, 2.15, 0.36);
-    mechGroup.add(visor);
-
-    // --- Arms ---
-    const armL = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.4, 0.5), matBody);
-    armL.position.set(-1.15, 1.2, 0);
-    armL.rotation.z = -0.15;
-    armL.castShadow = true;
-    mechGroup.add(armL);
-
-    const armR = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.4, 0.5), matBody);
-    armR.position.set(1.15, 1.2, 0);
-    armR.rotation.z = 0.15;
-    armR.castShadow = true;
-    mechGroup.add(armR);
-
-    // --- Legs ---
-    const legL = new THREE.Mesh(new THREE.BoxGeometry(0.55, 1.5, 0.6), matBody);
-    legL.position.set(-0.55, 0.0, 0.1);
-    legL.castShadow = true;
-    mechGroup.add(legL);
-
-    const legR = new THREE.Mesh(new THREE.BoxGeometry(0.55, 1.5, 0.6), matBody);
-    legR.position.set(0.55, 0.0, 0.1);
-    legR.castShadow = true;
-    mechGroup.add(legR);
-
-    // Feet
-    const footL = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.25, 0.5), matAccent);
-    footL.position.set(-0.55, -0.85, 0.25);
-    footL.castShadow = true;
-    mechGroup.add(footL);
-
-    const footR = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.25, 0.5), matAccent);
-    footR.position.set(0.55, -0.85, 0.25);
-    footR.castShadow = true;
-    mechGroup.add(footR);
-
-    // --- Back thruster unit ---
-    thrusterGroup = new THREE.Group();
-    thrusterGroup.position.set(0, 1.0, -0.62);
-    const thruster = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.7, 0.8), matBody);
-    thruster.castShadow = true;
-    thrusterGroup.add(thruster);
-    const thrusterAccent = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.35, 0.45), matAccent);
-    thrusterAccent.position.z = 0.42;
-    thrusterGroup.add(thrusterAccent);
-    mechGroup.add(thrusterGroup);
-
-    // --- Thruster flames (dash effect) ---
-    createFlamePair(new THREE.Vector3(0, 1.0, -1.05));
-
-    // Facing forward slightly angled
-    mechGroup.rotation.y = Math.PI * 0.05;
-
-    scene.add(mechGroup);
+  function createPlaceholderMech(){
+    clearCurrentModel();const placeholder=new THREE.Group();
+    const body=new THREE.MeshStandardMaterial({color:0x262d2b,roughness:.42,metalness:.75}),accent=new THREE.MeshStandardMaterial({color:0xa76d38,roughness:.35,metalness:.65}),glass=new THREE.MeshStandardMaterial({color:0x4f7774,emissive:0x1e4240,emissiveIntensity:.5,roughness:.2});
+    const torso=new THREE.Mesh(new THREE.BoxGeometry(1.5,1.7,.9),body);torso.position.y=.9;torso.castShadow=true;placeholder.add(torso);
+    const chest=new THREE.Mesh(new THREE.BoxGeometry(1,.48,.55),accent);chest.position.set(0,.95,.52);placeholder.add(chest);
+    const head=new THREE.Mesh(new THREE.BoxGeometry(.72,.58,.62),body);head.position.set(0,2.12,.08);head.castShadow=true;placeholder.add(head);
+    const visor=new THREE.Mesh(new THREE.BoxGeometry(.58,.18,.16),glass);visor.position.set(0,2.13,.42);placeholder.add(visor);
+    for(let side=-1;side<=1;side+=2){const arm=new THREE.Mesh(new THREE.BoxGeometry(.42,1.2,.44),body);arm.position.set(side,1,0);arm.rotation.z=-side*.12;placeholder.add(arm);
+      const leg=new THREE.Mesh(new THREE.BoxGeometry(.48,1.35,.55),body);leg.position.set(side*.45,-.35,.04);placeholder.add(leg);
+      const foot=new THREE.Mesh(new THREE.BoxGeometry(.65,.22,.72),accent);foot.position.set(side*.45,-1.14,.18);placeholder.add(foot);}
+    const back=new THREE.Mesh(new THREE.BoxGeometry(1.3,.72,.72),body);back.position.set(0,1.1,-.65);placeholder.add(back);
+    const box=new THREE.Box3().setFromObject(placeholder),center=box.getCenter(new THREE.Vector3()),size=box.getSize(new THREE.Vector3()),scale=9/Math.max(size.x,size.y,size.z);
+    placeholder.scale.setScalar(scale);placeholder.position.set(-center.x*scale,-center.y*scale,-center.z*scale);placeholder.updateMatrixWorld(true);
+    const bounds=new THREE.Box3().setFromObject(placeholder);mechGroup=new THREE.Group();mechGroup.position.set(0,suspensionBaseY,-.65);mechGroup.rotation.y=Math.PI*.075;mechGroup.add(placeholder);scene.add(mechGroup);
+    createInspectionAnchors(bounds);createSuspensionRig(bounds);setModelStatus('PLACEHOLDER','');recenterView();
   }
 
   // --------------------------------------------------------------------------
   // Animation (dash: lean forward + thrusters flare)
   // --------------------------------------------------------------------------
-  function updateAnimation(dt) {
-    if (!mechGroup) return;
-
-    const t = state.time;
-    const cycle = (t % CONFIG.dashDuration) / CONFIG.dashDuration; // 0..1 dash cycle
-
-    // Easing for the dash burst (quick flare, then settle)
-    // dash intensity: rises fast at start, fades
-    let dashIntensity = 0;
-    if (state.isPlaying) {
-      dashIntensity = Math.max(0, Math.sin(cycle * Math.PI)); // pulse 0->1->0 per cycle
-    }
-
-    // Lean forward when dashing
-    const targetLean = CONFIG.leanAngle * dashIntensity;
-    if (bodyMesh) {
-      bodyMesh.rotation.x = THREE.MathUtils.lerp(bodyMesh.rotation.x, targetLean, 0.15);
-    }
-    if (headMesh) {
-      headMesh.rotation.x = THREE.MathUtils.lerp(headMesh.rotation.x, targetLean * 0.6, 0.15);
-    }
-
-    // Slight bobbing
-    const bob = Math.sin(t * 4) * 0.02 * (1 - dashIntensity * 0.5);
-    mechGroup.position.y = bob;
-
-    // Thrusters flare during dash
-    const flameStrength = dashIntensity;
-    thrusterEffects.forEach(function (effect) {
-      const flicker = 0.92 + Math.sin(t * CONFIG.flamePulseSpeed + effect.phase) * 0.08;
-      effect.group.visible = flameStrength > 0.015;
-
-      if (flameStrength > 0.015) {
-        const length = (0.72 + flameStrength * 0.78) * flicker;
-        effect.outer.scale.set(1, 1, length);
-        effect.inner.scale.set(1, 1, length * 0.82);
-        effect.outer.material.opacity = (0.18 + flameStrength * 0.58) * flicker;
-        effect.inner.material.opacity = (0.22 + flameStrength * 0.68) * flicker;
-        effect.glow.material.opacity = 0.16 + flameStrength * 0.62;
-        effect.glow.scale.set(
-          (0.55 + flameStrength * 0.55) * effect.sizeFactor,
-          (0.55 + flameStrength * 0.55) * effect.sizeFactor,
-          1
-        );
-      }
-    });
-
-    // Slow idle hover rotation when not dashing
-    if (!state.isPlaying) {
-      mechGroup.rotation.y = Math.PI * 0.05 + Math.sin(t * 0.5) * 0.02;
-    } else {
-      mechGroup.rotation.y = THREE.MathUtils.lerp(
-        mechGroup.rotation.y,
-        Math.PI * 0.05,
-        0.1
-      );
-    }
+  function updateAnimation(dt){
+    if(!mechGroup)return;const motion=state.motionEnabled?1:0,t=state.time;
+    mechGroup.rotation.z=THREE.MathUtils.lerp(mechGroup.rotation.z,Math.sin(t*.56)*.012*motion,.035);
+    mechGroup.rotation.x=THREE.MathUtils.lerp(mechGroup.rotation.x,Math.cos(t*.39)*.009*motion,.035);
+    mechGroup.position.y=THREE.MathUtils.lerp(mechGroup.position.y,suspensionBaseY+Math.sin(t*.72)*.035*motion,.035);
+    if(craneAssembly)craneAssembly.position.z=Math.sin(t*.17)*.025*motion;
   }
 
   // --------------------------------------------------------------------------
   // UI
   // --------------------------------------------------------------------------
-  function wireUI() {
-    const btnPlay = document.getElementById('btn-play');
-    const btnPause = document.getElementById('btn-pause');
-    const btnRestart = document.getElementById('btn-restart');
-    const btnToggleSidebar = document.getElementById('btn-toggle-sidebar');
-    const btnOpenSidebar = document.getElementById('btn-open-sidebar');
-    const btnFullscreen = document.getElementById('btn-fullscreen');
-    const btnFullscreenFloating = document.getElementById('btn-fullscreen-fs');
-    const btnLoadModel = document.getElementById('btn-load-model');
-    const btnRecenter = document.getElementById('btn-recenter');
-    const btnSelectModel = document.getElementById('btn-select-model');
-    const btnUsePlaceholder = document.getElementById('btn-use-placeholder');
-    const modelFileInput = document.getElementById('model-file-input');
-    const sliderTOD = document.getElementById('slider-tod');
-    const sidebar = document.getElementById('sidebar');
-
-    function setPlaying(playing) {
-      state.isPlaying = playing;
-      btnPlay.classList.toggle('active', playing);
-      btnPause.classList.toggle('active', !playing);
-    }
-
-    function setSidebarVisible(visible) {
-      state.showSidebar = visible;
-      sidebar.classList.toggle('collapsed', !visible);
-      document.body.classList.toggle('sidebar-collapsed', !visible);
-      btnToggleSidebar.textContent = visible ? 'Collapse' : 'Expand';
-      btnToggleSidebar.title = visible ? 'Collapse sidebar' : 'Expand sidebar';
-      btnOpenSidebar.setAttribute('aria-expanded', String(visible));
-    }
-
-    function openModelPicker() {
-      modelFileInput.value = '';
-      modelFileInput.click();
-    }
-
-    btnPlay.addEventListener('click', function () { setPlaying(true); });
-    btnPause.addEventListener('click', function () { setPlaying(false); });
-    btnRestart.addEventListener('click', function () {
-      state.time = 0;
-      setPlaying(true);
-    });
-
-    btnToggleSidebar.addEventListener('click', function () {
-      setSidebarVisible(!state.showSidebar);
-    });
-    btnOpenSidebar.addEventListener('click', function () {
-      setSidebarVisible(true);
-    });
-
-    btnFullscreen.addEventListener('click', toggleFullscreen);
-    btnFullscreenFloating.addEventListener('click', toggleFullscreen);
-    btnLoadModel.addEventListener('click', openModelPicker);
-    btnRecenter.addEventListener('click', recenterView);
-    btnSelectModel.addEventListener('click', openModelPicker);
-
-    btnUsePlaceholder.addEventListener('click', function () {
-      hideLocalModelDialog();
-      if (!mechGroup) createPlaceholderMech();
-      setModelStatus('Placeholder', '');
-    });
-
-    modelFileInput.addEventListener('change', function (event) {
-      const file = event.target.files && event.target.files[0];
-      if (file) loadModelFromFile(file);
-    });
-
-    sliderTOD.addEventListener('input', function (event) {
-      updateTimeOfDay(parseFloat(event.target.value));
-    });
-
-    setPlaying(true);
-    setSidebarVisible(state.showSidebar);
-    sliderTOD.value = state.timeOfDay;
-    document.getElementById('tod-value').textContent = state.timeOfDay.toFixed(0) + ':00';
+  function wireUI(){
+    const sidebar=document.getElementById('sidebar'),toggle=document.getElementById('btn-toggle-sidebar'),open=document.getElementById('btn-open-sidebar');
+    const fullscreen=document.getElementById('btn-fullscreen'),floating=document.getElementById('btn-fullscreen-fs');
+    const load=document.getElementById('btn-load-model'),recenter=document.getElementById('btn-recenter'),motion=document.getElementById('btn-motion');
+    const select=document.getElementById('btn-select-model'),placeholder=document.getElementById('btn-use-placeholder'),input=document.getElementById('model-file-input');
+    function setSidebar(visible){state.showSidebar=visible;sidebar.classList.toggle('collapsed',!visible);document.body.classList.toggle('sidebar-collapsed',!visible);toggle.textContent=visible?'Collapse Panel':'Expand Panel';open.setAttribute('aria-expanded',String(visible));}
+    function picker(){input.value='';input.click();}
+    renderComponentIndex();selectInspectionPart('head');
+    toggle.addEventListener('click',function(){setSidebar(!state.showSidebar);});open.addEventListener('click',function(){setSidebar(true);});
+    fullscreen.addEventListener('click',toggleFullscreen);floating.addEventListener('click',toggleFullscreen);
+    load.addEventListener('click',picker);select.addEventListener('click',picker);recenter.addEventListener('click',recenterView);
+    motion.addEventListener('click',function(){state.motionEnabled=!state.motionEnabled;motion.textContent=state.motionEnabled?'Hold Position':'Resume Sway';motion.classList.toggle('active',state.motionEnabled);});
+    placeholder.addEventListener('click',function(){hideLocalModelDialog();if(!mechGroup)createPlaceholderMech();setModelStatus('PLACEHOLDER','');});
+    input.addEventListener('change',function(e){const f=e.target.files&&e.target.files[0];if(f)loadModelFromFile(f);});
+    setSidebar(state.showSidebar);
   }
 
   function syncFullscreenState() {
@@ -4990,105 +4727,35 @@ function createStudioEnvironment() {
   // --------------------------------------------------------------------------
   // Camera navigation
   // --------------------------------------------------------------------------
-  function recenterView() {
-    orbit.theta = Math.PI * 0.25;
-    orbit.phi = Math.PI * 0.35;
-    orbit.radius = 12;
-    orbit.target.set(0, 1, 0);
-    state.isDragging = false;
-    delete state.dragMode;
-    updateCamera();
+  function recenterView(){
+    orbit.theta=Math.PI*.25;orbit.phi=Math.PI*.39;orbit.radius=19;orbit.target.set(1.4,5.05,-.4);
+    state.isDragging=false;state.dragMoved=false;state.dragMode=null;updateCamera();
   }
 
   // --------------------------------------------------------------------------
   // Simple orbit controls (left-drag rotate, middle-drag pan, wheel zoom)
   // --------------------------------------------------------------------------
-  function setupPointerControls() {
-    const dom = renderer.domElement;
-
-    dom.addEventListener('mousedown', function (event) {
-      if (event.button === 1 || event.button === 2) event.preventDefault();
-
-      state.isDragging = true;
-      state.lastMouse.set(event.clientX, event.clientY);
-      state.dragMode = (event.button === 1 || event.button === 2) ? 'pan' : 'rotate';
-    }, false);
-
-    dom.addEventListener('contextmenu', function (event) {
-      event.preventDefault();
-    }, false);
-
-    window.addEventListener('mouseup', function () {
-      state.isDragging = false;
-      delete state.dragMode;
-    }, false);
-
-    dom.addEventListener('mousemove', function (event) {
-      if (!state.isDragging) return;
-      const dx = event.clientX - state.lastMouse.x;
-      const dy = event.clientY - state.lastMouse.y;
-      state.lastMouse.set(event.clientX, event.clientY);
-
-      if (state.dragMode === 'rotate') {
-        orbit.theta -= dx * 0.004;
-        orbit.phi -= dy * 0.004;
-        orbit.phi = Math.max(0.1, Math.min(Math.PI - 0.1, orbit.phi));
-      } else if (state.dragMode === 'pan') {
-        // Keep the target close to the mech so it cannot be lost while panning.
-        const panSpeed = 0.003;
-        orbit.target.x = THREE.MathUtils.clamp(orbit.target.x - dx * panSpeed, -3.2, 3.2);
-        orbit.target.y = THREE.MathUtils.clamp(orbit.target.y + dy * panSpeed, -1.0, 3.2);
-        orbit.target.z = THREE.MathUtils.clamp(orbit.target.z, -2.0, 2.0);
-      }
-    }, false);
-
-    dom.addEventListener('wheel', function (e) {
-      e.preventDefault();
-      const zoom = e.deltaY > 0 ? 1.08 : 1 / 1.08;
-      orbit.radius *= zoom;
-      orbit.radius = Math.max(6, Math.min(45, orbit.radius));
-    }, { passive: false });
-
-    // Touch support
-    dom.addEventListener('touchstart', function (e) {
-      if (e.touches.length === 1) {
-        state.isDragging = true;
-        state.lastMouse.set(e.touches[0].clientX, e.touches[0].clientY);
-        state.dragMode = 'rotate';
-      }
-    }, { passive: false });
-
-    dom.addEventListener('touchmove', function (e) {
-      if (!state.isDragging || e.touches.length !== 1) return;
-      e.preventDefault();
-      const dx = e.touches[0].clientX - state.lastMouse.x;
-      const dy = e.touches[0].clientY - state.lastMouse.y;
-      state.lastMouse.set(e.touches[0].clientX, e.touches[0].clientY);
-      orbit.theta -= dx * 0.006;
-      orbit.phi -= dy * 0.006;
-      orbit.phi = Math.max(0.1, Math.min(Math.PI - 0.1, orbit.phi));
-    }, { passive: false });
-
-    dom.addEventListener('touchend', function () {
-      state.isDragging = false;
-      delete state.dragMode;
-    }, false);
-
-    dom.addEventListener('touchcancel', function () {
-      state.isDragging = false;
-      delete state.dragMode;
-    }, false);
+  function setupPointerControls(){
+    const dom=renderer.domElement;
+    dom.addEventListener('mousedown',function(e){if(e.button===1||e.button===2)e.preventDefault();state.isDragging=true;state.dragMoved=false;state.lastMouse.set(e.clientX,e.clientY);state.dragMode=(e.button===1||e.button===2)?'pan':'rotate';});
+    dom.addEventListener('contextmenu',function(e){e.preventDefault();});
+    window.addEventListener('mouseup',function(e){if(state.isDragging&&!state.dragMoved&&state.dragMode==='rotate'&&e.button===0)pickInspectionPart(e.clientX,e.clientY);state.isDragging=false;state.dragMode=null;});
+    dom.addEventListener('mousemove',function(e){if(!state.isDragging)return;const dx=e.clientX-state.lastMouse.x,dy=e.clientY-state.lastMouse.y;if(Math.abs(dx)+Math.abs(dy)>3)state.dragMoved=true;state.lastMouse.set(e.clientX,e.clientY);
+      if(state.dragMode==='rotate'){orbit.theta-=dx*.004;orbit.phi-=dy*.004;orbit.phi=Math.max(.16,Math.min(Math.PI-.16,orbit.phi));}
+      else{orbit.target.x=THREE.MathUtils.clamp(orbit.target.x-dx*.0026,-3.4,3.4);orbit.target.y=THREE.MathUtils.clamp(orbit.target.y+dy*.0026,2.4,7.7);orbit.target.z=THREE.MathUtils.clamp(orbit.target.z,-2.8,2.5);}});
+    dom.addEventListener('wheel',function(e){e.preventDefault();orbit.radius*=e.deltaY>0?1.075:1/1.075;orbit.radius=Math.max(11.5,Math.min(34,orbit.radius));},{passive:false});
+    dom.addEventListener('touchstart',function(e){if(e.touches.length===1){state.isDragging=true;state.dragMoved=false;state.lastMouse.set(e.touches[0].clientX,e.touches[0].clientY);state.dragMode='rotate';}},{passive:false});
+    dom.addEventListener('touchmove',function(e){if(!state.isDragging||e.touches.length!==1)return;e.preventDefault();const dx=e.touches[0].clientX-state.lastMouse.x,dy=e.touches[0].clientY-state.lastMouse.y;if(Math.abs(dx)+Math.abs(dy)>3)state.dragMoved=true;state.lastMouse.set(e.touches[0].clientX,e.touches[0].clientY);orbit.theta-=dx*.006;orbit.phi-=dy*.006;orbit.phi=Math.max(.16,Math.min(Math.PI-.16,orbit.phi));},{passive:false});
+    dom.addEventListener('touchend',function(e){if(!state.dragMoved&&e.changedTouches&&e.changedTouches.length)pickInspectionPart(e.changedTouches[0].clientX,e.changedTouches[0].clientY);state.isDragging=false;state.dragMode=null;});
+    dom.addEventListener('touchcancel',function(){state.isDragging=false;state.dragMode=null;});
   }
 
   // --------------------------------------------------------------------------
   // Camera update + render
   // --------------------------------------------------------------------------
-  function updateCamera() {
-    const x = orbit.radius * Math.sin(orbit.phi) * Math.sin(orbit.theta);
-    const y = orbit.radius * Math.cos(orbit.phi);
-    const z = orbit.radius * Math.sin(orbit.phi) * Math.cos(orbit.theta);
-    camera.position.set(orbit.target.x + x, orbit.target.y + y, orbit.target.z + z);
-    camera.lookAt(orbit.target);
+  function updateCamera(){
+    const x=orbit.radius*Math.sin(orbit.phi)*Math.sin(orbit.theta),y=orbit.radius*Math.cos(orbit.phi),z=orbit.radius*Math.sin(orbit.phi)*Math.cos(orbit.theta);
+    camera.position.set(orbit.target.x+x,orbit.target.y+y,orbit.target.z+z);camera.lookAt(orbit.target);
   }
 
   function onWindowResize() {
@@ -5100,17 +4767,9 @@ function createStudioEnvironment() {
   // --------------------------------------------------------------------------
   // Main loop
   // --------------------------------------------------------------------------
-  function animate() {
-    requestAnimationFrame(animate);
-
-    const dt = clock.getDelta();
-    state.time += dt * state.speed;
-
-    updateAnimation(dt);
-    updateBackdrop(dt);
-    updateCamera();
-
-    renderer.render(scene, camera);
+  function animate(){
+    requestAnimationFrame(animate);const dt=clock.getDelta();state.time+=dt;
+    updateAnimation(dt);updateBackdrop(dt);updateSuspensionRig();updateCamera();updateInspectionHotspots();renderer.render(scene,camera);
   }
 
   // --------------------------------------------------------------------------
